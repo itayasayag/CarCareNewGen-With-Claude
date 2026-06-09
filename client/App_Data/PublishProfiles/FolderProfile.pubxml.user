@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+<<<<<<< Updated upstream
+    <History>True|2024-05-20T20:06:49.4575870Z;</History>
+=======
+    <History>True|2024-05-20T17:23:21.2535393Z;</History>
+>>>>>>> Stashed changes
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>

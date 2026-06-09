@@ -1,0 +1,235 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
+    https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+    https://unpkg.com/sweetalert/dist/sweetalert.min.js
+
+    https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous
+
+
+    ../JS/ajaxCall.js
+
+
+    <title>Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+            width: 300px;
+            margin: auto;
+            margin-top: 50px;
+        }
+
+        input[type=text], input[type=email], input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            input[type=submit]:hover {
+                background-color: #45a049;
+            }
+    </style>
+
+
+
+
+    <script>
+
+        $(document).ready(function () {
+
+
+
+            sessionStorage.clear();
+            // Event handling for radio buttons to toggle between registration and login fields
+            $("#submitBTN").click(f);
+            $("input[name='formType']").change(function () {
+                if ($(this).val() === 'registration') {
+                    $("#registrationFields").show();
+                    $("#loginFields").hide();
+                } else if ($(this).val() === 'login')  {
+                    $("#registrationFields").hide();
+                    $("#loginFields").show();
+                }
+
+            });
+           
+           
+        });
+
+        function f() {
+            typeform = $("input[name='formType']:checked").val();
+            if (typeform === 'registration') {
+                f1();
+                return false;
+            } else if (typeform === 'login') {
+                f2();
+                return false;
+            }
+
+        }
+
+        function f1() {
+            postUser();
+          
+        }
+        function f2() {
+           login();
+        
+            
+        }
+
+        function postUser() {
+            let U = {
+                "FirstName": $("#firstNameTB").val(),
+                "FamilyName": $("#familyNameTB").val(),
+                "Email": $("#emailTB").val(),
+                "Password": $("#passwordTB").val(),
+            };
+
+            if (U.FirstName == null || U.FamilyName == null || U.Email == 0 || U.Password == null) {
+                alert("missing data!")
+            }
+            else {
+                let api = "https://localhost:7029/api/User";
+                ajaxCall("POST", api, JSON.stringify(U), postSCB, postECB);
+            }
+        }
+
+        function postSCB(res) {
+            console.log(res);
+            alert("Registration successful, now you can log in");
+            document.querySelector('input[name="formType"][value="login"]').checked = true;
+            $("#registrationFields").hide();
+            $("#loginFields").show();
+
+        }
+
+
+      
+
+        function postECB(err) {
+            console.log(err);
+            alert("Email already exists");
+
+        }
+
+
+        function login() {
+            
+            US = {
+                "FirstName": "",
+                "FamilyName": "",
+                "Email": $("#loginEmail").val(),
+                "Password": $("#loginPassword").val(),
+            };
+            let api = "https://localhost:7029/api/User/" + US.Email;
+            ajaxCall("POST", api, JSON.stringify(US), loginSCB, loginECB);
+        }
+
+        function loginSCB(res)
+        {
+            if (res) {
+ 
+                if (res.isActive) {
+                    if (res.isAdmin) {
+                        window.location.href = "admin.html"
+                        alert("login successful");
+                        sessionStorage.setItem('user', JSON.stringify(res));
+                    }
+                    else {
+
+                        alert("login successful");
+                        sessionStorage.setItem('user', JSON.stringify(res));
+                        window.location.href = "flats .html";
+                    }
+                }
+                else {
+                    alert("The user isnot active");
+                }
+            }
+
+            console.log(res);
+            
+        }
+
+        function loginECB(err) {
+            console.log(err);
+            alert("Email OR password is not incorrect");
+        }
+
+
+    </script>
+
+
+</head>
+<body>
+
+    <div class="container">
+        <h2>Welcome</h2> <br>
+        <form>
+            <!-- Radio buttons for choosing between registration and login -->
+            <label>
+                <input type="radio" name="formType" value="registration" checked> Register
+            </label>
+            <label>
+                <input type="radio" name="formType" value="login" > Login </label> <br>
+            <!-- Registration Fields -->
+            <div id="registrationFields" >
+            <label for="firstNameTB">First Name:</label><br>
+            <input type="text" id="firstNameTB" name="firstName" required><br>
+            <label for="familyNameTB">Family Name:</label><br>
+            <input type="text" id="familyNameTB" name="familyName" required><br>
+            <label for="emailTB">Email:</label><br>
+            <input type="email" id="emailTB" name="email" required><br>
+            <label for="passwordTB">Password:</label><br>
+            <input type="password" id="passwordTB" name="password" required><br><br>
+                </div>
+            <!-- Login Fields -->
+            <div id="loginFields" style="display: none;">
+                <label for="loginEmail">Email:</label><br>
+                <input type="email" id="loginEmail" name="loginEmail" required><br>
+                <label for="loginPassword">Password:</label><br>
+                <input type="password" id="loginPassword" name="loginPassword" required><br><br>
+            </div>
+
+            <!-- Submit Button -->
+            <input type="submit" value="Submit" id="submitBTN" />
+
+
+
+        </form>
+    </div>
+
+</body>
+</html>

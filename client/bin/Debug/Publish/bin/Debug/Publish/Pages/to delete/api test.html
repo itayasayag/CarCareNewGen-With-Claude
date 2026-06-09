@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Details Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        .record {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+            .record pre {
+                margin: 0;
+            }
+    </style>
+</head>
+<body>
+    <h1>Vehicle Details Finder</h1>
+    <form id="searchForm">
+        <label for="misparRechev">Enter Mispar Rechev (Vehicle Number):</label>
+        <input type="text" id="misparRechev" name="misparRechev" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const misparRechev = document.getElementById('misparRechev').value.trim();
+            const resourceId = "053cea08-09bc-40ec-8f7a-156f0677aff3";
+            const url = `https://data.gov.il/api/3/action/datastore_search?resource_id=${resourceId}&q=${misparRechev}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    const records = data.result.records;
+                    displayData(records);
+                } else {
+                    console.error("Failed to fetch data:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        });
+
+        function displayData(records) {
+            const output = document.getElementById('output');
+            output.innerHTML = "";
+
+            if (records.length > 0) {
+                records.forEach(record => {
+                    const recordDiv = document.createElement('div');
+                    recordDiv.className = 'record';
+                    recordDiv.innerHTML = `
+                            <pre>${JSON.stringify(record, null, 2)}</pre>
+                        `;
+                    output.appendChild(recordDiv);
+                });
+            } else {
+                output.textContent = "No details found for the given Mispar Rechev.";
+            }
+        }
+    </script>
+</body>
+</html>

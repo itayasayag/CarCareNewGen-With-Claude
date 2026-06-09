@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>OCR Example - Improved for Numbers</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.1/dist/tesseract.min.js"></script>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <canvas id="canvas" style="display:none;"></canvas>
+    <div id="output" style="font-size:20px"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('fileInput').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            const canvas = document.getElementById('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+
+                            // Convert to grayscale and enhance contrast
+                            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            let data = imageData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                                const contrast = avg > 128 ? 255 : 0; // simple contrast enhancement
+                                data[i] = data[i + 1] = data[i + 2] = contrast;
+                            }
+                            ctx.putImageData(imageData, 0, 0);
+
+                            Tesseract.recognize(
+                                canvas.toDataURL(),
+                                'eng',
+                                {
+                                    tessedit_char_whitelist: '0123456789',
+                                    tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK, // page segmentation mode
+                                    logger: m => console.log(m)
+                                }
+                            ).then(({ data: { text } }) => {
+                                document.getElementById('output').innerText = text.trim();
+                            });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

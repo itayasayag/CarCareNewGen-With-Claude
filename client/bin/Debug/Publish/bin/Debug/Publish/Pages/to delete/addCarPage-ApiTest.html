@@ -1,0 +1,544 @@
+﻿
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>הוסף רכב חדש</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <meta charset="utf-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <script src="../JS/ajaxCall.js"></script>
+    <script src="../JS/CarCareFunctions.js"></script>
+
+    <script>
+
+        var addCarSucceed = false;
+        var imageFilename = "";
+
+        $(document).ready(function () {
+
+            addCarSucceed = false;
+            //let port = "7024";
+            //server = `https://localhost:${port}`;
+
+            $('#AddCarBTN').click(fixfunctionForAdd);
+
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            if (temp != null) {
+                document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
+            }
+
+
+        });
+
+
+
+
+        function uploadPIC() {
+            if (!addCarSucceed) {
+                Swal.fire({
+                    title: "לא בוצעה הוספת רכב",
+                    icon: "error"
+                });
+                return 0;
+            }
+
+            var data = new FormData();
+            var files = $("#file-input").get(0).files;
+
+            // Add the uploaded file to the form data collection
+            if (files.length > 0) {
+                for (f = 0; f < files.length; f++) {
+                    var renamedFile = renameFile(files[f]);
+                    data.append("files", renamedFile);
+                }
+            }
+            api = server + "/api/Upload";
+            imageFolder = server + "/images/";
+
+
+            // Ajax upload
+            $.ajax({
+                type: "POST",
+                url: api,
+                contentType: false,
+                processData: false,
+                data: data,
+                success: showImages,
+                error: error
+            });
+            return false;
+
+        }
+
+        // Function to rename the file
+        function renameFile(file) {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            // Get the file extension
+            var ext = file.name.split('.').pop();
+            var newName = tempUser.email + $("#IDlicenseNum").val() + 'license' + '.' + ext;
+            imageFilename = newName;
+            // Create a new File object with the new name
+            return new File([file], newName, { type: file.type });
+        }
+
+        function showImages(data) {
+            console.log(data);
+            updateCarDetails();
+
+            Swal.fire({
+                title: "העלאת קובץ בוצעה בהצלחה!",
+                icon: "success"
+            });
+
+            var imgStr = "";
+
+            if (Array.isArray(data)) {
+
+                for (var i = 0; i < data.length; i++) {
+                    src = imageFolder + data[i];
+                    imgStr += `<img src='${src}'/>`;
+                }
+
+            }
+
+            else { // just in case you have an api returning a single string
+                src = imageFolder + data;
+                imgStr = `<img src='${src}'/>`;
+            }
+
+            document.getElementById("carPhoto").innerHTML = imgStr;
+        }
+
+        function error(data) {
+            console.log(data);
+        }
+
+
+
+        function fixfunctionForAdd() {
+            AddCar();
+            return false;
+        }
+
+        function fixfunctionForUpdate() {
+            updateCarDetails();
+            return false
+        }
+
+        function AddCar() {
+
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            if (tempUser.email != null) {
+                if ($("#IDlicenseNum").val() == '' || $("#IDnickname").val() == '' || $("#IDkilometer").val() == '') {
+                    Swal.fire({
+                        title: "מידע חסר",
+                        text: "ודא/י שלא פספסת כלום",
+                        icon: "question"
+                    })
+                }
+                else {
+                    car = {
+                        licensePlate: $("#IDlicenseNum").val(),
+                        nickName: $("#IDnickname").val(),
+                        currentKM: $("#IDkilometer").val(),
+                        picURL: "null",
+                        userEmail: tempUser.email
+                    }
+                    var NewCartoStorage = JSON.stringify(car);
+                    var oldCarData = localStorage.getItem("UserCarlist");
+                    localStorage.setItem("UserCarlist", oldCarData + NewCartoStorage);
+                    api = server + "/api/UserCar";
+                    ajaxCall("POST", api, JSON.stringify(car), postSCB, postECB);
+                    ReadUserCarByEmail(tempUser.email);//קריאה מחדש של הרכבים לאתר, לאחר הוספת רכב.איתי.
+                }
+            }
+            else Swal.fire({
+                title: "אינך מחובר למערכת",
+                icon: "info"
+            });
+
+        }
+        function postSCB(res) {
+
+            console.log(res);
+            Swal.fire({
+                title: "הרכב נוסף בהצלחה!",
+                text: "כעת ניתן להעלות צילום של רשיון הרכב",
+                icon: "success"
+            });
+            addCarSucceed = true;
+            ChangePageAfterAdd();
+
+
+        }
+
+        function postECB(err) {
+            console.log(err);
+            Swal.fire({
+                title: "רכב קיים",
+                text: "הרכב קיים במערכת תחת משתמש זה",
+                icon: "warning"
+            });
+
+        }
+
+        function ChangePageAfterAdd() {
+            /*GetCarDetails($('#IDlicenseNum').val());*/ //משום מה הפונקציה הזאת שוברת את הדף. אביעד. TBD
+            $('#IDlicenseNum').prop('readonly', true);
+
+            // Replace AddCar button with updateCarDetails button
+            $('#AddCarBTN').replaceWith('<button type="submit" class="btn btn-primary rounded-pill" id="updateCarDetails">עדכן פרטי רכב</button>');
+
+            // Click event for the new button
+            $('#updateCarDetails').click(fixfunctionForUpdate);
+        }
+
+        function updateCarDetails() {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            updatecar = {
+                licensePlate: $("#IDlicenseNum").val(),
+                nickName: $("#IDnickname").val(),
+                currentKM: $("#IDkilometer").val(),
+                picURL: server + "/uploadedFiles/" + imageFilename,//המיקום מחזיר 404, לברר עם ענת
+                userEmail: tempUser.email
+            }
+
+            var email = tempUser.email;
+            var licence_plate = $("#IDlicenseNum").val();
+            api = server + "/api/UserCar/" + email + "," + licence_plate + '?email=' + email + '&licence_Plate=' + licence_plate;
+            ajaxCall("PUT", api, JSON.stringify(updatecar), putSCB, putECB);
+
+        }
+
+        var tempuser = localStorage.getItem('LogInUser');//משתנים גלובלים לשימוש פונקציית קריאה
+        var tempUserparsed = JSON.parse(tempuser);
+        let email = tempUserparsed.email;
+
+        function putSCB(suc) {
+
+            console.log(suc);
+            Swal.fire({
+                title: "פרטי הרכב עודכנו בהצלחה!",
+                icon: "success"
+            }).then(ReadUserCarByEmail(email));
+
+        }
+
+        function putECB(err) {
+            console.log(err);
+        }
+
+
+
+        function GetCarDetails(LPlate) {
+            if ($("#IDlicenseNum").val() !== "") {
+                let api = server + "/api/CarModel/" + LPlate; // תיקון איתי - שולח לקריאה את הלוחית רישוי ללא בנאי
+                ajaxCall("GET", api, "", getSCB, getECB);
+            }
+
+            const misparRechev = document.getElementById('IDlicenseNum').value.trim();
+            const resourceId = "053cea08-09bc-40ec-8f7a-156f0677aff3";
+            const url = `https://data.gov.il/api/3/action/datastore_search?resource_id=${resourceId}&q=${misparRechev}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    const records = data.result.records;
+                    sessionStorage.setItem('vehicleDetails', JSON.stringify(records));
+                } else {
+                    console.error("Failed to fetch data:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+
+        }
+
+        function getSCB(suc) {
+            ShowCarDetails(suc);
+            console.log(suc);
+
+        }
+
+        function getECB(err) {
+            console.log(err); //TBD להוסיף לפרוצדורה אי מציאה ואז שיחזיר ECB במקום SCB
+            Swal.fire({ //במידה והרכב לא מופיע במערכת
+                title: "מספר רישוי זה אינו מופיע במערכת",
+                icon: "error"
+            }).then(function () {
+                $("#IDlicenseNum").val() = "";
+            });
+        }
+
+
+        function ShowCarDetails(CarDetails) {
+            var tempyear = (CarDetails[0].yearOfManufacture);
+            year = tempyear.toString();
+            document.getElementById("IDmanufacturer").innerHTML = CarDetails[0].manufacturer;
+            document.getElementById("IDmodel").innerHTML = CarDetails[0].model;
+            document.getElementById("IDSubModel").innerHTML = CarDetails[0].subModelCode;
+            document.getElementById("IDYearOfManu").innerHTML = year;
+
+
+        }
+
+
+
+        function putECB(err) {
+            console.log(err);
+        }
+
+        //קוד לקריאת מספרים מתמונה
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('file-input').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            const canvas = document.getElementById('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+
+                            // Convert to grayscale and enhance contrast
+                            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            let data = imageData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                                const contrast = avg > 128 ? 255 : 0; // simple contrast enhancement
+                                data[i] = data[i + 1] = data[i + 2] = contrast;
+                            }
+                            ctx.putImageData(imageData, 0, 0);
+
+                            Tesseract.recognize(
+                                canvas.toDataURL(),
+                                'eng',
+                                {
+                                    tessedit_char_whitelist: '0123456789',
+                                    tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK, // page segmentation mode
+                                    logger: m => console.log(m)
+                                }
+                            ).then(({ data: { text } }) => {
+                                // Use regex to extract only numbers from the recognized text
+                                const numbers = text.match(/\d+/g);
+                                if (numbers) {
+                                    tmpSTR = numbers.join(' ');
+                                    document.getElementById('output').innerText += tmpSTR;
+                                } else {
+                                    document.getElementById('output').innerText = "No numbers found";
+                                }
+                            });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+
+
+
+    </script>
+
+
+
+    <style>
+        body {
+            font-family: Calibri, sans-serif;
+            direction: rtl; /* Right-to-left text direction */
+            text-align: center;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="submit"],
+        input[type="tel"],
+        input[type="email"],
+        button {
+            width: 70%;
+            height: 50px;
+            margin: auto;
+            font-family: Calibri;
+            font-size: 25px;
+            margin: 15px 0;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            border-radius: 25px; /* Rounded corners */
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f0f0f0b0;
+            color: #235978;
+        }
+
+        input::placeholder {
+            text-align: right;
+            font-size: 22px;
+            color: #235978;
+        }
+
+        header {
+            height: 8%;
+            background-color: #235978;
+        }
+
+
+        .footer {
+            height: 8%;
+            position: absolute;
+            background-color: #235978;
+            bottom: 0px;
+            width: 100%;
+        }
+
+        #logo {
+            width: 50px;
+            position: relative;
+            bottom: 25px; /*חייב להיות חצי מרוחב*/
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .plus {
+            width: 100px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+
+        #btngrp {
+            width: 90%;
+            margin-bottom: 30px;
+        }
+
+        #logoutBTN {
+            color: white;
+            background-color: #235978;
+            font-family: Calibri, sans-serif;
+            font-size: 22px;
+            text-align: left;
+            width: 98%;
+        }
+
+        #AddCarBTN, #updateCarDetails {
+            vertical-align: central;
+            background-color: #55a35d;
+            font-size: 22px;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            bottom: 92%;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        #file-input {
+            display: none; /* Hide the default file input */
+        }
+
+        #CarDetails{
+            max-height:50%;
+            max-width:50%;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    <div id="top">
+
+        <div id="header" class="header">
+
+            <h1 class="h1header">
+                <span id="helloUser">CarCare</span>
+            </h1>
+            <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
+            <div>
+                <img onclick="document.location='HomePage.html'" id="logo" src="images/LOGO ROUND WHITE BG.png" />
+                <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="container">
+
+        <form id="registrationForm" method="post" action="#">
+            <div class="form-group">
+                <input onfocusout="GetCarDetails($(this).val())" type="number" class="form-control" id="IDlicenseNum" name="licenseNum" placeholder="מספר רישוי" required>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="IDnickname" name="nickname" placeholder="כינוי רכב" required>
+            </div>
+            <div class="form-group">
+                <input type="number" class="form-control" id="IDkilometer" name="kilometer" placeholder="קילומטר נוכחי" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary rounded-pill" id="AddCarBTN">הוסף רכב</button>
+
+
+        </form>
+    </div>
+    <div id="CarDetails" class="container">
+        <div class="row">
+            <div class="col-6">
+                <p><b>יצרן</b>:&nbsp;<span id="IDmanufacturer">  </span></p>
+                <p><b>דגם</b>:&nbsp; <span id="IDmodel"></span></p>
+            </div>
+            <div class="col-6">
+                <p><b>שנת יצור:</b>&nbsp; <span id="IDYearOfManu">  </span></p>
+                <p><b>תת דגם:</b>&nbsp; <span id="IDSubModel">  </span></p>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="footer">
+            <label for="file-input">
+                <img id="plussign" class="plus" src="images/uploadimage.png" alt="Upload Image">
+            </label>
+            <input type="file" id="file-input" onchange="uploadPIC()">
+        </div>
+
+        
+        <div id="carPhoto">
+            יש להעלות צילום רשיון רכב לאימות בעלות על הרכב
+
+        </div>
+        <p id="tmpP">מחרוזת שחזרה מהתמונה: <br /> </p>
+
+    </div>
+
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Files Upload Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+
+        img {
+            height: 100px;
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('#buttonUpload').on('click', function () {
+                var data = new FormData();
+                var files = $("#files").get(0).files;
+
+                // Add the uploaded file to the form data collection
+                if (files.length > 0) {
+                    for (f = 0; f < files.length; f++) {
+                        data.append("files", files[f]);
+                    }
+                }
+
+                api = server + "/api/Upload";
+                imageFolder = server + "/images/";
+
+                // Ajax upload
+                $.ajax({
+                    type: "POST",
+                    url: api,
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: showImages,
+                    error: error
+                });
+
+                return false;
+            });
+
+        });
+
+
+        function showImages(data) {
+            console.log(data);
+
+            var imgStr = "";
+
+            if (Array.isArray(data)) {
+
+                for (var i = 0; i < data.length; i++) {
+                    src = imageFolder + data[i];
+                    imgStr += `<img src='${src}'/>`;
+                }
+
+            }
+
+            else { // just in case you have an api returning a single string
+                src = imageFolder + data;
+                imgStr = `<img src='${src}'/>`;
+            }
+
+            document.getElementById("ph").innerHTML = imgStr;
+        }
+
+        function error(data) {
+            console.log(data);
+        }
+
+    </script>
+
+</head>
+<body>
+
+    <form method="post" enctype="multipart/form-data" id="formUpload">
+        <div>
+            <label for="files">Files</label>
+            <input type="file" id="files" name="files" multiple="multiple" />
+        </div>
+        <br/>
+        <button type="button" id="buttonUpload">Upload files</button>
+    </form>
+
+    <div id="ph"></div>
+
+
+</body>
+</html>

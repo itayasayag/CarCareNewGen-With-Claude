@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+     <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+
+    <meta charset="utf-8" />
+
+    <title>CarCareSignUp</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../JS/ajaxCall.js"> </script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#greybook").click(needregister);
+        $("#greyswap").click(needregister);
+        $("#greyplus").click(needregister);
+
+        var LogedInUser = localStorage.getItem('LogInUser');
+
+        //let port = "7024";
+        //server = `https://localhost:${port}`;
+
+        $("#signupBTN").click(function () {
+            window.location.href = "SignUpPage.html"
+        })
+
+        $("#Lights").click(function () {
+            window.location.href = "LightIndicator.html"
+        })
+
+        $("#FindGarage").click(function () {
+            window.location.href = "FindGaragePage.html"
+        })
+    });
+
+        function needregister() {
+            Swal.fire({
+                title: "משתמש לא רשום",
+                text: "אינך רשאי/ת להשתמש בתכנים אלו ללא הרשמה",
+                icon: "warning"
+            })
+            return;
+    };
+
+    </script>
+    <style>
+    </style>
+</head>
+<body class="mainpage">
+    <div>
+        <h1 class="h1header">
+            <span id="helloUser">CarCare</span>
+        </h1>
+        <p id="signupBTN">הרשמה </p>
+
+    </div>
+    <div>
+        <img id="logo" src="images/LOGO ROUND WHITE BG.png" />
+        <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+    </div>
+    <!-- Content Section -->
+    <div class="content">
+        <div class="flextest">
+            <div class="mainscreenimg">
+                <img id="Lights" class="fleximg" src="images/oil-indicator.png" />
+                <p>מקרא נורות</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="FindGarage" class="fleximg" src="images/maintenance (3).png" />
+                <p>חפש מוסכים</p>
+            </div>
+        </div>
+        <div class="flextest">
+            <div class="mainscreenimg">
+                <img id="greybook" class="fleximg" src="images/testGREY.png" />
+                <p>ספר הרכב שלי</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="greyswap" class="fleximg" src="images/GREYarrows.png" />
+                <p>העברת רכב</p>
+            </div>
+        </div>
+    </div>
+    <!-- Footer Section -->
+    <div class="footer">
+        <img id="greyplus" class="plus" src="images/PLUSGREYED.png" />
+    </div>
+</body>
+</html >

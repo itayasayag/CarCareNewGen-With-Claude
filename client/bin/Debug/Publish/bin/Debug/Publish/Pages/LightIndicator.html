@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <meta charset="utf-8" />
+    <title>מקרא נורות</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <!--תוספות אביעד-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!--סוף תוספות אביעד-->
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            if (temp !== null) {
+                document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
+                $('#logo').click(function () { window.location.href = 'HomePage.html' })
+            }
+            else {
+                $('#logo').click(function () { window.location.href = 'HomePage - Guest.html' })
+            }
+            //מצבי התחלה
+            $('#GreenLightDiv').show();
+            $('#GreenLight').addClass('active');
+
+            $('.img-Ilight').click(function () {
+                var target = $(this).data('target');
+                $('.toggle-content').hide();
+                $(target).show();
+
+                // Reset all images to 85px and remove active class
+                $('.img-Ilight').removeClass('active');
+                // Enlarge the clicked image to 115px and add active class
+                $(this).addClass('active');
+
+                // Hide other divs based on the clicked image
+                if (target === '#GreenLightDiv') {
+                    $('#OrangeLightDiv, #RedLightDiv').hide();
+                } else if (target === '#OrangeLightDiv') {
+                    $('#GreenLightDiv, #RedLightDiv').hide();
+                } else if (target === '#RedLightDiv') {
+                    $('#GreenLightDiv, #OrangeLightDiv').hide();
+                }
+            });
+        });
+    </script>
+
+
+</head>
+<body>
+
+    <div id="top">
+        <div class="header">
+            <div>
+                <h1 id="helloUser" class="h1header">CarCare</h1>
+
+                <img id="logo" src="images/LOGO ROUND WHITE BG.png" />
+            </div>
+
+        </div>
+        <div>
+            <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+        </div>
+    </div>
+    <div class="RollDown">
+        <!--תוכן העמוד-->
+        <!--שלושת הנורות-->
+        <div class="row ThreeLights" id="threelights">
+            <div>
+                <img id="GreenLight" class="img-Ilight active" src="images/LightIndicator/GreenLight.png" data-target="#GreenLightDiv" />
+                <p class="p-light-L">נוריות מידע</p>
+            </div>
+            <div>
+                <img id="OrangeLight" class="img-Ilight" src="images/LightIndicator/orange Light.png" data-target="#OrangeLightDiv" />
+                <p class="p-light-L">נוריות אזהרה</p>
+            </div>
+            <div>
+                <img id="RedLight" class="img-Ilight" src="images/LightIndicator/RedLight.png" data-target="#RedLightDiv" />
+                <p class="p-light-L">נוריות תקלה</p>
+            </div>
+
+        </div>
+        <div id="GreenLightDiv">
+            <!-- Green DIV -->
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/pedalGREEN.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">דוושת הבלם</p>
+                    <p class="p-light">נורה זו תידלק באם קיים הצורך ללחוץ על הבלם על מנת להתניע את הרכב או להעביר את ההילוכים למצב Drive.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/fog-lightGREEN.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">אורות ערפל</p>
+                    <p class="p-light">אור ערפל קדמי דולק. מסייע לראות את הדרך במידה והראות אינה אופטימלית.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/GREENENGINELIGHT.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">טמפרטורת מנוע נמוכה</p>
+                    <p class="p-light"> נדלקת לרוב בהתנעה ראשונה של הרכב או בימים קרים מאוד.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="OrangeLightDiv">
+            <!-- Orange DIV -->
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/ORANGEgas-station.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">מד דלק נמוך</p>
+                    <p class="p-light"> כמות הדלק נמוכה ויש למלא דלק בקרוב, לרוב מציין כשנותרו כ-50 קילומטר אחרונים לנסיעה.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/OrangeCheckEngine.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">בדוק מנוע</p>
+                    <p class="p-light"> ישנו משהו לא תקין במנוע הרכב, נדרש להגיע למוסך.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/ORANGEtirePressure.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">לחץ גלגלים נמוך</p>
+                    <p class="p-light"> לחץ האוויר בגלגלים נמוך, נדרש למלא אוויר .במידה והנורית נדלקת בשנית לאחר מילוי האוויר, ככל הנראה יש תקר.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/OrangeTractionControl.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">בקרת החלקה EBS כבויה</p>
+                    <p class="p-light">בקרת ההחלקה כבויה, יכול לקרות עקב תקלה או בעקבות לחיצה על כפתור ביטול בקרת החלקה ברכב.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="RedLightDiv">
+            <!-- Red DIV -->
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/REDoil.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">לחץ שמן נמוך</p>
+                    <p class="p-light"> נורת אזהרה המעידה על כך שאין מספיק שמן במנוע. נסיעה עם לחץ שמן נמוך יכולה לגרום לתקלות ברכב.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/REDdashboard.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">מעצור יד מורם</p>
+                    <p class="p-light">
+                        נורה זו מופיעה כשמשאירים את בלם היד ('אמברקס') מורם או כשיש תקלה בבלמים.
+                    </p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/REDcar-battery.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">מצבר</p>
+                    <p class="p-light"> הופעת הנורה מעידה על ליקוי בחשמל הרכב.</p>
+                </div>
+            </div>
+            <div class="row light-div">
+                <div class="col-4 img-ICONcol">
+                    <img class="img-light" src="images/LightIndicator/REDcar-cooler.png" />
+                </div>
+                <div class="col-8">
+                    <p class="p-light-H">נוזל קירור</p>
+                    <p class="p-light">המנוע התחמם יתר על המידע, ייתכן עקב חוסר בנוזל קירור.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+      
+    </div>
+</body>
+</html>

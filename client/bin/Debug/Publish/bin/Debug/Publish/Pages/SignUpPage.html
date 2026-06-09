@@ -1,0 +1,345 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="../JS/CarCareFunctions.js"></script>
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <meta charset="utf-8" />
+
+    <title>התחברות / הרשמה</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../JS/ajaxCall.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            var LogedIUser = localStorage.getItem('LogInUser');
+            if (LogedIUser !== null) {
+                window.location.href = "HomePage.html";
+            }
+
+            //let port = "7024";
+            //server = `https://localhost:${port}`;
+
+            changePageToLogIn();
+
+            $("#Guestlogin").click(function () {
+                window.location.href = "HomePage - Guest.html"
+            })
+
+            $('#RegBtn').click(postUser);
+            $('#loginBtn').click(login);
+
+            // Function to handle changes when registerOption is checked
+            $('#registerToggle').change(function () {
+                // Unhide all elements
+                $('input, button').show();
+                // Change style of #Tgl2
+                $('#Tgl2').css({
+                    'background-color': '#f0f0f0b0',
+                    'color': '#b0b0b0'
+                });
+                $('#Tgl1').css({
+                    'background-color': '#235978',
+                    'color': '#e5e5e5'
+                });
+                // Hide #loginBtn and show #RegBtn
+                $('#loginBtn').hide();
+                $('#RegBtn').show();
+                $('#Guestlogin').hide();//תוספת איתי
+                // Hide #firstName, #lastName, #phoneNumber
+                $('#firstName, #lastName, #phoneNumber').show();
+            });
+
+            // Function to handle changes when loginOption is checked
+            $('#loginToggle').change(function () {
+                changePageToLogIn();
+            });
+
+            function changePageToLogIn() {
+                // Unhide all elements
+                $('input, button').show();
+                // Change style of #Tgl1
+                $('#Tgl1').css({
+                    'background-color': '#f0f0f0b0',
+                    'color': '#b0b0b0'
+                });
+                $('#Tgl2').css({
+                    'background-color': '#235978',
+                    'color': '#e5e5e5'
+                });
+                // Hide #RegBtn and show #loginBtn
+                $('#RegBtn').hide();
+                $('#loginBtn').show();
+                // Hide #firstName, #lastName, #phoneNumber
+                $('#firstName, #lastName, #phoneNumber').hide();
+            }
+        });
+
+        //הרשמה
+        function postUser() {
+
+            ;
+
+            let U = {
+                "firstName": $("#firstName").val(),
+                "familyName": $("#lastName").val(),
+                "password": $("#password").val(),
+                "email": $("#email").val(),
+                "phoneNum": $("#phoneNumber").val(),
+                "verified": false,
+            };
+
+
+            if ($("#firstName").val() == "" || $("#lastName").val() == "" || $("#password").val() == "" || $("#email").val() == "" || $("#phoneNumber").val() == "") {
+                Swal.fire({
+                    title: "מידע חסר",
+                    text: "ודא/י שלא פספסת כלום",
+                    icon: "question"
+                })
+            }
+            else {
+                let api = server + "/api/User";
+                ajaxCall("POST", api, JSON.stringify(U), postSCB, postECB);
+                console.log("test");
+                
+            }
+        }
+
+        function postSCB(res) {
+            console.log(res);
+            login();
+
+        }
+
+        function postECB(err) {
+            console.log(err);
+            Swal.fire({
+                title: "משתמש קיים!",
+                text: "האימייל קיים במערכת",
+                icon: "warning"
+            });
+        }
+
+
+        //התחברות
+
+        function login() {
+
+            let U = {
+                "firstName": $("#firstName").val(),
+                "familyName": $("#lastName").val(),
+                "password": $("#password").val(),
+                "email": $("#email").val(),
+                "phoneNum": $("#phoneNumber").val()
+            }
+            let api = server + "/api/User/" + U.email;
+            ajaxCall("POST", api, JSON.stringify(U), loginSCB, loginECB);
+        }
+
+        function loginSCB(res) {
+            localStorage.setItem('LogInUser', JSON.stringify(res));
+            //ניסיון לשמירת פרטי רכב בעמוד התחברות
+            user = res;
+            ReadUserCarByEmail(user.email);
+            ReadUserCarCareByEmail(user.email);
+
+            
+            Swal.fire({
+                title: "ברוך הבא!",
+                icon: "success"
+            }).then(function () {
+                window.location = "HomePage.html";
+            });
+
+        }
+
+
+        function loginECB(err) {
+            console.log(err);
+            Swal.fire({
+                title: "שגיאה",
+                text: "אתה לא מחובר למערכת",
+                icon: "info"	
+            })
+        }
+
+
+    </script>
+    <style>
+        body {
+            font-family: Calibri, sans-serif;
+            direction: rtl; /* Right-to-left text direction */
+            text-align: center;
+            display: block;
+            overflow: auto;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="submit"],
+        input[type="tel"],
+        input[type="email"],
+        button {
+            width: 70%;
+            height: 50px;
+            margin: auto;
+            font-family: Calibri;
+            font-size: 25px;
+            margin: 20px 0;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            border-radius: 25px; /* Rounded corners */
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f0f0f0b0;
+            color: #235978;
+        }
+
+        input::placeholder {
+            text-align: right;
+            font-size: 22px;
+            color: #235978;
+        }
+
+        header {
+            height: 8%;
+        }
+
+        .footer {
+            height: 10%;
+            position: fixed;
+            background-color: #235978;
+            bottom: 0px;
+            width: 100%;
+        }
+
+        #logo {
+            width: 40%;
+            margin-top: 15px;
+            bottom: 60%; /*חייב להיות חצי מרוחב*/
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .plus {
+            width: 100px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #RegBtn, #loginBtn {
+            vertical-align: central;
+            background-color: #55a35d;
+            font-size: 22px;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            bottom: 92%;
+            position: relative;
+            margin-top: 30px;
+            bottom: 75px;
+        }
+
+        #btngrp {
+            width: 90%;
+            margin-bottom: 15px;
+            margin-top: 30px;
+        }
+
+        #Tgl1, #Tgl2 {
+            border-radius: 20px;
+            background-color: #235978;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            font-family: Calibri;
+            font-size: 20px;
+            display: inline-block;
+        }
+
+        #Tgl2 {
+            background-color: #f0f0f0b0;
+            color: #b0b0b0;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="top">
+        <div id="header" class="header">
+            <h1 class="h1header">CarCare</h1>
+        </div>
+
+    </div>
+
+
+    <div class="container RollDown">
+        <div>
+            <img id="logo" src="images/LOGO ROUND WHITE BG.png" />
+        </div>
+
+        <div class="btn-group btn-group-toggle" id="btngrp" data-toggle="buttons">
+            <label class="btn btn-secondary active" id="Tgl1">
+                <input type="radio" name="registerOption"
+                       id="registerToggle" autocomplete="off"> הרשמה
+            </label>
+            <label class="btn btn-secondary" id="Tgl2">
+                <input type="radio" name="loginOption"
+                       id="loginToggle" autocomplete="off" checked> התחברות
+            </label>
+        </div>
+
+        <form id="registrationForm" class="SignupForm" method="post" action="#">
+            <div class="form-group">
+                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="שם פרטי" required>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="שם משפחה" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="מספר טלפון" required>
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control" id="email" name="email" placeholder="מייל" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="password" name="password" placeholder="סיסמה" required>
+            </div>
+
+        </form>
+       
+    </div>
+
+    <div>
+        <button type="button" class="btn-secondary rounded-button" id="Guestlogin">התחבר כאורח</button>
+    </div>
+
+    <div>
+        <div class="footersignup">
+            <button type="submit" class="btn btn-primary rounded-pill" id="RegBtn">הרשמה</button>
+            <button type="submit" class="btn btn-primary rounded-pill" id="loginBtn">התחבר</button>
+        </div>
+    </div>
+
+</body>
+</html>

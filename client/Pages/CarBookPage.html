@@ -1,0 +1,771 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../JS/CarCareFunctions.js"></script>
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <meta charset="utf-8" />
+    <title>ספר רכב</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <script src="../JS/ajaxCall.js"></script>
+    <!--ספריית פונט open sans-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <!--תוספות אביעד-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!--סוף תוספות אביעד-->
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!--ספריות לייצוא לPDF-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        #uploadreciptswal {
+    width: 85px;
+    top: 120px;
+    left: 15px;
+    background: white;
+    z-index: 1001;
+    border-radius: 50%;
+}
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            //let port = "7024";
+            //server = `https://localhost:${port}`;
+
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            showDetails();
+
+            if (temp !== null) {
+                document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
+            }
+
+            AddCarToListFromStorage();
+            var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
+            if (selectedCarValue !== null) {
+                $('#carSelect').val(selectedCarValue);//השמת הערך בבחירה
+                GetSelectedCarDetails(selectedCarValue);
+            }
+
+            getLastCareInfo();
+
+            showApprovedTag();
+            
+           
+            $("#logoutBTN").click(function () {
+                localStorage.removeItem('LogInUser');
+                window.location.href = "SignUpPage.html"
+
+            })
+
+            $("#approved").show() //TBD כשהרכב יאושר יריץ את זה
+
+            $("#MyCarBook").click(function () {
+                window.location.href = "CarBookPage.html"
+
+            })
+
+            $("#plussign").click(function () {
+                window.location.href = "AddCarCarePage.html"
+            })
+            $("#editcars").click(function () {
+                localStorage.setItem('editMode', JSON.stringify(true));//כניסה למצב עריכת רכב
+                window.location.href = "addCarPage.html"
+
+            })
+
+            $("#exportPDF").click(function () {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const divIds = ['fristIconRow', 'secondIconRow', 'CarBook']; // IDs of the divs you want to include
+                let promises = [];
+
+                // Add title and image to the top of the page
+                const title = "";
+                const logoPath = "images/LOGO ROUND WHITE BG.png";
+                const logoWidth = 20; // width in mm
+                const logoHeight = 20; // height in mm
+                const titleFontSize = 20;
+                const textColor = "#235978";
+                const margin = 10; // margin from page edges
+
+                // Fetch 'SelectedCar' from local storage
+                const selectedCar = JSON.parse(localStorage.getItem('SelectedCar')) || 'Unknown';
+
+                // Add a date and time stamp
+                const currentDate = new Date();
+                const dateString = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
+
+                // Generate the images for the divs
+                divIds.forEach(id => {
+                    const div = document.getElementById(id);
+                    if (div) {
+                        promises.push(html2canvas(div, { scale: 2 }).then(canvas => {
+                            return canvas.toDataURL('image/png');
+                        }));
+                    }
+                });
+
+                Promise.all(promises).then(images => {
+                    // Define page size
+                    const imgWidth = 190; // Width with margin
+                    const pageHeight = 295; // A4 height in mm
+                    let yOffset = margin; // Start from top margin
+
+                    // Add the title and logo image to the PDF
+                    doc.setFontSize(titleFontSize);
+                    doc.setFont("Calibri");
+                    doc.text(title, 105, yOffset, { align: 'center' }); // Title at the center
+                    doc.addImage(logoPath, 'PNG', margin, margin, logoWidth, logoHeight); // Logo at the top-left corner
+                    doc.setFontSize(titleFontSize);
+                    doc.setTextColor(textColor);
+                    doc.text("CarCare", logoWidth + 20, margin + 10); // Add text next to the logo
+
+                    // Add the date and time in the top-right corner
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0); // Black color for date
+                    doc.text(dateString, 200, margin + 10, { align: 'right' });
+
+                    // Add the SelectedCar value to the center of the page
+                    doc.setFontSize(16);
+                    doc.setTextColor(textColor);
+                    doc.text(`Car-Book of: ${selectedCar}`, 105, yOffset + 30, { align: 'center' }); // Positioned just below the title
+                    let CarLplate = localStorage.getItem("SelectedCar");
+                    let pdfFileName = 'CarCareFile' + CarLplate + 'CarBook.pdf'
+                    
+                    // Add images of divs
+                    let position = yOffset + 50; // Start below the SelectedCar text
+                    images.forEach((imgData, index) => {
+                        const img = new Image();
+                        img.src = imgData;
+                        img.onload = function () {
+                            const imgHeight = img.height * imgWidth / img.width;
+
+                            // Adjust the image height to fit within the page
+                            if (position + imgHeight > pageHeight - margin) {
+                                position = margin; // Reset position to top
+                                doc.addPage();
+                            }
+
+                            // Add image to the PDF
+                            doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                            position += imgHeight + 10; // Add some space between images
+
+                            // Save the PDF once all images are processed
+                            if (index === images.length - 1) {
+                                doc.save(pdfFileName);
+                            }
+                        };
+                    });
+                }).catch(error => {
+                    console.error('Error generating PDF:', error);
+                });
+            });
+
+
+
+            ReadUserCarByEmail(tempUser.email);
+
+
+
+        });
+        function setImageSrc(element) {
+            var imageSrc = element.dataset.src1
+            document.getElementById('modalImage').src = imageSrc;
+        }
+
+        function getLastCareInfo() {
+            //השמת ערך תאריך טסט הבא
+            if (localStorage.getItem('vehicleDetails') != null) {
+                document.getElementById("CareType6").innerHTML = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
+            }
+            var tmpCarelist = JSON.parse(localStorage.getItem('UserCarCarelist'));
+            var selectedCar = JSON.parse(localStorage.getItem('SelectedCar'));
+            var MaxKM = document.getElementById("CareType9").innerHTML;
+            var logSTR = "";
+            for (var i = 0; i < tmpCarelist.length; i++) {
+                if (tmpCarelist[i].licensePlate == selectedCar) {
+
+                    let DateString = new Date(tmpCarelist[i].recordDate);
+                    let Now = new Date();
+                    let formattedDate = DateString.toLocaleDateString();
+                    divID = "CareType" + tmpCarelist[i].careID;
+
+                    logSTR += '<tr>';
+                    logSTR += '<td>' + formattedDate + '</td>';
+                    logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" style="border:none; background:none; padding:0; margin:0; font-family:inherit; font-size:inherit; cursor:pointer;">' + tmpCarelist[i].carename +  '</button> </td>'
+
+                    logSTR += '<td>' + tmpCarelist[i].currentKM + '</td>';
+                    if (tmpCarelist[i].invoiceFileName != "ללא תמונה") {
+                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server+ /images/ + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
+                    }
+                    else {
+                        logSTR += '<td></td>';
+                    }
+                    logSTR += '</tr>';
+                    document.getElementById("carBookTbl").innerHTML += logSTR;
+                    logSTR = "";
+                    
+
+                    if (document.getElementById(divID) != null) {
+                        divIdValue = document.getElementById(divID).innerHTML;
+                        if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
+
+                            let numOfDays = Math.round((Now - DateString) / (1000 * 60 * 60 * 24));//המרה מ:מילישניות לימים
+                            document.getElementById(divID).innerHTML = '<p>' + formattedDate + '</p>';
+                            tmpstr = '<p';
+                            if (numOfDays > 0) {
+                                if (numOfDays > 330) {
+                                    tmpstr += ` style ="color: red; font-weight:bold"`;
+                                }
+                                document.getElementById(divID).innerHTML += tmpstr + '>לפני ' + numOfDays + ' ימים</p>';
+                            }
+                            else {
+                                document.getElementById(divID).innerHTML += '<p>תיעוד עתידי</p>';
+                            }
+
+                        }
+
+                    }
+
+
+
+
+
+
+                    if (MaxKM == "טרם תועד" || tmpCarelist[i].currentKM > MaxKM) {
+                        MaxKM = tmpCarelist[i].currentKM;
+                    }
+                }
+            }
+            document.getElementById("CareType9").innerHTML = MaxKM + ' ק"מ ';
+
+
+
+        }
+
+        function ParseDate(date) {
+            var tempdate = new Date(date);
+            var day = tempdate.getDate();
+            var month = tempdate.getMonth() + 1;
+            var year = tempdate.getFullYear();
+
+            var formattedDate = day + '/' + month + '/' + year;
+            return formattedDate;
+        }
+
+        function changeCarSelect() {//הוספת רכב ושמירת בחירה בזיכרון
+
+            if ($("#carSelect").val() == "addCar") {
+                Swal.fire({
+                    title: "האם ברצונך להוסיף רכב חדש?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#235978",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "הוסף רכב חדש",
+                    cancelButtonText: "בטל",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "addCarPage.html";
+                    }
+                });
+                $('#carSelect').prop('selectedIndex', 0);
+            }
+            else {
+                //שומר רק אם הוא לא בחר ערך שמי (שלא מאופשר)
+                localStorage.setItem('SelectedCar', JSON.stringify($("#carSelect").val()))
+                console.log($("#carSelect").val());
+                showApprovedTag();
+                location.reload();
+
+            }
+
+        };
+
+
+        function updateKM(KM) {
+
+            var now = new Date;
+
+            LogRecord = {
+                useremail: JSON.parse(localStorage.getItem('LogInUser')).email,
+                licensePlate: parseInt(JSON.parse(localStorage.getItem('SelectedCar'))),
+                recordDate: now.toLocaleDateString(),
+                currentKM: KM,
+                mispar_mosah: null,
+                careID: 9,
+                cost: 0,
+                notes: "תיעוד מהיר",
+                warrantyExpirationDate: null,
+                invoiceFileName: null,
+            }
+
+            api = server + "/api/Log_Record";
+            ajaxCall("POST", api, JSON.stringify(LogRecord), postqSCB, postqECB);
+
+            function postqSCB(res) {
+                ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
+                console.log(res);
+                Swal.fire({
+                    title: `נוסף תיעוד ק"מ"`,
+                    icon: "success"
+                });
+
+            }
+
+            function postqECB(err) {
+                console.log(err);
+                Swal.fire({
+                    title: "כשל בהוספת טיפול",
+                    text: "אנא בדוק את הפרטים שהוזנו במערכת",
+                    icon: "warning"
+                });
+
+            }
+
+  
+        }
+
+
+        function showDetails() {
+            document.getElementById('showDetails').addEventListener('click', function () {
+                // Retrieve data from local storage
+                const storedData = localStorage.getItem('vehicleDetails');
+                console.log("Stored Data:", storedData); // Debugging line
+
+                if (storedData) {
+                    // Parse the JSON data and access the first element
+                    const vehicleDetailsArray = JSON.parse(storedData);
+                    const vehicleDetails = vehicleDetailsArray[0];
+                    console.log("Parsed Vehicle Details:", vehicleDetails); // Debugging line
+
+                    // Define the keys to display and their corresponding labels
+                    const displayFields = {
+                        "mispar_rechev": "מספר רישוי",
+                        "tozeret_nm": "יצרן",
+                        "kinuy_mishari": "דגם",
+                        "ramat_gimur": "רמת גימור",
+                        "shnat_yitzur": "שנת ייצור",
+                        "sug_delek_nm": "סוג דלק",
+                        "tzeva_rechev": "צבע",
+                        "baalut": "בעלות",
+                        "mivchan_acharon_dt": "מבחן רישוי אחרון"
+                    };
+
+                    // Construct the HTML table with the selected vehicle details
+                    let tableHtml = '<table class="vehicle-details-table">';
+                    /*tableHtml += '<tr><th>Field</th><th>Value</th></tr>';*/
+
+                    let hasContent = false;
+
+                    for (const [key, label] of Object.entries(displayFields)) {
+                        if (vehicleDetails[key] !== undefined) {
+                            tableHtml += `<tr><td class="label">${label}</td><td class="value">${vehicleDetails[key]}</td></tr>`;
+                            hasContent = true;
+                        } else {
+                            console.log(`Key not found in vehicleDetails: ${key}`); // Debugging line
+                        }
+                    }
+
+                    tableHtml += '</table>';
+
+                    if (hasContent) {
+                        Swal.fire({
+                            title: 'פרטי הרכב',
+                            html: tableHtml,
+                            width: '80%',
+                            customClass: {
+                                container: 'custom-swal-container',
+                                title: 'custom-swal-title',
+                                htmlContainer: 'custom-swal-html-container',
+                                confirmButton: 'custom-swal-confirm-button'
+                            },
+                            confirmButtonText: 'סגור'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No Data',
+                            text: 'No relevant vehicle details found to display!',
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'מצטערים...',
+                        text: 'לא נמצאו נתונים עבור הרכב הנבחר',
+                    });
+                }
+            });
+        }
+
+        function UpdateLogRecord(logID,KM,COST,NOTES,CAREID,INVOIEFILENAME ) {
+            UpdateLogRecord = {
+                useremail: "",
+                licensePlate: 0,
+                recordDate: "2024-08-10T23:06:06.229Z",
+                currentKM: KM,
+                mispar_mosah: 371,
+                careID: CAREID,
+                cost: COST,
+                notes: NOTES,
+                warrantyExpirationDate: "2024-08-10T23:06:06.229Z",
+                invoiceFileName: INVOIEFILENAME /*uploadrecipt.toString()*/,
+                careName: "",
+                garagename: ""
+            }
+
+
+        api = server + "/api/Log_Record/" + logID;
+            ajaxCall("PUT", api, JSON.stringify(UpdateLogRecord), UpdateLogRecordSCB, UpdateLogRecordECB);
+
+        }
+
+        function UpdateLogRecordSCB(suc) {
+            Swal.fire({
+                title: " הטיפול עודכן בהצלחה!",
+                icon: "success"
+            }).then(() => {
+                // Actions to perform after the success alert is closed
+                ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
+                ReadLogRecordByID(JSON.parse(sessionStorage.getItem('TemplogRecord')).logID);
+                getLastCareInfo();
+                location.reload(); // Reload the page
+            });
+
+        }
+
+        function UpdateLogRecordECB(err) {
+            Swal.fire({
+                title: "כשל",
+                icon: "warning"
+            })
+
+            console.log(err);
+        }
+
+        function ReadLogRecordByID(id) {
+            api = server + "/api/Log_Record/ReadLogRecordByID/"+id+"?LogID="+id;
+            ajaxCall("GET", api, "", getLogSCB, getLogECB);
+        }
+     
+
+        function getLogSCB(suc) {
+            sessionStorage.setItem('TemplogRecord', JSON.stringify(suc));
+            swalFunction(suc[0].logID);
+            console.log(suc);
+            
+            return suc;
+
+        }
+
+        function getLogECB(err) {
+            console.log(err);
+        }
+
+        function editCare(index) {
+
+            ReadLogRecordByID(index);
+    
+           
+
+        }
+        function swalFunction(index) {
+
+
+            var temp = sessionStorage.getItem("TemplogRecord");
+            const TempLogRecord = JSON.parse(temp);
+            const formattedDate = formatToDDMMYYYY(TempLogRecord[0].recordDate)
+
+
+
+            Swal.fire({
+                title: TempLogRecord[0].carename,
+                html: `
+
+        
+         <div style="align-items: center;">
+             <span> ${formattedDate} </span>
+       
+         </div>
+         <br>
+           <div style="align-items: center;">
+             <label for="cost">מוסך </label>
+            <span> ${TempLogRecord[0].garageName} </span>
+         </div>
+           <br>
+             <div style="align-items: center;">
+                 <label for="cost">ק"מ</label>
+                 <span>${TempLogRecord[0].currentKM}</span>
+             </div>
+         <br>
+         <div style="align-items: center;">
+           <label for="cost">מחיר</label>
+           <input type="number" id="Lcost" class="swal2-input" value="${TempLogRecord[0].cost}" min="0" step="0.01">
+       </div>
+     
+         <br>
+
+         <div style="align-items: center;">
+             <label for="notes">הערה</label>
+              <textarea id="Lnotes" class="swal2-input"  > ${TempLogRecord[0].notes} </textarea>
+        
+         </div>
+         <br>
+           <div style="text-align: center;">
+             <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;" />
+             <input type="file" id="imgupload" style="display:none;" />
+         </div>
+
+     `,
+
+                showCancelButton: true,
+                confirmButtonText: 'שמור',
+                cancelButtonText: 'בטל',
+
+
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    uploadInvoice();
+                    const cost = document.getElementById('Lcost').value;
+                    const notes = document.getElementById('Lnotes').value;
+                    UpdateLogRecord(index, TempLogRecord[0].currentKM, cost, notes, TempLogRecord[0].careID, newName)
+
+                }
+            });
+            $("#uploadreciptswal").click(function () {
+                $("#imgupload").trigger('click');
+            });
+
+
+
+
+
+        }
+        function formatToDDMMYYYY(isoDate) {
+            const date = new Date(isoDate);
+            const day = String(date.getDate()).padStart(2, '0'); // Day of the month
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const year = date.getFullYear(); // Full year
+            return `${day}/${month}/${year}`;
+        }
+
+        function uploadInvoice() {
+            var temp = sessionStorage.getItem("TemplogRecord");
+            var TempLogRecord = JSON.parse(temp);
+            var data = new FormData();
+            var files = $("#imgupload").get(0).files;
+
+            // Add the uploaded file to the form data collection
+            if (files.length > 0) {
+                for (f = 0; f < files.length; f++) {
+                    var renamedFile = renameFile(files[f]);
+                    data.append("files", renamedFile);
+                   
+                }
+            }
+            else {
+                newName = TempLogRecord[0].invoiceFileName;
+                return false;
+            }
+            api = server + "/api/Upload";
+            imageFolder = server + "/images/";
+
+
+            // Ajax upload
+            $.ajax({
+                type: "POST",
+                url: api,
+                contentType: false,
+                processData: false,
+                data: data,
+                success: success,
+                error: error
+            });
+            /*return false;*/
+
+        }
+
+        // Function to rename the file
+        function renameFile(file) {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            var createTime = new Date();
+            var currentCar = localStorage.getItem('SelectedCar');
+            // Get the file extension
+            var ext = file.name.split('.').pop();
+            newName = tempUser.email + "_" + parseInt(currentCar.replace(/"/g, '')) + 'invoice' + "_" + createTime.getTime() + '.' + ext;
+            imageFilename = newName;
+            // Create a new File object with the new name
+            return new File([file], newName, { type: file.type });
+        }
+
+        function success(data) {
+            console.log(data);
+        }
+
+        function error(data) {
+            console.log(data);
+        }
+
+
+
+    </script>
+
+
+</head>
+<body>
+    <div id="top">
+        <div class="header" , id="header">
+            <div id="VerifyPicture">
+                <img class="hiddenApproved" id="approvedIMG" src="images/Approved.png" />
+            </div>
+            <div>
+                <h1 class="h1header">
+                    <span id="helloUser">CarCare</span>
+                </h1>
+                    <img onclick="document.location='HomePage.html'" id="logo" src="images/LOGO ROUND WHITE BG.png" />
+                    <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
+                <div id="SelectDiv">
+                    <!--דיב שמוסיפים אליו את כל הרכבים-->
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+            <img id="editcars" alt="עדכון פרטי רכב" src="images/edit.png" />
+            <img id="showDetails" alt="הצג פרטי רכב" src="images/CARINFO.png" />
+            <img id="exportPDF" src="images/picture-as-pdf-red.png" alt="Export to PDF" />
+
+        </div>
+    </div>
+    <div class="RollDownCarBook">
+        <div id="SelectDiv">
+            <!--דיב שמוסיפים אליו את כל הרכבים-->
+        </div>
+        <!--תוכן העמוד-->
+        <div id="fristIconRow" class="flextest">
+            <!--שורה עליונה-->
+            <div class="mainscreenimg">
+                <img id="carBookKMIMG" class="fleximgCarBook" src="images/kilometer.png" />
+                <p class="carbookheadline">קילומטראז'</p>
+                <p id="CareType9" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookBrakesIMG" class="fleximgCarBook" src="images/Brakes.png" />
+                <p class="carbookheadline">החלפת בלמים</p>
+                <p id="CareType8" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookOilIMG" class="fleximgCarBook" src="images/car-oilblue.png" />
+                <p class="carbookheadline">שמן מים</p>
+                <p id="CareType1" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookTireReplaceIMG" class="fleximgCarBook" src="images/tiresBlue.png" />
+                <p class="carbookheadline">החלפת צמיגים</p>
+                <p id="CareType3" class="lowerline">טרם תועד</p>
+            </div>
+        </div>
+        <div id="secondIconRow" class="flextest">
+            <!--שורה תחתונה-->
+            <div class="mainscreenimg">
+                <img id="carBookTirePressureIMG" class="fleximgCarBook" src="images/tire-pressureblue.png" />
+                <p class="carbookheadline">לחץ אוויר</p>
+                <p id="CareType2" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookBatteryIMG" class="fleximgCarBook" src="images/car-battery (1).png" />
+                <p class="carbookheadline">החלפת מצבר</p>
+                <p id="CareType4" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookTestIMG" class="fleximgCarBook" src="images/testblue.png" />
+                <p class="carbookheadline">טסט הבא</p>
+                <p id="CareType6" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookinsurenceIMG" class="fleximgCarBook" src="images/car-insurance.png" />
+                <p class="carbookheadline">גמר ביטוח</p>
+                <p id="CareType7" class="lowerline">טרם תועד</p>
+            </div>
+        </div>
+
+        <!--טבלת ספר רכב מפורטת-->
+        <p id="carbookpara" class="carbooktableheader">ספר הטיפולים</p> <!--TBD להוסיף את כינוי הרכב-->
+        <div class="FullCarBook">
+            <div id="CarBook" class="scrollCarbook">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>תאריך</th>
+                            <th>תיאור</th>
+                            <th>ק"מ</th>
+                            <th>חש'</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="carBookTbl">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <img onclick="TBD" id="plussign" class="plus" src="images/PLUS.png" />
+    </div>
+
+
+    <!-- invoice Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">צילום חשבונית </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalImage" src="" class="img-fluid" alt="Large Image">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--pdf modal-->
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="margin: 2cm;">
+                <div class="modal-body">
+                    <img id="modalImage" src="" class="img-fluid" alt="Large Image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body >
+</html >

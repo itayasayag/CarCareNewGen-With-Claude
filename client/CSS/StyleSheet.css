@@ -1,0 +1,883 @@
+﻿/*תוספות אביעד*/
+body, html {
+    background-color: #F0F0F0;
+    color: #235978;
+    height: 100%;
+}
+
+.mainpage {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.fleximg {
+    display: block;
+    height: 90px;
+    padding: 5px;
+    margin: 10px;
+}
+
+.fleximgCarBook {
+    display: block;
+    height: 70px;
+    padding: 5px;
+    margin: 0px 10px 0px 10px;
+}
+
+.flextest {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+h3 {
+    text-align: center;
+}
+
+#h2carcare, #h3carcare {
+    text-align: center;
+    color: #235878
+}
+
+.form-container {
+    max-width: 500px;
+    margin: auto;
+    margin-bottom: 50px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.form-control {
+    border-radius: 20px;
+    border-color: #235978;
+}
+
+
+.h1header {
+    padding-top: 25px;
+    padding-bottom: 25px;
+    background-color: #235978;
+    color: white;
+    font-family: Titillium Web,Calibri, sans-serif; /*תוספות מאי*/
+    text-align: center;
+    margin: 0;
+    font-size: 48px;
+    height: 115px;
+}
+
+
+
+.footer {
+    position: fixed;
+    bottom: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #235978;
+    margin-top: 25px;
+    height: 8%;
+    width: 100%;
+    text-align: center;
+}
+
+.footersignup {
+    position: fixed;
+    bottom: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #235978;
+    margin-top: 25px;
+    height: 8%;
+    width: 100%;
+    text-align: center;
+}
+
+#logo {
+    width: 70px;
+    position: relative;
+    bottom: 35px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.plus {
+    width: 100px;
+    position: relative;
+    bottom: 90px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+}
+
+.UploadPapers {
+    width: 100px;
+    position: relative;
+    bottom: 90px;
+    display: none;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+}
+
+img.homepageimg {
+    width: 110px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 15px;
+    display: block;
+    align-content: center;
+}
+
+.homepagetb {
+    color: #235978;
+    text-align: center;
+    font-size: 14px;
+    display: block;
+    padding: 0px 15px 0 15px;
+    width: 110px;
+    /* צריכים להיות ביחד ברוחב התמונה שמעליהם*/
+}
+
+.rounded-div {
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: #bdbdbd;
+    padding: 5px 20px 5px 20px;
+    display: flex;
+    align-items: center;
+    margin: 50px 20px 30px 20px;
+}
+
+
+.text-container {
+    margin-left: 20px;
+}
+
+
+#addcar {
+    margin-bottom: 25px;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Optional: Set a specific height for centering vertically */
+    text-align: center;
+}
+
+    .center img {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    /*remark*/
+body, html {
+    height: 100%;
+    overflow-x: hidden; 
+}
+
+.mainpage {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    color: white;
+    text-align: center;
+    height: 17%;
+    border: solid, 1px;
+}
+
+.flextest {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.fleximg {
+    width: 150px; /* Adjust image size */
+    height: auto;
+    margin: 0 10px;
+}
+
+.text-container {
+    flex-grow: 1;
+}
+
+
+.mainpage {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.content {
+    flex-grow: 1;
+    overflow-y: auto; /* Allow scrolling if content exceeds viewport */
+    padding: 0px 20px;
+}
+
+.flextest {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.fleximg {
+    width: 150px; /* Adjust image size */
+    height: auto;
+    margin: 0 10px;
+}
+
+.text-container {
+    flex-grow: 1;
+}
+
+.mainscreenimg {
+    text-align: center
+}
+
+
+body {
+    font-family: Calibri, sans-serif;
+    direction: rtl; /* Right-to-left text direction */
+    text-align: center;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="submit"],
+input[type="tel"],
+input[type="email"],
+button,
+textarea {
+    width: 70%;
+    height: 50px;
+    margin: auto;
+    font-family: Calibri;
+    font-size: 25px;
+    margin: 15px 0;
+    border: solid;
+    border-width: 2px;
+    border-color: #e5e5e5;
+    border-radius: 25px; /* Rounded corners */
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #f0f0f0b0;
+    color: #235978;
+}
+
+input[type="number"],
+input[type="date"],
+.carcare-select, textarea {
+    width: 70%;
+    height: 50px;
+    margin: auto;
+    font-family: Calibri;
+    text-align: center;
+    border: solid;
+    border-width: 2px;
+    border-color: #e5e5e5;
+    border-radius: 50rem !important; /* Rounded corners */
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #f0f0f0b0;
+    color: #235978;
+    font-size: 20px;
+}
+
+
+input::placeholder {
+    font-family: Calibri, sans-serif;
+    text-align: center;
+    font-size: 22px;
+    color: #235978;
+}
+
+.img-care {
+    width: 85px;
+    margin-right: 20px;
+    padding: 10px;
+}
+
+.img-care-Garage {
+    width: 85px;
+    margin-right: 20px;
+}
+
+.rounded-input {
+    padding: 20px;
+    margin: auto;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.SendBTN {
+    background-color: #99BFD2;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    position: relative;
+    top: 15px;
+    border-radius: 25px;
+    align-items: center;
+    margin: auto;
+    text-align: center;
+}
+
+.rounded-input-Garage {
+    margin: auto;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.rounded-button {
+    margin: auto;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    width: 150px;
+}
+
+#Type, #garage, #notes {
+    font-size: 20px;
+}
+
+#uploadrecipt {
+    position: absolute;
+    width: 85px;
+    top: 120px;
+    left: 15px;
+    background: white;
+    z-index:1001;
+    border-radius:50%;
+}
+
+#AddCareDiv {
+    margin-top: 15px;
+}
+
+#AddNoteDiv {
+    margin: 20px,0px,20px,0px;
+    position: relative;
+    top: -5%;
+}
+
+
+#RegBtn, #AddCarBTN {
+    vertical-align: central;
+    background-color: #55a35d;
+    font-size: 22px;
+    border: solid;
+    border-width: 2px;
+    border-color: #e5e5e5;
+}
+
+#DeleteCarBTN {
+    vertical-align: central;
+    font-size: 22px;
+    border: solid;
+    border-width: 2px;
+    display: none;
+}
+
+#AddCareButton {
+    display: block;
+    background-color: #55a35d;
+    font-size: 22px;
+    border-color: #e5e5e5;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    bottom: 60px;
+    margin-top: 30px;
+}
+
+#AddAlertBTN {
+    display: block;
+    background-color: #55a35d;
+    font-size: 22px;
+    border-color: #e5e5e5;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    bottom: 60px;
+    margin-top: 30px;
+}
+
+#redBell {
+    width: 80px;
+    margin: auto;
+    padding-left: 10px;
+}
+
+.alertsDiv {
+    border-radius: 20px;
+    display: flex;
+    background-color: lightgrey;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    max-height: 250px;
+}
+
+.scroll {
+    overflow-y: auto; /* Changed to overflow-y */
+    flex-grow: 1;
+    padding: 10px;
+    max-height: 150px; /* Set a maximum height for the container */
+}
+
+#logoutBTN, #signupBTN {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    color: white;
+    background-color: #235978;
+    font-family: Calibri, sans-serif;
+    font-size: 22px;
+    text-align: left;
+}
+
+.select-car {
+    position: absolute;
+    right: 2px;
+    top: 75px;
+    font-size: 20px;
+    background-color: #235978;
+    border-width: 0;
+    color: white;
+    max-width: 150px;
+}
+
+.select_car select {
+    width: 220px;
+    border: 0;
+    position: relative;
+    z-index: 99;
+    background: none;
+}
+
+#CarDetails {
+    direction: rtl;
+    color: #235978;
+    font-size: 22px;
+    text-align: right;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.carbookheadline {
+    color: #235978;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 0px;
+    font-weight: 600;
+    padding: 2px;
+}
+
+.lowerline {
+    color: gray;
+    text-align: center;
+    font-size: 13px;
+    line-height: 4px;
+    padding-top: 2px;
+}
+
+.FullCarBook {
+    border-radius: 20px;
+    display: flex;
+    background-color: #e5e5e5;
+    margin: 0px 10px 80px 10px;
+    padding: 10px;
+/*    max-height: 300px;*/
+}
+
+.scrollCarbook {
+    /*overflow-y: auto;*/ /* Changed to overflow-y */
+    flex-grow: 1;
+    padding: 5px 10px 10px 10px;
+    /*max-height: 180px;*/ /* Set a maximum height for the container */
+}
+
+.carbooktableheader {
+    border-top: 1px solid;
+    border-color: lightgrey;
+    color: #235978;
+    text-align: right;
+    margin: 12px 20px 0px 20px;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#editcars {
+    height: 35px;
+    position: absolute;
+    right: 10px;
+    top: 70%;
+}
+
+#showDetails {
+    height: 40px;
+    position: absolute;
+    right: 60px;
+    top: 68%;
+}
+
+#BackBTN {
+    height: 20px;
+    position: absolute;
+    right: 5px;
+    top: 10px;
+}
+
+#selectedcity {
+    font-family: Calibri;
+    text-align: center;
+    border: solid;
+    border-width: 2px;
+    border-color: #e5e5e5;
+    border-radius: 50rem !important;
+    box-sizing: border-box;
+    background-color: #f0f0f0b0;
+    color: #235978;
+    font-size: 20px;
+    position: relative;
+    right: 40px;
+    width: 85px;
+    z-index: 99;
+}
+
+#selectedgarage {
+    position: relative;
+    left: 5px;
+    width: 105px;
+}
+
+#selectedgarage {
+    flex-direction: unset;
+}
+
+#footerCarCare {
+    height: 6%;
+}
+
+#CarSelectIMG {
+    width: 100px
+}
+
+.NotePara {
+    position: relative;
+    bottom: -10px;
+    color: #235978;
+    text-align: center;
+    margin-bottom: 0px;
+    right: 15%;
+}
+
+.NoteType {
+    border: 1px solid;
+    border-color: gray;
+    border-radius: 25px;
+    margin: 10px;
+    padding-top: 4px;
+}
+
+.Noteh4 {
+    margin-bottom: 5px;
+    text-align: center
+}
+
+.bellAlerts {
+    width: 40px;
+    margin-right: 5px;
+    padding-bottom: 10px;
+    position: relative;
+    top: -5%;
+}
+
+.addNotih2 {
+    text-align: center;
+    color: #235878;
+    display: contents;
+    margin-top: 20px;
+}
+
+.MapH2 {
+    text-align: center;
+    color: #235878;
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+}
+
+#cityInput {
+    margin-bottom: 10px;
+}
+
+/*טבלאות*/
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align-last: center;
+}
+
+th {
+    background-color: #f2f2f2;
+
+}
+
+.toggle-btn img {
+    width: 100px;
+    height: 100px;
+}
+
+.ThreeLights {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.light-div {
+    margin-top: 7px;
+}
+
+.img-light {
+    width: 100px;
+    padding: 10px;
+}
+
+.img-ICONcol {
+    padding-left: 5px !important;
+}
+
+.p-light-H {
+    text-align: right;
+    padding-left: 10px;
+    margin: 3px;
+    color: #235978;
+    font-weight: 500;
+}
+
+.p-light-L {
+    text-align: center;
+    color: #235978;
+    font-weight: 600;
+}
+
+.p-light {
+    text-align: right;
+    padding-left: 10px;
+    padding-bottom: 8px;
+    margin: 3px;
+    color: #235978;
+    font-weight: 400;
+    border-bottom: 1px solid;
+    border-color: gray;
+}
+
+.img-Ilight {
+    width: 85px;
+    margin-right: 20px;
+    padding: 10px;
+    cursor: pointer;
+    transition: width 0.3s, height 0.3s;
+}
+
+
+    .img-Ilight.active {
+        width: 115px;
+        height: 115px;
+    }
+
+.toggle-content {
+    display: none;
+}
+
+.SendPlane {
+    width: 50px;
+    position: relative;
+    top: -5%;
+    left: 14%;
+}
+.reminderinnerDiv {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.ApprovedStamp {
+    display: none;
+    width: 60px;
+    position: absolute;
+    top: 10%;
+    left: 5%;
+}
+#OrangeLightDiv, #RedLightDiv{
+    display: none;
+}
+
+#approvedIMG {
+    width: 70px;
+    height: 70px;
+}
+
+#VerifyPicture {
+    position: absolute;
+    top: 75px;
+    left: 10%;
+
+}
+
+#approvedIMG2 {
+    width: 70px;
+    height: 70px;
+}
+.hiddenApproved{
+    display:none;
+}
+
+#VerifyPicture2 {
+    position: absolute;
+    top: 75px;
+    left: 10%;
+}
+
+.invoiceIcon {
+    max-width: 50px;
+    max-height: 50px;
+}
+
+
+/*עיצוב למודאל של פרטי הרכב*/
+
+.custom-swal-container {
+    direction: rtl;
+    text-align: center;
+    font-family: 'Titillium Web', Calibri, sans-serif;
+}
+
+.custom-swal-title {
+    color: #235978;
+    background-color: #ffffff; /* Modal background */
+}
+
+.custom-swal-html-container {
+    color: white;
+}
+
+.custom-swal-html-container table.vehicle-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #235978; /* Table background */
+    color: white;
+}
+
+.custom-swal-html-container table.vehicle-details-table th,
+.custom-swal-html-container table.vehicle-details-table td {
+    border: 1px solid white;
+    padding: 8px;
+    text-align: right; /* RTL text alignment */
+}
+
+
+.custom-swal-confirm-button {
+    background-color: #823007; /* Button color */
+    color: white; /* Button text color */
+    border: none;
+    width:100%;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-family: 'Titillium Web', Calibri, sans-serif;
+}
+#top {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white; /* Ensures the background covers content behind it */
+    width: 100%;
+
+}
+.RollDown {
+    overflow-y: auto; /* Changed to overflow-y */
+    flex-grow: 1;
+    overflow-x: hidden;
+    margin-bottom: 50px;
+}
+.RollDownCarBook {
+    overflow-y: auto; /* Changed to overflow-y */
+    flex-grow: 1;
+    overflow-x: hidden;
+    margin-bottom: 50px;
+    margin-bottom: -25px;
+}
+
+.SignupForm{
+    margin-bottom:50px;
+}
+
+#exportPDF {
+    height: 45px;
+    position: absolute;
+    right: 112px;
+    top: 67%;
+}
+div#carPhoto{
+    margin-bottom: 65px;
+}
+.ocrAlert{
+    text-align:right;
+    font-family:calibri, sans-serif;
+}
+.ocrAlert > pre {
+    display: block;
+    font-size: 87.5%;
+    color: #212529;
+    font-family: calibri;
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    padding-right: 40%;
+}
+
+#uploadreciptswal {
+    width: 85px;
+    top: 120px;
+    left: 15px;
+    background: white;
+    z-index: 1001;
+    border-radius: 50%;
+}
+
+.miniMargin{
+    margin-bottom:-30px;
+}
