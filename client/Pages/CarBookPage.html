@@ -208,7 +208,7 @@
 
                     logSTR += '<tr>';
                     logSTR += '<td>' + formattedDate + '</td>';
-                    logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" style="border:none; background:none; padding:0; margin:0; font-family:inherit; font-size:inherit; cursor:pointer;">' + tmpCarelist[i].carename +  '</button> </td>'
+                    logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" style="border:none; background:none; padding:0; margin:0; font-family:inherit; font-size:inherit; cursor:pointer;">' + tmpCarelist[i].careName +  '</button> </td>'
 
                     logSTR += '<td>' + tmpCarelist[i].currentKM + '</td>';
                     if (tmpCarelist[i].invoiceFileName != "ללא תמונה") {
@@ -304,11 +304,11 @@
             var now = new Date;
 
             LogRecord = {
-                useremail: JSON.parse(localStorage.getItem('LogInUser')).email,
+                userEmail: JSON.parse(localStorage.getItem('LogInUser')).email,
                 licensePlate: parseInt(JSON.parse(localStorage.getItem('SelectedCar'))),
                 recordDate: now.toLocaleDateString(),
                 currentKM: KM,
-                mispar_mosah: null,
+                garageId: null,
                 careID: 9,
                 cost: 0,
                 notes: "תיעוד מהיר",
@@ -417,11 +417,11 @@
 
         function UpdateLogRecord(logID,KM,COST,NOTES,CAREID,INVOIEFILENAME ) {
             UpdateLogRecord = {
-                useremail: "",
+                userEmail: "",
                 licensePlate: 0,
                 recordDate: "2024-08-10T23:06:06.229Z",
                 currentKM: KM,
-                mispar_mosah: 371,
+                garageId: 371,
                 careID: CAREID,
                 cost: COST,
                 notes: NOTES,
@@ -496,7 +496,7 @@
 
 
             Swal.fire({
-                title: TempLogRecord[0].carename,
+                title: TempLogRecord[0].careName,
                 html: `
 
         

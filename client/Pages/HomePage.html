@@ -155,7 +155,7 @@
                     var tempDate = ParseDate(list[i].remindDate);
                     if (tempDate != "1/1/1900") {
                         str += `<div class='reminderinnerDiv'>  <button class='remove-reminder' onclick='removeReminder(${list[i].reminderID}); event.stopPropagation();'><b> X</b> </button>
-                        <button Class='reminder-item' data-careid='${list[i].careID}' onclick='handleReminderClick(${list[i].reminderID},"${tempDate}",  "${list[i].notes}")' value='${list[i].reminderID}'><b>` + tempDate + '<br>' + list[i].carNickName +
+                        <button Class='reminder-item' data-careid='${list[i].careID}' onclick='handleReminderClick(${list[i].reminderID},"${tempDate}",  "${list[i].notes}")' value='${list[i].reminderID}'><b>` + tempDate + '<br>' + list[i].carNickname +
                             ' </b>' + list[i].careName  +' ' + list[i].notes + '</button></div>';
                     }
                 }
