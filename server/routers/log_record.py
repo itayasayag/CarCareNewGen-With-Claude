@@ -1,0 +1,131 @@
+from fastapi import APIRouter, HTTPException
+from database import get_connection
+from models.schemas import LogRecordCreate, LogRecordUpdate
+
+router = APIRouter(prefix="/api/logs", tags=["Log Records"])
+
+
+def row_to_log(r) -> dict:
+    return {
+        "log_id": r[0], "current_km": r[1], "record_date": r[2],
+        "warranty_expiration_date": r[3], "cost": r[4], "notes": r[5],
+        "garage_id": r[6], "care_id": r[7], "user_email": r[8],
+        "license_plate": r[9], "invoice_file_name": r[10],
+        "care_name": r[11] if len(r) > 11 else None,
+        "garage_name": r[12] if len(r) > 12 else None,
+    }
+
+
+@router.get("/{email}")
+def get_logs_by_email(email: str):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
+                      lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
+                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName, g.Shem_mosah
+               FROM Log_Record lr
+               LEFT JOIN CareType ct ON lr.CareID = ct.CareID
+               LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
+               WHERE lr.UserEmail = ?""",
+            email
+        )
+        return [row_to_log(r) for r in cursor.fetchall()]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.get("/by-id/{log_id}")
+def get_log_by_id(log_id: int):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
+                      lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
+                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName, g.Shem_mosah
+               FROM Log_Record lr
+               LEFT JOIN CareType ct ON lr.CareID = ct.CareID
+               LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
+               WHERE lr.LogID = ?""",
+            log_id
+        )
+        rows = cursor.fetchall()
+        if not rows:
+            raise HTTPException(status_code=404, detail="Log not found")
+        return [row_to_log(r) for r in rows]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.post("/", status_code=201)
+def create_log(log: LogRecordCreate):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO Log_Record
+               (CurrentKM, RecordDate, WarrantyExpirationDate, Cost, Notes,
+                Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            log.current_km, log.record_date, log.warranty_expiration_date,
+            log.cost, log.notes, log.garage_id, log.care_id,
+            log.user_email, log.license_plate, log.invoice_file_name
+        )
+        conn.commit()
+        return {"message": "Log record created successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.put("/{log_id}")
+def update_log(log_id: int, log: LogRecordUpdate):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """UPDATE Log_Record
+               SET CurrentKM=?, RecordDate=?, WarrantyExpirationDate=?,
+                   Cost=?, Notes=?, Mispar_mosah=?, CareID=?, InvoiceFileName=?
+               WHERE LogID=?""",
+            log.current_km, log.record_date, log.warranty_expiration_date,
+            log.cost, log.notes, log.garage_id, log.care_id,
+            log.invoice_file_name, log_id
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Log not found")
+        return {"message": "Log updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.delete("/{log_id}")
+def delete_log(log_id: int):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Log_Record WHERE LogID = ?", log_id)
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Log not found")
+        return {"message": "Log deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()

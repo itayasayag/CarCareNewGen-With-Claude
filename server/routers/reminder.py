@@ -1,0 +1,144 @@
+from fastapi import APIRouter, HTTPException
+from database import get_connection
+from models.schemas import ReminderCreate, ReminderUpdate
+from services.email_service import send_reminder_email
+
+router = APIRouter(prefix="/api/reminders", tags=["Reminders"])
+
+
+def get_care_name(cursor, care_id: int) -> str:
+    cursor.execute("SELECT CareName FROM CareType WHERE CareID = ?", care_id)
+    row = cursor.fetchone()
+    return row[0] if row else ""
+
+
+def get_car_nickname(cursor, email: str, license_plate: int) -> str:
+    cursor.execute(
+        "SELECT NickName FROM UserCar WHERE UserEmail = ? AND LicensePlate = ?",
+        email, license_plate
+    )
+    row = cursor.fetchone()
+    return row[0] if row else ""
+
+
+@router.get("/{email}")
+def get_reminders_by_email(email: str):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """SELECT r.ReminderID, r.RemindDate, r.Notes, r.CareID, r.Email,
+                      r.LicensePlate, ct.CareName, uc.NickName
+               FROM Reminder r
+               LEFT JOIN CareType ct ON r.CareID = ct.CareID
+               LEFT JOIN UserCar uc ON r.Email = uc.UserEmail AND r.LicensePlate = uc.LicensePlate
+               WHERE r.Email = ?""",
+            email
+        )
+        return [
+            {
+                "reminder_id": r[0], "remind_date": r[1], "notes": r[2],
+                "care_id": r[3], "email": r[4], "license_plate": r[5],
+                "care_name": r[6], "car_nickname": r[7]
+            } for r in cursor.fetchall()
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.post("/", status_code=201)
+def create_reminder(reminder: ReminderCreate):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        care_name = get_care_name(cursor, reminder.care_id)
+        car_nickname = get_car_nickname(cursor, reminder.email, reminder.license_plate)
+
+        # Send email (non-blocking failure)
+        try:
+            send_reminder_email(
+                to_email=reminder.email,
+                care_name=care_name,
+                car_nickname=car_nickname,
+                remind_date=reminder.remind_date,
+                notes=reminder.notes or ""
+            )
+        except Exception as email_err:
+            print(f"Email send failed (non-critical): {email_err}")
+
+        cursor.execute(
+            "INSERT INTO Reminder (RemindDate, Notes, Email, CareID, LicensePlate) "
+            "VALUES (?, ?, ?, ?, ?)",
+            reminder.remind_date, reminder.notes,
+            reminder.email, reminder.care_id, reminder.license_plate
+        )
+        conn.commit()
+        return {"message": "Reminder created successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.put("/{reminder_id}")
+def update_reminder(reminder_id: int, reminder: ReminderUpdate):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Fetch current reminder for email sending
+        cursor.execute(
+            "SELECT Email, LicensePlate FROM Reminder WHERE ReminderID = ?", reminder_id
+        )
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Reminder not found")
+
+        email, license_plate = row
+        care_name = get_care_name(cursor, reminder.care_id) if reminder.care_id else ""
+        car_nickname = get_car_nickname(cursor, email, license_plate)
+
+        try:
+            send_reminder_email(
+                to_email=email,
+                care_name=care_name,
+                car_nickname=car_nickname,
+                remind_date=reminder.remind_date,
+                notes=reminder.notes or ""
+            )
+        except Exception as email_err:
+            print(f"Email send failed (non-critical): {email_err}")
+
+        cursor.execute(
+            "UPDATE Reminder SET RemindDate=?, Notes=?, CareID=? WHERE ReminderID=?",
+            reminder.remind_date, reminder.notes, reminder.care_id, reminder_id
+        )
+        conn.commit()
+        return {"message": "Reminder updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@router.delete("/{reminder_id}")
+def delete_reminder(reminder_id: int):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Reminder WHERE ReminderID = ?", reminder_id)
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Reminder not found")
+        return {"message": "Reminder deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
