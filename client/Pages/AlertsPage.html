@@ -52,7 +52,7 @@
 
         function ReadCareTypeFromDB() {
         
-            api = server + "/api/CareType";
+            api = server + "/api/caretypes/";
             ajaxCall("GET", api, "", getcaretypeSCB, getcaretypeECB);
         }
 
@@ -118,7 +118,7 @@
 
                 }
 
-                api = server + "/api/Reminder";
+                api = server + "/api/reminders/";
                 ajaxCall("POST", api, JSON.stringify(Reminder), postSCB, postECB);
 
             }

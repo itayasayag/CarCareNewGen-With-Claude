@@ -133,7 +133,7 @@
         function ReadRemindersFromDB() {
             var temp = localStorage.getItem('LogInUser');
             var tempUser = JSON.parse(temp);
-            api = server + "/api/Reminder/" + tempUser.email;
+            api = server + "/api/reminders/" + tempUser.email;
             ajaxCall("GET", api, "", getReminderSCB, getReminderECB);
         }
 
@@ -185,7 +185,7 @@
                             licensePlate: 0
                         }
 
-                        api = server + "/api/Reminder/" + reminderID;
+                        api = server + "/api/reminders/" + reminderID;
                         ajaxCall("DELETE", api, JSON.stringify(DELREMINDER), RemoveReminderSCB, RemoveReminderECB);
 
              
@@ -245,7 +245,7 @@
                
             }
           
-            api = server + "/api/Reminder/" + rID;
+            api = server + "/api/reminders/" + rID;
             ajaxCall("PUT", api, JSON.stringify(UpdateReminder), UpdateReminderSCB, UpdateReminderECB);
 
         }
@@ -327,7 +327,7 @@
 
         function ReadCareTypeName(id)
         {
-            api = server + "/api/CareType/" + id;
+            api = server + "/api/caretypes/" + id;
             ajaxCall("GET", api, "", getTypeNameSCB, getTypeNameECB);
         }
 

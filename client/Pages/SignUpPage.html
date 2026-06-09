@@ -114,7 +114,7 @@
                 })
             }
             else {
-                let api = server + "/api/User";
+                let api = server + "/api/users/";
                 ajaxCall("POST", api, JSON.stringify(U), postSCB, postECB);
                 console.log("test");
                 
@@ -148,7 +148,7 @@
                 "email": $("#email").val(),
                 "phoneNum": $("#phoneNumber").val()
             }
-            let api = server + "/api/User/" + U.email;
+            let api = server + "/api/users/login";
             ajaxCall("POST", api, JSON.stringify(U), loginSCB, loginECB);
         }
 

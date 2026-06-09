@@ -71,12 +71,12 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     TransferData = {
-                        NewEmail: $('#SendToUser').val(),
-                        OldMail: tempUser.email,
-                        Lplate: $("#carSelect").val()
+                        new_email: $('#SendToUser').val(),
+                        old_email: tempUser.email,
+                        license_plate: parseInt($("#carSelect").val())
                     }
-                    api = server + "/api/UserCar/SendCar" + '?NewEmail=' + TransferData.NewEmail + '&OldMail=' + TransferData.OldMail + '&Lplate=' + TransferData.Lplate;
-                    ajaxCall("PUT", api,JSON.stringify(TransferData), SendCarSCB, SendCarECB);
+                    api = server + "/api/usercars/transfer";
+                    ajaxCall("PUT", api, JSON.stringify(TransferData), SendCarSCB, SendCarECB);
 
                 } else if (result.isDenied) {
                     Swal.fire("העברת הרכב בוטלה", "", "error");

@@ -316,7 +316,7 @@
                 invoiceFileName: null,
             }
 
-            api = server + "/api/Log_Record";
+            api = server + "/api/logs/";
             ajaxCall("POST", api, JSON.stringify(LogRecord), postqSCB, postqECB);
 
             function postqSCB(res) {
@@ -432,7 +432,7 @@
             }
 
 
-        api = server + "/api/Log_Record/" + logID;
+        api = server + "/api/logs/" + logID;
             ajaxCall("PUT", api, JSON.stringify(UpdateLogRecord), UpdateLogRecordSCB, UpdateLogRecordECB);
 
         }
@@ -461,7 +461,7 @@
         }
 
         function ReadLogRecordByID(id) {
-            api = server + "/api/Log_Record/ReadLogRecordByID/"+id+"?LogID="+id;
+            api = server + "/api/logs/by-id/" + id;
             ajaxCall("GET", api, "", getLogSCB, getLogECB);
         }
      
@@ -584,7 +584,7 @@
                 newName = TempLogRecord[0].invoiceFileName;
                 return false;
             }
-            api = server + "/api/Upload";
+            api = server + "/api/upload/";
             imageFolder = server + "/images/";
 
 

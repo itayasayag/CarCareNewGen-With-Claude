@@ -101,7 +101,7 @@
                     data.append("files", renamedFile);
                 }
             }
-            api = server + "/api/Upload";
+            api = server + "/api/upload/";
             imageFolder = server + "/images/";
 
 
@@ -251,7 +251,7 @@
                     var NewCartoStorage = JSON.stringify(car);
                     var oldCarData = localStorage.getItem("UserCarlist");
                     localStorage.setItem("UserCarlist", oldCarData + NewCartoStorage);
-                    api = server + "/api/UserCar";
+                    api = server + "/api/usercars/";
                     ajaxCall("POST", api, JSON.stringify(car), postSCB, postECB);
                     ReadUserCarByEmail(tempUser.email);//קריאה מחדש של הרכבים לאתר, לאחר הוספת רכב.איתי.
                 }
@@ -312,7 +312,7 @@
 
             var email = tempUser.email;
             var licence_plate = $("#IDlicenseNum").val();
-            api = server + "/api/UserCar/" + email + "," + licence_plate + '?email=' + email + '&licence_Plate=' + licence_plate;
+            api = server + "/api/usercars/" + email + "/" + licence_plate;
             ajaxCall("PUT", api, JSON.stringify(updatecar), putSCB, putECB);
 
         }
@@ -353,8 +353,8 @@
                     }
                     var email = tempUser.email;
                     var licence_plate = $("#IDlicenseNum").val();
-                    api = server + "/api/UserCar/" + '?email=' + email + '&licence_Plate=' + licence_plate;
-                    ajaxCall("PUT", api, JSON.stringify(Usercar), deacticeSCB, deacticeECB);
+                    api = server + "/api/usercars/deactivate/" + email + "/" + licence_plate;
+                    ajaxCall("PUT", api, "", deacticeSCB, deacticeECB);
 
 
 
@@ -501,12 +501,8 @@
 
                 temp1 = localStorage.getItem('LogInUser');
                 tempUser = JSON.parse(temp1);
-                api = server + "/api/UserCar/SetVerified?email=" + tempUser.email + "&licence_Plate=" + vehicleDetailsArry[0].mispar_rechev;
-                TransferData = {
-                    email: tempUser.email,
-                    licence_Plate: vehicleDetailsArry[0].mispar_rechev
-                }
-                ajaxCall("PUT", api, JSON.stringify(TransferData), verSCB, verECB);
+                api = server + "/api/usercars/verify/" + tempUser.email + "/" + vehicleDetailsArry[0].mispar_rechev;
+                ajaxCall("PUT", api, "", verSCB, verECB);
 
                 function verSCB(suc) {
                     console.log("1");
