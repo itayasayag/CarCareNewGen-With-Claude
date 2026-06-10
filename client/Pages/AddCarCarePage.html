@@ -229,7 +229,7 @@
                             licensePlate: parseInt(selectedCar),
                             recordDate: $("#date-input").val(),
                             currentKM: $("#kilometers").val(),
-                            garageId: $("#selectedgarage").val(),
+                            garageID: $("#selectedgarage").val(),
                             careID: $("#selectedtype").val(),
                             cost: $("#cost").val(),
                             notes: $("#notes").val(),
@@ -289,7 +289,7 @@
                 return false;
             }
             api = server + "/api/upload/";
-            imageFolder = server + "/images/";
+            imageFolder = server + "/api/upload/";
 
 
             // Ajax upload
@@ -322,6 +322,7 @@
 
         function showImages(data) {
             console.log(data);
+            if (data && data.uploadedFiles) data = data.uploadedFiles; // FastAPI returns {uploadedFiles: [...]}
 
 
             var imgStr = "";

@@ -1,12 +1,18 @@
 from pydantic import BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel
 from typing import Optional
 from datetime import datetime
+
+# Legacy frontend uses uppercase acronyms: careID, currentKM, picURL
+ACRONYMS = {"id": "ID", "km": "KM", "url": "URL"}
+
+def to_legacy_camel(name: str) -> str:
+    parts = name.split('_')
+    return parts[0] + ''.join(ACRONYMS.get(p, p.title()) for p in parts[1:])
 
 
 class CamelModel(BaseModel):
     model_config = ConfigDict(
-        alias_generator=to_camel,
+        alias_generator=to_legacy_camel,
         populate_by_name=True,  # accept both snake_case and camelCase on input
         from_attributes=True
     )
@@ -46,6 +52,9 @@ class UserCarBase(CamelModel):
     is_verified: bool = False
 
 class UserCarCreate(UserCarBase):
+    pass
+
+class UserCarResponse(UserCarBase):
     pass
 
 class UserCarUpdate(CamelModel):

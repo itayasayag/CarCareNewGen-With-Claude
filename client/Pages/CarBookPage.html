@@ -306,9 +306,9 @@
             LogRecord = {
                 userEmail: JSON.parse(localStorage.getItem('LogInUser')).email,
                 licensePlate: parseInt(JSON.parse(localStorage.getItem('SelectedCar'))),
-                recordDate: now.toLocaleDateString(),
+                recordDate: now.toISOString(),
                 currentKM: KM,
-                garageId: null,
+                garageID: null,
                 careID: 9,
                 cost: 0,
                 notes: "תיעוד מהיר",
@@ -421,7 +421,7 @@
                 licensePlate: 0,
                 recordDate: "2024-08-10T23:06:06.229Z",
                 currentKM: KM,
-                garageId: 371,
+                garageID: 371,
                 careID: CAREID,
                 cost: COST,
                 notes: NOTES,
@@ -585,7 +585,7 @@
                 return false;
             }
             api = server + "/api/upload/";
-            imageFolder = server + "/images/";
+            imageFolder = server + "/api/upload/";
 
 
             // Ajax upload

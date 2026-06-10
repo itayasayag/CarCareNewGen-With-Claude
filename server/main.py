@@ -9,9 +9,12 @@ from routers import users, user_cars, log_record, reminder, upload
 from routers.lookups import car_model_router, garage_router, care_type_router
 
 
+# Legacy frontend uses uppercase acronyms: careID, currentKM, picURL
+ACRONYMS = {"id": "ID", "km": "KM", "url": "URL"}
+
 def snake_to_camel(name: str) -> str:
     components = name.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    return components[0] + ''.join(ACRONYMS.get(x, x.title()) for x in components[1:])
 
 
 def convert_keys_to_camel(obj):
@@ -36,10 +39,12 @@ class CamelCaseMiddleware(BaseHTTPMiddleware):
                 body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             except Exception:
                 pass
+            headers = dict(response.headers)
+            headers.pop("content-length", None)  # let Response recompute it
             return Response(
                 content=body,
                 status_code=response.status_code,
-                headers=dict(response.headers),
+                headers=headers,
                 media_type="application/json"
             )
         return response
