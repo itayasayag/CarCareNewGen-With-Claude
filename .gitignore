@@ -27,3 +27,16 @@ replay_pid*
 *.vsidx
 /CCserver/CarCare/obj/Debug
 CCserver/CarCare/appsettings.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+pyodbc.py
+
+# Runtime folders
+server/uploadedFiles/
+
+# C# build output
+client/bin/
