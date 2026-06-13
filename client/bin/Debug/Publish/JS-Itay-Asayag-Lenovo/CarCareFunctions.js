@@ -41,7 +41,7 @@ function AddCarToAlertsListFromStorage() { //טיפה שונה מהוספה רג
 
 function ReadUserCarByEmail(email)
 {
-    api = server + "/api/usercars/"+email;
+    api = server + "/api/UserCar/"+email;
     ajaxCall("GET", api, "", getSCB, getECB);
 }
 
@@ -59,7 +59,7 @@ function SaveCarsToLocalStorage(CarList) {
 
 //קריאת רשימת טיפולים של משתמש ללוקאל
 function ReadUserCarCareByEmail(email) {
-    api = server + "/api/logs/" + email;
+    api = server + "/api/Log_Record/" + email;
     ajaxCall("GET", api, "", getCCSCB, getCCECB);
 }
 
