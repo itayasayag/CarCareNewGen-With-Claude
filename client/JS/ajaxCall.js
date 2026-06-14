@@ -1,7 +1,6 @@
-/*server = `https://proj.ruppin.ac.il/cgroup71/test2/tar2`*/
 
 let port = "8000";
-server = `http://localhost:${port}`;
+server = `http://127.0.0.1:${port}`;
 
 function ajaxCall(method, api, data, successCB, errorCB) {
     $.ajax({

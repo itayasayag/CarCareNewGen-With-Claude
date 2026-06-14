@@ -23,11 +23,19 @@ def get_settings() -> Settings:
 
 def get_connection():
     settings = get_settings()
-    conn_str = (
-        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-        f"SERVER={settings.db_server};"
-        f"DATABASE={settings.db_name};"
-        f"UID={settings.db_user};"
-        f"PWD={settings.db_password};"
-    )
+    if settings.db_user and settings.db_password:
+        conn_str = (
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+            f"SERVER={settings.db_server};"
+            f"DATABASE={settings.db_name};"
+            f"UID={settings.db_user};"
+            f"PWD={settings.db_password};"
+        )
+    else:
+        conn_str = (
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+            f"SERVER={settings.db_server};"
+            f"DATABASE={settings.db_name};"
+            f"Trusted_Connection=yes;"
+        )
     return pyodbc.connect(conn_str)
