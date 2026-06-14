@@ -1,0 +1,753 @@
+/* ============================================================
+   CarCare — Modern Theme Override
+   Clean & minimal restyle. Loaded AFTER StyleSheet.css.
+   Keeps existing layout/classes; refreshes color, type, spacing, depth.
+   ============================================================ */
+
+/* ---- Design tokens ---- */
+:root {
+    --cc-bg:        #F7F9FB;   /* app background — soft off-white */
+    --cc-surface:   #FFFFFF;   /* cards / panels */
+    --cc-primary:   #1E5A82;   /* refined version of original #235978 */
+    --cc-primary-2: #2C7DB3;   /* lighter accent for gradients/hovers */
+    --cc-ink:       #1B2B36;   /* primary text */
+    --cc-muted:     #5E7382;   /* secondary text */
+    --cc-line:      #E5EBF0;   /* hairline borders */
+    --cc-accent:    #C2410C;   /* warm accent (modernized brown #823007) */
+    --cc-shadow:    0 1px 2px rgba(16,42,67,.04), 0 6px 20px rgba(16,42,67,.07);
+    --cc-shadow-sm: 0 1px 3px rgba(16,42,67,.08);
+    --cc-radius:    16px;
+    --cc-font:      'Assistant','Titillium Web',Calibri,system-ui,sans-serif;
+}
+
+/* ---- Base ---- */
+body, body.mainpage {
+    background: var(--cc-bg) !important;
+    font-family: var(--cc-font) !important;
+    color: var(--cc-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Top bar / header ---- */
+#top { background: transparent !important; }
+
+.header {
+    height: auto !important;
+}
+
+.h1header {
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    height: auto !important;
+    padding: 22px 20px 30px !important;
+    font-size: 34px !important;
+    font-weight: 700 !important;
+    letter-spacing: .5px;
+    border-radius: 0 0 24px 24px;
+    box-shadow: var(--cc-shadow);
+}
+
+/* Logo sits over the rounded header edge */
+#logo {
+    width: 64px !important;
+    bottom: 26px !important;
+    padding: 6px;
+    background: var(--cc-surface);
+    border-radius: 50%;
+    box-shadow: var(--cc-shadow-sm);
+}
+
+/* Logout button — pill */
+/* Logout now lives inside the hamburger menu — hide the standalone link
+   to avoid clutter/collision with the back button on the top-left. */
+#logoutBTN { display: none !important; }
+
+/* Guest pages: keep the signup link, move it clear of the back button */
+#signupBTN {
+    top: calc(14px + env(safe-area-inset-top)) !important;
+    left: 14px !important;
+    background: rgba(255,255,255,.16) !important;
+    border-radius: 999px;
+    padding: 6px 16px !important;
+    font-size: 15px !important;
+    font-family: var(--cc-font) !important;
+    backdrop-filter: blur(4px);
+    transition: background .2s ease;
+}
+#logoutBTN:hover, #signupBTN:hover {
+    background: rgba(255,255,255,.28) !important;
+    text-decoration: none;
+}
+
+/* Car selector dropdown — pill */
+.select-car {
+    top: 60px !important;
+    right: 14px !important;
+    background: rgba(255,255,255,.16) !important;
+    border-radius: 999px !important;
+    padding: 6px 14px !important;
+    font-size: 16px !important;
+    color: #fff !important;
+    backdrop-filter: blur(4px);
+}
+.select-car option { color: var(--cc-ink); }
+
+/* ---- Main action tiles ---- */
+.flextest { margin-top: 18px !important; gap: 16px; }
+
+.mainscreenimg {
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line);
+    border-radius: var(--cc-radius);
+    box-shadow: var(--cc-shadow);
+    padding: 22px 14px 14px;
+    width: 150px;
+    transition: transform .18s ease, box-shadow .18s ease;
+    cursor: pointer;
+}
+.mainscreenimg:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(16,42,67,.08), 0 14px 32px rgba(16,42,67,.12);
+}
+.mainscreenimg p {
+    margin: 12px 0 0;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--cc-ink);
+}
+
+.fleximg {
+    width: 76px !important;
+    height: 76px !important;
+    object-fit: contain;
+    margin: 0 auto !important;
+    display: block;
+}
+
+/* ---- Reminders panel ---- */
+.alertsDiv {
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-line);
+    border-radius: var(--cc-radius) !important;
+    box-shadow: var(--cc-shadow);
+    padding: 16px !important;
+    margin: 22px 4px !important;
+    align-items: stretch;
+}
+
+#ReminderList {
+    color: var(--cc-ink) !important;
+    font-family: var(--cc-font) !important;
+    font-size: 16px !important;
+}
+
+.reminderinnerDiv {
+    background: var(--cc-bg);
+    border: 1px solid var(--cc-line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.reminderinnerDiv:hover {
+    border-color: var(--cc-primary-2);
+    box-shadow: var(--cc-shadow-sm);
+}
+
+.reminder-item {
+    color: var(--cc-ink) !important;
+    font-size: 15px !important;
+    text-align: right;
+    flex-grow: 1;
+}
+.reminder-item b { color: var(--cc-primary); }
+
+.remove-reminder {
+    color: var(--cc-accent) !important;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: background .15s ease;
+}
+.remove-reminder:hover { background: rgba(194,65,12,.10); }
+
+/* Red bell → accent circle */
+#redBell {
+    align-self: center;
+    width: 42px; height: 42px;
+    padding: 9px;
+    background: rgba(194,65,12,.10);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+}
+#redBell:hover { transform: scale(1.06); background: rgba(194,65,12,.18); }
+
+/* ---- Footer + plus button ---- */
+.footer {
+    background: transparent !important;
+    box-shadow: none;
+    height: auto !important;
+}
+.plus {
+    width: 64px !important;
+    bottom: 70px !important;
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: 0 6px 18px rgba(30,90,130,.35);
+    transition: transform .18s ease, box-shadow .18s ease;
+    cursor: pointer;
+}
+.plus:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 10px 26px rgba(30,90,130,.45);
+}
+
+/* ---- Approved badge ---- */
+#approvedIMG2 { filter: drop-shadow(0 2px 6px rgba(16,42,67,.15)); }
+
+/* ---- Scrollbars (subtle) ---- */
+.scroll::-webkit-scrollbar, .RollDown::-webkit-scrollbar { width: 8px; }
+.scroll::-webkit-scrollbar-thumb, .RollDown::-webkit-scrollbar-thumb {
+    background: var(--cc-line); border-radius: 999px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}
+
+/* ============================================================
+   RESPONSIVE — phone-first, fits any device
+   ============================================================ */
+
+/* Safe-area support for notched phones (iPhone X+ etc.) */
+.h1header {
+    padding-top: calc(22px + env(safe-area-inset-top)) !important;
+}
+.footer {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+}
+#logoutBTN, #signupBTN {
+    top: calc(14px + env(safe-area-inset-top)) !important;
+}
+.select-car {
+    top: calc(60px + env(safe-area-inset-top)) !important;
+}
+
+/* Make the two-up tile rows fluid instead of fixed 150px each.
+   Cards share the row and shrink to fit any width. */
+.flextest {
+    display: flex !important;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 14px;
+    flex-wrap: nowrap;
+}
+.mainscreenimg {
+    width: auto !important;
+    flex: 1 1 0 !important;
+    max-width: 200px;
+    min-width: 0;             /* allow shrinking below content size */
+    box-sizing: border-box;
+}
+
+/* Tile icons scale with the card */
+.fleximg {
+    width: clamp(48px, 18vw, 76px) !important;
+    height: clamp(48px, 18vw, 76px) !important;
+}
+.mainscreenimg p {
+    font-size: clamp(13px, 4vw, 16px);
+    white-space: nowrap;
+}
+
+/* Header title scales down on tiny screens */
+.h1header {
+    font-size: clamp(26px, 8vw, 34px) !important;
+}
+
+/* Cap the whole app to a comfortable phone column on tablets/desktop,
+   centered, so it always *looks* like the phone app it is. */
+body.mainpage {
+    max-width: 480px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    position: relative;
+}
+.footer { max-width: 480px; left: 50%; transform: translateX(-50%); }
+
+/* ---- Small phones (≤360px: iPhone SE, small Androids) ---- */
+@media (max-width: 360px) {
+    .flextest { gap: 10px; padding: 0 10px; }
+    .mainscreenimg { padding: 16px 8px 10px; border-radius: 14px; }
+    .mainscreenimg p { font-size: 12.5px; }
+    .alertsDiv { margin: 16px 8px !important; padding: 12px !important; }
+    #logo { width: 56px !important; }
+}
+
+/* ---- Very small (≤320px) ---- */
+@media (max-width: 320px) {
+    .h1header { font-size: 24px !important; }
+    .fleximg { width: 44px !important; height: 44px !important; }
+    .mainscreenimg p { font-size: 12px; }
+}
+
+/* ---- Landscape phones: tighten vertical space ---- */
+@media (max-height: 480px) and (orientation: landscape) {
+    .h1header { padding: 12px 20px 18px !important; font-size: 24px !important; }
+    #logo { width: 48px !important; bottom: 20px !important; }
+    .flextest { margin-top: 10px !important; }
+    .plus { bottom: 50px !important; width: 54px !important; }
+}
+
+/* Prevent iOS auto-zoom on focused inputs (font-size must be ≥16px) */
+input, select, textarea { font-size: 16px; }
+
+/* ============================================================
+   SHARED COMPONENTS — applied across all pages
+   ============================================================ */
+
+/* Sub-page headers (back button, page title, bell) */
+.MapH2, .addNotih2, .h2header,
+h2.MapH2, h2.addNotih2 {
+    color: var(--cc-ink);
+    font-weight: 700;
+    font-family: var(--cc-font);
+    margin: 14px 0 4px;
+}
+
+#BackBTN {
+    position: fixed !important;
+    top: calc(16px + env(safe-area-inset-top)) !important;
+    left: 14px !important;
+    right: auto !important;
+    z-index: 2147483001;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 11px !important;
+    background: rgba(0,0,0,.16);
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--cc-shadow-sm);
+    cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+    margin: 0;
+    object-fit: contain;
+    filter: brightness(0) invert(1);   /* render the arrow icon white */
+}
+#BackBTN:hover { transform: scale(1.06); background: rgba(0,0,0,.26); }
+html.cc-dark #BackBTN { background: rgba(255,255,255,.14); }
+html.cc-dark #BackBTN:hover { background: rgba(255,255,255,.24); }
+
+/* Content scroller spacing */
+.RollDown, .RollDownCarBook { padding-bottom: 24px; }
+
+/* ---- Form rows (icon + input) ---- */
+.rounded-input, .rounded-input-Garage {
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    box-shadow: var(--cc-shadow-sm);
+    margin: 10px 14px !important;
+    padding: 6px 12px !important;
+}
+
+.img-care {
+    width: clamp(40px, 12vw, 56px) !important;
+    padding: 8px !important;
+    margin-right: 8px !important;
+}
+
+/* Inputs, selects, textareas inside form rows */
+.rounded-input input, .rounded-input-Garage input,
+.rounded-input textarea, .rounded-input select,
+input[type="text"], input[type="tel"], input[type="email"],
+input[type="password"], input[type="date"], input[type="number"],
+textarea, .carcare-select, .select-car {
+    border: none !important;
+    outline: none;
+    background: transparent;
+    font-family: var(--cc-font) !important;
+    color: var(--cc-ink);
+    width: 100%;
+}
+.rounded-input input::placeholder,
+.rounded-input-Garage input::placeholder,
+textarea::placeholder { color: var(--cc-muted); }
+
+/* Dropdowns inside content (care type, garage, car) */
+.carcare-select {
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-line) !important;
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+    box-shadow: var(--cc-shadow-sm);
+    color: var(--cc-ink) !important;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Focus ring for accessibility */
+input:focus, textarea:focus, select:focus,
+.rounded-input:focus-within, .rounded-input-Garage:focus-within {
+    border-color: var(--cc-primary-2) !important;
+    box-shadow: 0 0 0 3px rgba(44,125,179,.15) !important;
+}
+
+/* ---- Buttons ---- */
+.btn-primary, .btn.btn-primary,
+.rounded-pill.btn-primary {
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 12px 30px !important;
+    font-family: var(--cc-font) !important;
+    font-weight: 600;
+    font-size: 17px !important;
+    box-shadow: 0 4px 14px rgba(30,90,130,.30);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(30,90,130,.40) !important;
+}
+
+.btn-danger, .btn.btn-danger {
+    background: var(--cc-accent) !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 12px 30px !important;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(194,65,12,.28);
+}
+
+.btn-secondary, .rounded-button {
+    border-radius: 999px !important;
+    font-family: var(--cc-font) !important;
+}
+
+.SendBTN, .btn-default.SendBTN {
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 12px 28px !important;
+    box-shadow: 0 4px 14px rgba(30,90,130,.30);
+}
+
+/* ---- Tables (CarBookPage) ---- */
+.carbooktableheader {
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    color: #fff !important;
+    border-radius: 12px 12px 0 0;
+    font-family: var(--cc-font);
+}
+.vehicle-details-table, table {
+    background: var(--cc-surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--cc-shadow-sm);
+    font-family: var(--cc-font);
+}
+.vehicle-details-table td, .vehicle-details-table th,
+table td, table th {
+    border-color: var(--cc-line) !important;
+}
+
+/* ---- Map (FindGaragePage) ---- */
+#map {
+    border-radius: var(--cc-radius);
+    overflow: hidden;
+    box-shadow: var(--cc-shadow);
+    margin: 14px;
+    min-height: 320px;
+}
+
+/* ---- Light Indicator page ---- */
+.ThreeLights, #threelights {
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line);
+    border-radius: var(--cc-radius);
+    box-shadow: var(--cc-shadow);
+    margin: 14px;
+    padding: 14px;
+}
+.img-Ilight {
+    transition: transform .15s ease;
+    cursor: pointer;
+    width: clamp(60px, 22vw, 85px);
+}
+.img-Ilight.active { transform: scale(1.12); }
+.light-div {
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    box-shadow: var(--cc-shadow-sm);
+    margin: 10px 14px;
+    padding: 12px;
+}
+.p-light-H { color: var(--cc-primary); font-weight: 700; font-family: var(--cc-font); }
+.p-light, .p-light-L { color: var(--cc-muted); font-family: var(--cc-font); }
+.img-light { width: clamp(48px, 16vw, 70px); }
+
+/* ---- SignUp toggle tabs ---- */
+#Tgl1, #Tgl2 {
+    border-radius: 999px !important;
+    font-family: var(--cc-font) !important;
+    border: none !important;
+}
+.rounded-button { box-shadow: var(--cc-shadow-sm); }
+
+/* ---- Guest homepage greyed tiles ---- */
+.mainpage .fleximg { display: block; margin: 0 auto !important; }
+
+/* ============================================================
+   DARK MODE
+   Toggled by adding class "cc-dark" to <html> or <body>.
+   ============================================================ */
+html.cc-dark {
+    --cc-bg:        #0F1822;
+    --cc-surface:   #18242F;
+    --cc-primary:   #2C7DB3;
+    --cc-primary-2: #3D9BD8;
+    --cc-ink:       #E8EEF3;
+    --cc-muted:     #93A6B3;
+    --cc-line:      #26333F;
+    --cc-accent:    #F2733B;
+    --cc-shadow:    0 1px 2px rgba(0,0,0,.30), 0 6px 20px rgba(0,0,0,.45);
+    --cc-shadow-sm: 0 1px 3px rgba(0,0,0,.40);
+}
+
+/* Make sure body + page chrome follow the tokens in dark mode */
+html.cc-dark body,
+html.cc-dark body.mainpage { background: var(--cc-bg) !important; color: var(--cc-ink); }
+html.cc-dark #top { background: transparent !important; }
+
+/* Inputs/selects readable on dark surfaces */
+html.cc-dark input, html.cc-dark textarea, html.cc-dark select,
+html.cc-dark .carcare-select, html.cc-dark .form-control {
+    color: var(--cc-ink) !important;
+    background: transparent;
+}
+html.cc-dark .form-control::placeholder,
+html.cc-dark input::placeholder { color: var(--cc-muted) !important; }
+
+/* Native date picker icon visible in dark */
+html.cc-dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+/* SweetAlert popups in dark */
+html.cc-dark .swal2-popup { background: var(--cc-surface) !important; color: var(--cc-ink) !important; }
+
+/* ============================================================
+   HAMBURGER + SIDE MENU (injected on every page)
+   ============================================================ */
+.cc-menu-btn {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    right: 14px;
+    z-index: 2147483000;
+    width: 42px; height: 42px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.16);
+    border: none; border-radius: 12px;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: background .2s ease;
+}
+.cc-menu-btn:hover { background: rgba(255,255,255,.28); }
+.cc-menu-btn span {
+    display: block; width: 20px; height: 2px;
+    background: #fff; border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+}
+/* When open, hamburger becomes an X */
+.cc-menu-open .cc-menu-btn span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.cc-menu-open .cc-menu-btn span:nth-child(2) { opacity: 0; }
+.cc-menu-open .cc-menu-btn span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Slide-in panel (from right, since RTL) */
+.cc-drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(82vw, 320px);
+    background: var(--cc-surface);
+    box-shadow: -8px 0 40px rgba(0,0,0,.25);
+    z-index: 2147482900;
+    transform: translateX(105%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    padding: calc(70px + env(safe-area-inset-top)) 0 24px;
+    direction: rtl;
+}
+.cc-menu-open .cc-drawer { transform: translateX(0); }
+
+.cc-drawer-title {
+    font-family: var(--cc-font);
+    font-weight: 700; font-size: 20px;
+    color: var(--cc-primary);
+    padding: 0 22px 14px;
+    border-bottom: 1px solid var(--cc-line);
+    margin-bottom: 8px;
+}
+
+.cc-drawer a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 22px;
+    color: var(--cc-ink) !important;
+    font-family: var(--cc-font);
+    font-size: 17px; font-weight: 600;
+    text-decoration: none !important;
+    transition: background .15s ease;
+}
+.cc-drawer a:hover { background: var(--cc-bg); }
+.cc-drawer a .cc-ico { font-size: 20px; width: 24px; text-align: center; }
+
+.cc-drawer-spacer { flex-grow: 1; }
+
+/* Dark-mode toggle row inside drawer */
+.cc-dm-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 22px;
+    border-top: 1px solid var(--cc-line);
+    margin-top: 8px;
+    font-family: var(--cc-font); font-weight: 600; font-size: 16px;
+    color: var(--cc-ink);
+}
+.cc-dm-switch {
+    position: relative; width: 52px; height: 28px;
+    background: var(--cc-line); border-radius: 999px;
+    cursor: pointer; transition: background .2s ease; flex-shrink: 0;
+}
+.cc-dm-switch::after {
+    content: ""; position: absolute; top: 3px; right: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; transition: transform .22s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+html.cc-dark .cc-dm-switch { background: var(--cc-primary); }
+html.cc-dark .cc-dm-switch::after { transform: translateX(-24px); }
+
+/* Backdrop */
+.cc-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(8,15,22,.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s ease;
+    z-index: 2147482800;
+}
+.cc-menu-open .cc-backdrop { opacity: 1; pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    .cc-drawer, .cc-backdrop, .cc-menu-btn span, .cc-dm-switch::after { transition: none !important; }
+}
+
+/* ============================================================
+   CarBookPage — center the maintenance-card icons
+   ============================================================ */
+.fleximgCarBook {
+    display: block !important;
+    margin: 0 auto 8px !important;          /* center horizontally */
+    width: clamp(44px, 16vw, 60px) !important;
+    height: clamp(44px, 16vw, 60px) !important;
+    object-fit: contain;
+}
+.carbookheadline {
+    font-weight: 600;
+    font-size: clamp(13px, 3.6vw, 15px);
+    color: var(--cc-ink);
+    margin: 0;
+    text-align: center;
+}
+.lowerline {
+    font-size: clamp(11px, 3vw, 13px);
+    color: var(--cc-muted);
+    margin: 2px 0 0;
+    text-align: center;
+}
+/* The CarBook tiles are clickable now — show it */
+#fristIconRow .mainscreenimg, #secondIconRow .mainscreenimg { cursor: pointer; }
+
+/* ============================================================
+   FIXES — consistent width, form rows, hamburger
+   ============================================================ */
+
+/* ---- 1. Consistent app width on EVERY page (not just .mainpage) ---- */
+body {
+    max-width: 480px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    position: relative;
+    background: var(--cc-bg) !important;
+}
+/* header gradient + footer should span the same centered column */
+#top, .header, .h1header { width: 100%; }
+
+/* ---- 2. Form rows: icon + input on the SAME line ---- */
+.row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    margin: 10px 14px !important;
+}
+/* icon column: fixed, doesn't grow */
+.row .col-3 {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* input column: takes the rest of the line */
+.row .col-9 {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+}
+/* icon sizing inside a row */
+.row .img-care {
+    width: clamp(38px, 11vw, 50px) !important;
+    margin: 0 4px 0 10px !important;
+    padding: 0 !important;
+}
+/* the input/select sitting in that row fills it and aligns vertically */
+.row .rounded-input, .row .rounded-input-Garage {
+    margin: 0 !important;
+    width: 100%;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+.row .rounded-input input, .row .rounded-input-Garage input,
+.row .rounded-input textarea, .row .rounded-input select,
+.row .carcare-select {
+    text-align: right;
+    width: 100%;
+}
+/* when a select IS the col-9 directly */
+.row .col-9.carcare-select { padding: 12px 14px !important; }
+
+/* ---- 3. Hamburger button — solid, sits cleanly, not washed out ---- */
+.cc-menu-btn {
+    top: calc(16px + env(safe-area-inset-top)) !important;
+    right: 14px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(0,0,0,.16) !important;   /* subtle dark glass over the gradient header */
+    border-radius: 12px !important;
+    gap: 5px;
+    box-shadow: var(--cc-shadow-sm);
+}
+.cc-menu-btn:hover { background: rgba(0,0,0,.26) !important; }
+.cc-menu-btn span { width: 22px !important; height: 2.5px !important; background: #fff !important; }
+
+/* In dark mode the header is darker — keep the button readable */
+html.cc-dark .cc-menu-btn { background: rgba(255,255,255,.14) !important; }
+html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; }

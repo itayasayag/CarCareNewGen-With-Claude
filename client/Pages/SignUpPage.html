@@ -4,6 +4,7 @@
 
     <script src="../JS/CarCareFunctions.js"></script>
     <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="../JS/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -183,106 +184,93 @@
     </script>
     <style>
         body {
-            font-family: Calibri, sans-serif;
-            direction: rtl; /* Right-to-left text direction */
+            direction: rtl;
             text-align: center;
             display: block;
             overflow: auto;
         }
 
-        input[type="text"],
-        input[type="password"],
-        input[type="submit"],
-        input[type="tel"],
-        input[type="email"],
-        button {
-            width: 70%;
-            height: 50px;
-            margin: auto;
-            font-family: Calibri;
-            font-size: 25px;
-            margin: 20px 0;
-            border: solid;
-            border-width: 2px;
-            border-color: #e5e5e5;
-            border-radius: 25px; /* Rounded corners */
+        /* Inputs inherit the modern theme; just size + center them */
+        input[type="text"], input[type="password"], input[type="tel"],
+        input[type="email"], .form-control {
+            width: 80%;
+            height: 52px;
+            margin: 12px auto !important;
+            font-size: 17px;
+            border: 1px solid var(--cc-line) !important;
+            border-radius: 14px !important;
             box-sizing: border-box;
-            margin-left: auto;
-            margin-right: auto;
-            background-color: #f0f0f0b0;
-            color: #235978;
-        }
-
-        input::placeholder {
+            background: var(--cc-surface) !important;
+            box-shadow: var(--cc-shadow-sm);
             text-align: right;
-            font-size: 22px;
-            color: #235978;
+            padding: 0 18px;
         }
-
-        header {
-            height: 8%;
-        }
-
-        .footer {
-            height: 10%;
-            position: fixed;
-            background-color: #235978;
-            bottom: 0px;
-            width: 100%;
-        }
+        input::placeholder { text-align: right; color: var(--cc-muted); }
 
         #logo {
-            width: 40%;
-            margin-top: 15px;
-            bottom: 60%; /*חייב להיות חצי מרוחב*/
+            width: 120px;
+            margin: 10px auto 4px;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            padding: 8px;
+            background: var(--cc-surface);
+            border-radius: 50%;
+            box-shadow: var(--cc-shadow-sm);
         }
 
-        .plus {
-            width: 100px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
+        /* Segmented toggle: register / login */
+        #btngrp {
+            width: 80%;
+            max-width: 360px;
+            margin: 22px auto 8px;
+            background: var(--cc-bg);
+            border: 1px solid var(--cc-line);
+            border-radius: 999px;
+            padding: 4px;
+            box-shadow: var(--cc-shadow-sm) inset;
         }
+        #Tgl1, #Tgl2 {
+            border-radius: 999px !important;
+            font-family: var(--cc-font) !important;
+            font-size: 17px !important;
+            border: none !important;
+            color: var(--cc-muted) !important;
+            background: transparent !important;
+            flex: 1;
+            padding: 10px 0 !important;
+            transition: background .2s ease, color .2s ease;
+        }
+        /* Active tab pill is set inline by the page JS via background-color;
+           we make sure text stays readable */
 
         #RegBtn, #loginBtn {
-            vertical-align: central;
-            background-color: #55a35d;
-            font-size: 22px;
-            border: solid;
-            border-width: 2px;
-            border-color: #e5e5e5;
-            bottom: 92%;
-            position: relative;
-            margin-top: 30px;
-            bottom: 75px;
+            font-size: 18px;
+            margin-top: 10px;
         }
 
-        #btngrp {
-            width: 90%;
-            margin-bottom: 15px;
-            margin-top: 30px;
+        .footersignup {
+            position: fixed;
+            bottom: 0;
+            padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+            background: transparent;
+            width: 100%;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
         }
 
-        #Tgl1, #Tgl2 {
-            border-radius: 20px;
-            background-color: #235978;
-            border: solid;
-            border-width: 2px;
-            border-color: #e5e5e5;
-            font-family: Calibri;
-            font-size: 20px;
+        #Guestlogin {
+            margin: 6px auto 90px;
             display: inline-block;
-        }
-
-        #Tgl2 {
-            background-color: #f0f0f0b0;
-            color: #b0b0b0;
+            background: transparent !important;
+            color: var(--cc-primary) !important;
+            border: 1px solid var(--cc-line) !important;
+            padding: 10px 26px !important;
         }
     </style>
 
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
 <body>
     <div id="top">

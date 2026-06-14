@@ -65,6 +65,9 @@
             getLastCareInfo();
 
             showApprovedTag();
+
+            // Click a maintenance card → quick add treatment of that type
+            wireTreatmentCards();
             
            
             $("#logoutBTN").click(function () {
@@ -190,9 +193,9 @@
         }
 
         function getLastCareInfo() {
-            //השמת ערך תאריך טסט הבא
+            //השמת ערך תאריך טסט הבא (careID 5 = טסט שנתי)
             if (localStorage.getItem('vehicleDetails') != null) {
-                document.getElementById("CareType6").innerHTML = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
+                document.getElementById("CareType5").innerHTML = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
             }
             var tmpCarelist = JSON.parse(localStorage.getItem('UserCarCarelist'));
             var selectedCar = JSON.parse(localStorage.getItem('SelectedCar'));
@@ -298,6 +301,127 @@
 
         };
 
+
+        // ============================================================
+        // Quick add-treatment from a maintenance card
+        // careID matches the DB CareType table (same as AddCarCarePage dropdown)
+        // ============================================================
+        var TREATMENT_TYPES = {
+            1: "החלפת שמן",
+            2: "טיפול תקופתי",
+            3: "החלפת צמיגים",
+            4: "החלפת בלמים",
+            5: "טסט שנתי",
+            6: "החלפת מצבר",
+            7: "מילוי נוזל קירור",
+            8: "החלפת פילטר אוויר",
+            9: "בדיקת מזגן"
+        };
+
+        function wireTreatmentCards() {
+            document.querySelectorAll('#fristIconRow .mainscreenimg, #secondIconRow .mainscreenimg')
+                .forEach(function (card) {
+                    var typeP = card.querySelector('p[id^="CareType"]');
+                    if (!typeP) return;
+                    var careId = parseInt(typeP.id.replace('CareType', ''), 10);
+                    var headline = card.querySelector('.carbookheadline');
+                    var careName = headline ? headline.textContent.trim() : (TREATMENT_TYPES[careId] || '');
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', function () {
+                        if (careId === 9) {
+                            openKMUpdate();   // KM card → quick KM update
+                        } else {
+                            openAddTreatment(careId, careName);
+                        }
+                    });
+                });
+        }
+
+        function openKMUpdate() {
+            var selected = localStorage.getItem('SelectedCar');
+            if (!selected || selected === 'null') {
+                Swal.fire({ title: "בחר/י רכב קודם", icon: "info" });
+                return;
+            }
+            Swal.fire({
+                title: "עדכון קילומטראז'",
+                input: 'number',
+                inputLabel: 'קילומטראז\' נוכחי',
+                inputPlaceholder: 'הזן/י ק"מ',
+                showCancelButton: true,
+                confirmButtonText: 'שמור',
+                cancelButtonText: 'בטל',
+                confirmButtonColor: '#1E5A82',
+                inputValidator: function (v) {
+                    if (!v || parseInt(v) <= 0) return 'יש להזין ק"מ תקין';
+                }
+            }).then(function (result) {
+                if (result.isConfirmed) { updateKM(parseInt(result.value)); }
+            });
+        }
+
+        function openAddTreatment(careId, careName) {
+            var selected = localStorage.getItem('SelectedCar');
+            if (!selected || selected === 'null') {
+                Swal.fire({ title: "בחר/י רכב קודם", icon: "info" });
+                return;
+            }
+            var today = new Date().toISOString().split('T')[0];
+            Swal.fire({
+                title: 'הוספת טיפול מהיר: ' + careName,
+                html:
+                    '<div style="text-align:right; direction:rtl;">' +
+                    '  <label style="font-weight:600;">תאריך</label>' +
+                    '  <input type="date" id="t_date" class="swal2-input" value="' + today + '">' +
+                    '  <label style="font-weight:600;">קילומטראז\' נוכחי</label>' +
+                    '  <input type="number" id="t_km" class="swal2-input" placeholder="ק\'\'מ">' +
+                    '  <label style="font-weight:600;">עלות (₪)</label>' +
+                    '  <input type="number" id="t_cost" class="swal2-input" placeholder="0">' +
+                    '  <label style="font-weight:600;">הערות</label>' +
+                    '  <textarea id="t_notes" class="swal2-input" placeholder="הערות"></textarea>' +
+                    '</div>',
+                showCancelButton: true,
+                confirmButtonText: 'שמור טיפול',
+                cancelButtonText: 'בטל',
+                confirmButtonColor: '#1E5A82',
+                focusConfirm: false,
+                preConfirm: function () {
+                    var date = document.getElementById('t_date').value;
+                    if (!date) { Swal.showValidationMessage('יש לבחור תאריך'); return false; }
+                    return {
+                        date: date,
+                        km: parseInt(document.getElementById('t_km').value) || 0,
+                        cost: parseInt(document.getElementById('t_cost').value) || 0,
+                        notes: document.getElementById('t_notes').value || ""
+                    };
+                }
+            }).then(function (result) {
+                if (result.isConfirmed) { saveTreatment(careId, result.value); }
+            });
+        }
+
+        function saveTreatment(careId, data) {
+            var LogRecord = {
+                userEmail: JSON.parse(localStorage.getItem('LogInUser')).email,
+                licensePlate: parseInt(JSON.parse(localStorage.getItem('SelectedCar'))),
+                recordDate: new Date(data.date).toISOString(),
+                currentKM: data.km,
+                garageID: null,
+                careID: careId,
+                cost: data.cost,
+                notes: data.notes,
+                warrantyExpirationDate: null,
+                invoiceFileName: null
+            };
+            api = server + "/api/logs/";
+            ajaxCall("POST", api, JSON.stringify(LogRecord), function (res) {
+                Swal.fire({ title: "הטיפול נוסף בהצלחה!", icon: "success" })
+                    .then(function () { location.reload(); });
+            }, function (err) {
+                console.log(err);
+                Swal.fire({ title: "כשל בהוספת טיפול", text: "אנא בדוק/י את הפרטים", icon: "warning" });
+            });
+        }
 
         function updateKM(KM) {
 
@@ -629,6 +753,9 @@
     </script>
 
 
+    <script src="../JS/menu.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
 <body>
     <div id="top">
@@ -662,21 +789,21 @@
         </div>
         <!--תוכן העמוד-->
         <div id="fristIconRow" class="flextest">
-            <!--שורה עליונה-->
+            <!--שורה עליונה — careID matches the DB CareType table-->
             <div class="mainscreenimg">
                 <img id="carBookKMIMG" class="fleximgCarBook" src="images/kilometer.png" />
                 <p class="carbookheadline">קילומטראז'</p>
                 <p id="CareType9" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
-                <img id="carBookBrakesIMG" class="fleximgCarBook" src="images/Brakes.png" />
-                <p class="carbookheadline">החלפת בלמים</p>
-                <p id="CareType8" class="lowerline">טרם תועד</p>
+                <img id="carBookOilIMG" class="fleximgCarBook" src="images/car-oilblue.png" />
+                <p class="carbookheadline">החלפת שמן</p>
+                <p id="CareType1" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
-                <img id="carBookOilIMG" class="fleximgCarBook" src="images/car-oilblue.png" />
-                <p class="carbookheadline">שמן מים</p>
-                <p id="CareType1" class="lowerline">טרם תועד</p>
+                <img id="carBookPeriodicIMG" class="fleximgCarBook" src="images/tire-pressureblue.png" />
+                <p class="carbookheadline">טיפול תקופתי</p>
+                <p id="CareType2" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
                 <img id="carBookTireReplaceIMG" class="fleximgCarBook" src="images/tiresBlue.png" />
@@ -685,25 +812,25 @@
             </div>
         </div>
         <div id="secondIconRow" class="flextest">
-            <!--שורה תחתונה-->
+            <!--שורה תחתונה — careID matches the DB CareType table-->
             <div class="mainscreenimg">
-                <img id="carBookTirePressureIMG" class="fleximgCarBook" src="images/tire-pressureblue.png" />
-                <p class="carbookheadline">לחץ אוויר</p>
-                <p id="CareType2" class="lowerline">טרם תועד</p>
-            </div>
-            <div class="mainscreenimg">
-                <img id="carBookBatteryIMG" class="fleximgCarBook" src="images/car-battery (1).png" />
-                <p class="carbookheadline">החלפת מצבר</p>
+                <img id="carBookBrakesIMG" class="fleximgCarBook" src="images/Brakes.png" />
+                <p class="carbookheadline">החלפת בלמים</p>
                 <p id="CareType4" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
                 <img id="carBookTestIMG" class="fleximgCarBook" src="images/testblue.png" />
-                <p class="carbookheadline">טסט הבא</p>
+                <p class="carbookheadline">טסט שנתי</p>
+                <p id="CareType5" class="lowerline">טרם תועד</p>
+            </div>
+            <div class="mainscreenimg">
+                <img id="carBookBatteryIMG" class="fleximgCarBook" src="images/car-battery (1).png" />
+                <p class="carbookheadline">החלפת מצבר</p>
                 <p id="CareType6" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
-                <img id="carBookinsurenceIMG" class="fleximgCarBook" src="images/car-insurance.png" />
-                <p class="carbookheadline">גמר ביטוח</p>
+                <img id="carBookCoolantIMG" class="fleximgCarBook" src="images/car-insurance.png" />
+                <p class="carbookheadline">מילוי נוזל קירור</p>
                 <p id="CareType7" class="lowerline">טרם תועד</p>
             </div>
         </div>
