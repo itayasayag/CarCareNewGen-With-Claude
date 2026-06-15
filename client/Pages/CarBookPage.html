@@ -95,7 +95,7 @@
             $("#exportPDF").click(function () {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                const divIds = ['fristIconRow', 'secondIconRow', 'CarBook']; // IDs of the divs you want to include
+                const divIds = ['careCarousel', 'CarBook']; // IDs of the divs you want to include
                 let promises = [];
 
                 // Add title and image to the top of the page
@@ -319,22 +319,62 @@
         };
 
         function wireTreatmentCards() {
-            document.querySelectorAll('#fristIconRow .mainscreenimg, #secondIconRow .mainscreenimg')
-                .forEach(function (card) {
-                    var typeP = card.querySelector('p[id^="CareType"]');
-                    if (!typeP) return;
-                    var careId = parseInt(typeP.id.replace('CareType', ''), 10);
-                    var headline = card.querySelector('.carbookheadline');
-                    var careName = headline ? headline.textContent.trim() : (TREATMENT_TYPES[careId] || '');
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', function () {
-                        if (careId === 9) {
-                            openKMUpdate();   // KM card → quick KM update
-                        } else {
-                            openAddTreatment(careId, careName);
-                        }
-                    });
+            var carousel = document.getElementById('careCarousel');
+            if (!carousel) return;
+            var cards = carousel.querySelectorAll('.mainscreenimg');
+
+            cards.forEach(function (card) {
+                var typeP = card.querySelector('p[id^="CareType"]');
+                if (!typeP) return;
+                var careId = parseInt(typeP.id.replace('CareType', ''), 10);
+                var headline = card.querySelector('.carbookheadline');
+                var careName = headline ? headline.textContent.trim() : (TREATMENT_TYPES[careId] || '');
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function () {
+                    // tapping a side card centers it; tapping the centered card opens it
+                    if (!card.classList.contains('cc-active')) {
+                        card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        return;
+                    }
+                    if (careId === 9) { openKMUpdate(); }
+                    else { openAddTreatment(careId, careName); }
                 });
+            });
+
+            // Highlight whichever card is nearest the carousel center
+            function updateActive() {
+                var rect = carousel.getBoundingClientRect();
+                var center = rect.left + rect.width / 2;
+                var best = null, bestDist = Infinity;
+                cards.forEach(function (c) {
+                    var r = c.getBoundingClientRect();
+                    var d = Math.abs((r.left + r.width / 2) - center);
+                    if (d < bestDist) { bestDist = d; best = c; }
+                });
+                cards.forEach(function (c) { c.classList.toggle('cc-active', c === best); });
+            }
+            var raf;
+            carousel.addEventListener('scroll', function () {
+                window.cancelAnimationFrame(raf);
+                raf = window.requestAnimationFrame(updateActive);
+            });
+            window.addEventListener('resize', updateActive);
+            // Center the first treatment card (index 1, skipping KM) once laid out
+            function initCarousel() {
+                var target = cards[1] || cards[0];
+                if (target) {
+                    // center without smooth (instant) on load
+                    var rect = carousel.getBoundingClientRect();
+                    var r = target.getBoundingClientRect();
+                    var delta = (r.left + r.width / 2) - (rect.left + rect.width / 2);
+                    carousel.scrollLeft += delta;
+                }
+                updateActive();
+            }
+            // run a few times as layout/fonts settle
+            setTimeout(initCarousel, 60);
+            setTimeout(updateActive, 300);
+            setTimeout(updateActive, 700);
         }
 
         function openKMUpdate() {
@@ -788,8 +828,8 @@
             <!--דיב שמוסיפים אליו את כל הרכבים-->
         </div>
         <!--תוכן העמוד-->
-        <div id="fristIconRow" class="flextest">
-            <!--שורה עליונה — careID matches the DB CareType table-->
+        <div id="careCarousel" class="cc-carousel">
+            <!-- single-line dynamic carousel — careID matches the DB CareType table -->
             <div class="mainscreenimg">
                 <img id="carBookKMIMG" class="fleximgCarBook" src="images/kilometer.png" />
                 <p class="carbookheadline">קילומטראז'</p>
@@ -810,9 +850,6 @@
                 <p class="carbookheadline">החלפת צמיגים</p>
                 <p id="CareType3" class="lowerline">טרם תועד</p>
             </div>
-        </div>
-        <div id="secondIconRow" class="flextest">
-            <!--שורה תחתונה — careID matches the DB CareType table-->
             <div class="mainscreenimg">
                 <img id="carBookBrakesIMG" class="fleximgCarBook" src="images/Brakes.png" />
                 <p class="carbookheadline">החלפת בלמים</p>
@@ -856,7 +893,7 @@
         </div>
     </div>
     <div class="footer">
-        <img onclick="TBD" id="plussign" class="plus" src="images/PLUS.png" />
+        <img id="plussign" class="plus" onclick="window.location.href='AddCarCarePage.html'" src="images/PLUS.png" />
     </div>
 
 

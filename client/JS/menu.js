@@ -28,6 +28,12 @@
     function build() {
         if (document.querySelector('.cc-menu-btn')) return; // avoid duplicates
 
+        // Replace the +(plus) image glyph with a transparent pixel so the CSS
+        // gradient circle + drawn "+" shows cleanly (the PNG art was off-ratio).
+        document.querySelectorAll('img.plus').forEach(function (img) {
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+        });
+
         // Hamburger button
         var btn = document.createElement('button');
         btn.className = 'cc-menu-btn';

@@ -82,6 +82,7 @@ body, body.mainpage {
 .select-car {
     top: 60px !important;
     right: 14px !important;
+    z-index: 50 !important;
     background: rgba(255,255,255,.16) !important;
     border-radius: 999px !important;
     padding: 6px 14px !important;
@@ -175,11 +176,14 @@ body, body.mainpage {
 /* Red bell → accent circle */
 #redBell {
     align-self: center;
-    width: 42px; height: 42px;
-    padding: 9px;
+    width: 48px; height: 48px;
+    padding: 11px;
+    box-sizing: border-box;
+    object-fit: contain;
     background: rgba(194,65,12,.10);
     border-radius: 50%;
     cursor: pointer;
+    flex-shrink: 0;
     transition: transform .15s ease, background .15s ease;
 }
 #redBell:hover { transform: scale(1.06); background: rgba(194,65,12,.18); }
@@ -189,15 +193,40 @@ body, body.mainpage {
     background: transparent !important;
     box-shadow: none;
     height: auto !important;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    pointer-events: none;          /* let clicks pass except on the button */
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 900;
 }
 .plus {
-    width: 64px !important;
-    bottom: 70px !important;
+    width: 60px !important;
+    height: 60px !important;
+    position: relative;
+    bottom: auto !important;
+    margin: 10px auto 18px !important;
     padding: 0;
     border-radius: 50%;
-    box-shadow: 0 6px 18px rgba(30,90,130,.35);
+    background-color: var(--cc-primary) !important;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='white' stroke-width='4' stroke-linecap='round'%3E%3Cline x1='30' y1='20' x2='30' y2='40'/%3E%3Cline x1='20' y1='30' x2='40' y2='30'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    background-position: center, center !important;
+    background-size: 60px 60px, cover !important;
+    background-repeat: no-repeat, no-repeat !important;
+    box-shadow: 0 6px 18px rgba(30,90,130,.40);
     transition: transform .18s ease, box-shadow .18s ease;
     cursor: pointer;
+    display: block;
+    pointer-events: auto;
+    font-size: 0;
+    text-indent: -9999px;
+    overflow: hidden;
 }
 .plus:hover {
     transform: translateY(-2px) scale(1.04);
@@ -668,7 +697,7 @@ html.cc-dark .cc-dm-switch::after { transform: translateX(-24px); }
     text-align: center;
 }
 /* The CarBook tiles are clickable now — show it */
-#fristIconRow .mainscreenimg, #secondIconRow .mainscreenimg { cursor: pointer; }
+.cc-carousel .mainscreenimg { cursor: pointer; }
 
 /* ============================================================
    FIXES — consistent width, form rows, hamburger
@@ -751,3 +780,174 @@ body {
 /* In dark mode the header is darker — keep the button readable */
 html.cc-dark .cc-menu-btn { background: rgba(255,255,255,.14) !important; }
 html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; }
+
+/* ============================================================
+   POLISH FIXES
+   ============================================================ */
+
+/* ---- + button: force a perfect circle (PLUS.png is portrait 0.85 ratio) ---- */
+/* (final styling is consolidated lower in this file) */
+
+/* ---- Homepage bell: give the icon room so it isn't clipped ---- */
+#redBell {
+    width: 46px !important;
+    height: 46px !important;
+    padding: 10px !important;
+    box-sizing: border-box;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   CarBookPage — single-line dynamic carousel (center card big)
+   ============================================================ */
+.cc-carousel {
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 14px;
+    margin: 14px 0 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* big side padding so the first & last cards can reach the center */
+    padding: 14px 40% 16px;
+}
+.cc-carousel::-webkit-scrollbar { display: none; }
+
+.cc-carousel .mainscreenimg {
+    flex: 0 0 auto !important;
+    width: 150px !important;
+    max-width: 150px !important;
+    padding: 22px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    scroll-snap-align: center;
+    /* default = side cards: smaller + faded */
+    transform: scale(.78);
+    opacity: .55;
+    transition: transform .25s ease, opacity .25s ease, box-shadow .25s ease;
+}
+/* the centered card, marked by JS */
+.cc-carousel .mainscreenimg.cc-active {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 8px 28px rgba(16,42,67,.16);
+    z-index: 2;
+}
+.cc-carousel .fleximgCarBook {
+    width: 58px !important;
+    height: 58px !important;
+    margin: 0 auto !important;
+}
+.carbookheadline {
+    line-height: 1.25;
+    margin: 0;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+}
+.lowerline { line-height: 1.2; margin: 0; text-align: center; font-size: 12.5px; color: var(--cc-muted); }
+
+/* The detailed log table: more padding so it doesn't hug the edges */
+/* The detailed log table — unified shape (header connects to body) */
+.carbooktableheader {
+    margin: 20px 16px 0 !important;
+    padding: 14px 18px !important;
+    border-radius: 14px 14px 0 0 !important;
+    box-shadow: 0 -1px 0 rgba(0,0,0,0);
+}
+.FullCarBook {
+    margin: 0 16px 0 !important;
+    background: var(--cc-surface);
+    border-radius: 0 0 14px 14px;
+    box-shadow: var(--cc-shadow);
+    overflow: hidden;
+}
+.scrollCarbook { margin: 0 !important; }
+/* table itself flush inside the card — no second border-radius/shadow */
+.FullCarBook table {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100%;
+}
+.FullCarBook table thead tr {
+    background: var(--cc-bg);
+}
+.FullCarBook table th {
+    color: var(--cc-muted) !important;
+    font-weight: 600;
+    padding: 12px 8px !important;
+}
+.FullCarBook table td {
+    padding: 10px 8px !important;
+    color: var(--cc-ink);
+}
+/* leave room for the fixed footer/plus button so it never covers content */
+.RollDownCarBook { padding-bottom: 100px !important; }
+
+/* ============================================================
+   AddCarCarePage — receipt button below note + fix rows
+   ============================================================ */
+/* Receipt upload as a clean centered button (was absolute-positioned at top) */
+#uplodePicture.receipt-upload {
+    position: static !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 8px 14px 4px;
+    padding: 12px;
+    background: var(--cc-surface);
+    border: 1.5px dashed var(--cc-line);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+#uplodePicture.receipt-upload:hover {
+    border-color: var(--cc-primary-2);
+    background: var(--cc-bg);
+}
+#uplodePicture.receipt-upload #uploadrecipt {
+    position: static !important;
+    width: 40px !important;
+    height: 40px;
+    object-fit: contain;
+    top: auto !important; left: auto !important;
+    background: transparent !important;
+    margin: 0 !important;
+}
+#uplodePicture.receipt-upload span {
+    font-family: var(--cc-font);
+    font-weight: 600;
+    color: var(--cc-primary);
+    font-size: 16px;
+}
+
+/* The location row has THREE columns (icon + city + garage) — share the line with spacing */
+#AddCareDiv .row .col-3.rounded-input,
+#AddCareDiv .row .col-6.rounded-input {
+    flex: 1 1 0 !important;
+    min-width: 0;
+    margin: 0 0 0 8px !important;   /* gap to the left (RTL) between city & garage */
+    padding: 6px 12px !important;
+}
+#AddCareDiv .row .col-6.rounded-input { margin-left: 0 !important; }
+#AddCareDiv .row { gap: 8px; }
+/* selects inside those columns fill them */
+#AddCareDiv .row .carcare-select,
+#AddCareDiv .row select { width: 100% !important; }
+/* textarea grows naturally inside its rounded box */
+#AddCareDiv .row .rounded-input textarea {
+    width: 100%;
+    min-height: 70px;
+    resize: vertical;
+    padding: 8px;
+}
+
