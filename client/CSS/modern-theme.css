@@ -951,3 +951,156 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
     padding: 8px;
 }
 
+
+/* ============================================================
+   DARK MODE — comprehensive fixes for elements using hardcoded
+   colors from StyleSheet.css that don't respond to CSS vars
+   ============================================================ */
+
+/* Header gradient — override StyleSheet's hardcoded #235978 */
+html.cc-dark .h1header,
+html.cc-dark .header .h1header,
+html.cc-dark h1.h1header {
+    background: linear-gradient(135deg, #0F2535 0%, #1A3A52 100%) !important;
+    color: #E8EEF3 !important;
+}
+
+/* Body / page backgrounds */
+html.cc-dark body,
+html.cc-dark .RollDown,
+html.cc-dark .RollDownCarBook,
+html.cc-dark .content {
+    background: var(--cc-bg) !important;
+    color: var(--cc-ink);
+}
+
+/* Cards / surface areas */
+html.cc-dark .mainscreenimg,
+html.cc-dark .reminderinnerDiv,
+html.cc-dark .alertsDiv,
+html.cc-dark .rounded-input,
+html.cc-dark .rounded-input-Garage,
+html.cc-dark .light-div,
+html.cc-dark .FullCarBook,
+html.cc-dark .carbooktableheader + .FullCarBook {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+}
+
+/* Text inside cards */
+html.cc-dark .mainscreenimg p,
+html.cc-dark .carbookheadline,
+html.cc-dark .lowerline,
+html.cc-dark .p-light-H,
+html.cc-dark h2, html.cc-dark h3 {
+    color: var(--cc-ink) !important;
+}
+html.cc-dark .lowerline,
+html.cc-dark .p-light,
+html.cc-dark .p-light-L {
+    color: var(--cc-muted) !important;
+}
+
+/* Table */
+html.cc-dark table,
+html.cc-dark .vehicle-details-table {
+    background: var(--cc-surface) !important;
+    color: var(--cc-ink) !important;
+}
+html.cc-dark table td,
+html.cc-dark table th {
+    border-color: var(--cc-line) !important;
+    color: var(--cc-ink) !important;
+    background: var(--cc-surface) !important;
+}
+html.cc-dark .carbooktableheader {
+    background: linear-gradient(135deg, #1A3A52 0%, #1E5A82 100%) !important;
+    color: #E8EEF3 !important;
+}
+
+/* Carousel cards */
+html.cc-dark .cc-carousel .mainscreenimg {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+}
+html.cc-dark .cc-carousel .mainscreenimg.cc-active {
+    box-shadow: 0 8px 28px rgba(0,0,0,.40) !important;
+}
+
+/* Inputs & selects */
+html.cc-dark input,
+html.cc-dark textarea,
+html.cc-dark select,
+html.cc-dark .carcare-select,
+html.cc-dark .form-control,
+html.cc-dark .rounded-input input,
+html.cc-dark .rounded-input-Garage input {
+    background: transparent !important;
+    color: var(--cc-ink) !important;
+    border-color: var(--cc-line) !important;
+}
+html.cc-dark input::placeholder,
+html.cc-dark textarea::placeholder {
+    color: var(--cc-muted) !important;
+}
+
+/* Toggle buttons (SignUpPage) */
+html.cc-dark #Tgl1, html.cc-dark #Tgl2 {
+    color: var(--cc-muted) !important;
+    background: transparent !important;
+}
+html.cc-dark #btngrp {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+}
+
+/* Logo circle */
+html.cc-dark #logo {
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-line);
+}
+
+/* Footer background */
+html.cc-dark .footer,
+html.cc-dark .footersignup {
+    background: transparent !important;
+}
+
+/* MyCars page card inline styles use CSS vars, so they respond automatically.
+   But we need inline-style fallback overrides: */
+html.cc-dark #carsContainer > div {
+    background: var(--cc-surface) !important;
+    color: var(--cc-ink) !important;
+}
+
+/* Alerts/reminder panel */
+html.cc-dark .reminderinnerDiv {
+    background: var(--cc-bg) !important;
+}
+
+/* Light indicator circles */
+html.cc-dark .ThreeLights,
+html.cc-dark .light-div {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+}
+
+/* Map container */
+html.cc-dark #map {
+    filter: invert(90%) hue-rotate(180deg);
+}
+
+/* Scrollbars */
+html.cc-dark ::-webkit-scrollbar-track {
+    background: var(--cc-bg);
+}
+html.cc-dark ::-webkit-scrollbar-thumb {
+    background: var(--cc-line);
+}
+
+/* The "הרכבים שלי" wide button on HomePage */
+html.cc-dark #MyCarsBtn {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+    color: var(--cc-primary) !important;
+}

@@ -361,9 +361,26 @@
             window.addEventListener('resize', updateActive);
             // Center the first treatment card (index 1, skipping KM) once laid out
             function initCarousel() {
-                var target = cards[1] || cards[0];
+                // Priority 1: find an overdue card (red text inside lowerline)
+                var target = null;
+                cards.forEach(function(c) {
+                    if (!target) {
+                        var lower = c.querySelector('.lowerline');
+                        if (lower && lower.querySelector('[style*="color: red"], [style*="color:red"]')) {
+                            target = c;
+                        }
+                    }
+                });
+                // Priority 2: the yearly test card (CareType5)
+                if (!target) {
+                    cards.forEach(function(c) {
+                        if (!target && c.querySelector('#CareType5')) target = c;
+                    });
+                }
+                // Fallback: second card (skip KM)
+                if (!target) target = cards[1] || cards[0];
+
                 if (target) {
-                    // center without smooth (instant) on load
                     var rect = carousel.getBoundingClientRect();
                     var r = target.getBoundingClientRect();
                     var delta = (r.left + r.width / 2) - (rect.left + rect.width / 2);

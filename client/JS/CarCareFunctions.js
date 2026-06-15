@@ -7,7 +7,7 @@
     var StorageCarlist = JSON.parse(localStorage.getItem('UserCarlist'));
 /*    userEmail = tempUser.email;*/
     var valueCounter = 1;/* משתנה רץ לאופשנס*/
-    var str = "<select onchange='changeCarSelect()' class='select-car' id='carSelect' name='carSelect'> <option value='' disabled selected>הרכבים שלי</option>";
+    var str = "<select onchange='changeCarSelect()' class='select-car' id='carSelect' name='carSelect'> <option value='' disabled selected>בחר רכב</option>";
     if (StorageCarlist != null) {
         for (var i = 0; i < StorageCarlist.length; i++) {
             str += `<option value='${StorageCarlist[i].licensePlate}'>` + StorageCarlist[i].nickName + '</option>';

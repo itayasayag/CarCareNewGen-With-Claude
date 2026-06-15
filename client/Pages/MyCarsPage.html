@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הרכבים שלי</title>
+    <script src="../JS/CarCareFunctions.js"></script>
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="../CSS/modern-theme.css" rel="stylesheet" />
+    <script src="../JS/menu.js"></script>
+    <style>
+        .car-card {
+            background: var(--cc-surface);
+            border: 1px solid var(--cc-line);
+            border-radius: var(--cc-radius);
+            box-shadow: var(--cc-shadow);
+            padding: 18px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .car-card:hover { box-shadow: 0 4px 20px rgba(16,42,67,.14); }
+        .car-card.selected { border-color: var(--cc-primary); border-width: 2px; }
+
+        .car-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .car-icon-wrap {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: var(--cc-primary);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .car-icon {
+            width: 46px; height: 46px;
+            object-fit: contain;
+            /* mix-blend-mode: screen makes black transparent, leaving the blue car visible on the colored circle */
+            mix-blend-mode: screen;
+            filter: brightness(1.4) saturate(0.8);
+        }
+
+        .car-name { font-weight: 700; font-size: 18px; color: var(--cc-ink); }
+        .car-plate { font-size: 13px; color: var(--cc-muted); margin-top: 2px; }
+        .car-selected-badge {
+            font-size: 12px; color: var(--cc-primary);
+            font-weight: 600; margin-top: 4px;
+        }
+        .car-actions {
+            display: flex; flex-direction: column;
+            gap: 7px; align-items: stretch;
+            margin-right: auto;
+            min-width: 62px;
+        }
+        /* Clean pill buttons */
+        .btn-select {
+            background: var(--cc-primary);
+            color: #fff !important;
+            border: none;
+            border-radius: 999px;
+            padding: 7px 0;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--cc-font);
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(30,90,130,.25);
+            transition: background .15s;
+        }
+        .btn-select:hover { background: var(--cc-primary-2); }
+        .btn-remove {
+            background: transparent;
+            color: var(--cc-accent) !important;
+            border: 1.5px solid var(--cc-accent);
+            border-radius: 999px;
+            padding: 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--cc-font);
+            cursor: pointer;
+            text-align: center;
+            transition: background .15s, color .15s;
+        }
+        .btn-remove:hover { background: var(--cc-accent); color: #fff !important; }
+
+        /* Treatment stats row */
+        .car-stats {
+            display: flex;
+            border-top: 1px solid var(--cc-line);
+            padding-top: 12px;
+            gap: 0;
+        }
+        .car-stat {
+            flex: 1;
+            text-align: center;
+            padding: 0 6px;
+        }
+        .car-stat + .car-stat {
+            border-right: 1px solid var(--cc-line);
+        }
+        .car-stat-label {
+            font-size: 11px;
+            color: var(--cc-muted);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .car-stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--cc-ink);
+            line-height: 1.3;
+        }
+        .car-stat-value.suggested {
+            color: var(--cc-primary);
+            font-size: 13px;
+        }
+
+        /* Add car card */
+        .add-car-card {
+            border: 2px dashed var(--cc-line);
+            border-radius: var(--cc-radius);
+            padding: 22px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--cc-primary);
+            font-weight: 600;
+            font-size: 17px;
+            font-family: var(--cc-font);
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .add-car-card:hover {
+            background: var(--cc-bg);
+            border-color: var(--cc-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        <div id="top">
+            <h1 class="h1header">הרכבים שלי</h1>
+            <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+        </div>
+    </div>
+
+    <div class="RollDown">
+        <div id="carsContainer" style="padding: 14px 14px 8px;">
+            <!-- cars injected here -->
+        </div>
+        <div style="padding: 0 14px 100px;">
+            <div class="add-car-card" onclick="addNewCar()">
+                + הוסף רכב חדש
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <img id="plussign" class="plus" onclick="window.location.href='AddCarCarePage.html'" src="images/PLUS.png" />
+    </div>
+
+    <script>
+        // Care type names (matches DB)
+        var CARE_NAMES = {
+            1:'החלפת שמן', 2:'טיפול תקופתי', 3:'החלפת צמיגים', 4:'החלפת בלמים',
+            5:'טסט שנתי', 6:'החלפת מצבר', 7:'מילוי נוזל קירור', 8:'החלפת פילטר אוויר', 9:'בדיקת מזגן'
+        };
+        // Suggested order when no treatment logged — most routine first
+        var SUGGEST_ORDER = [2, 3, 1, 8, 7, 4, 6, 9, 5];
+
+        $(document).ready(function () {
+            var temp = localStorage.getItem('LogInUser');
+            if (!temp) { window.location.href = 'SignUpPage.html'; return; }
+
+            var cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+            var allLogs = JSON.parse(localStorage.getItem('UserCarCarelist')) || [];
+            var selectedCar = String(JSON.parse(localStorage.getItem('SelectedCar')) || '');
+            var container = document.getElementById('carsContainer');
+
+            if (cars.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:var(--cc-muted);margin-top:40px;">אין רכבים רשומים</p>';
+                return;
+            }
+
+            cars.forEach(function (car) {
+                var lp = String(car.licensePlate);
+                var isSelected = (lp === selectedCar);
+
+                // Filter logs for this car
+                var carLogs = allLogs.filter(function(l){ return String(l.licensePlate) === lp; });
+
+                // Count of recorded treatments
+                var treatmentCount = carLogs.length;
+
+                // Last treatment (by date)
+                var lastTreatment = null;
+                if (carLogs.length > 0) {
+                    var sorted = carLogs.slice().sort(function(a,b){ return new Date(b.recordDate) - new Date(a.recordDate); });
+                    var last = sorted[0];
+                    var lastDate = new Date(last.recordDate).toLocaleDateString('he-IL');
+                    lastTreatment = last.careName + '<br><span style="font-size:12px;color:var(--cc-muted)">' + lastDate + '</span>';
+                }
+
+                // Next suggested — find a care type NOT yet recorded for this car
+                var recordedTypes = carLogs.map(function(l){ return l.careID; });
+                var suggested = null;
+                for (var i = 0; i < SUGGEST_ORDER.length; i++) {
+                    if (recordedTypes.indexOf(SUGGEST_ORDER[i]) === -1) {
+                        suggested = CARE_NAMES[SUGGEST_ORDER[i]];
+                        break;
+                    }
+                }
+                if (!suggested) suggested = 'בדיקת לחץ אוויר';
+
+                var card = document.createElement('div');
+                card.className = 'car-card' + (isSelected ? ' selected' : '');
+
+                card.innerHTML =
+                    '<div class="car-card-header">' +
+                    '  <div class="car-icon-wrap"><img class="car-icon" src="images/car_icon.png" alt="רכב" /></div>' +
+                    '  <div style="flex:1">' +
+                    '    <div class="car-name">' + car.nickName + '</div>' +
+                    '    <div class="car-plate">מ.ר. ' + car.licensePlate + '</div>' +
+                    (isSelected ? '    <div class="car-selected-badge">✓ רכב נבחר</div>' : '') +
+                    '  </div>' +
+                    '  <div class="car-actions">' +
+                    '    <button class="btn-select" onclick="selectCar(\'' + lp + '\', event)">בחר</button>' +
+                    '    <button class="btn-remove" onclick="deleteCar(\'' + lp + '\', \'' + car.nickName.replace(/'/g,"\\'") + '\', event)">הסר</button>' +
+                    '  </div>' +
+                    '</div>' +
+                    '<div class="car-stats">' +
+                    '  <div class="car-stat">' +
+                    '    <div class="car-stat-label">טיפולים<br>מתועדים</div>' +
+                    '    <div class="car-stat-value">' + treatmentCount + '</div>' +
+                    '  </div>' +
+                    '  <div class="car-stat">' +
+                    '    <div class="car-stat-label">טיפול<br>אחרון</div>' +
+                    '    <div class="car-stat-value">' + (lastTreatment || '—') + '</div>' +
+                    '  </div>' +
+                    '  <div class="car-stat">' +
+                    '    <div class="car-stat-label">טיפול<br>מוצע הבא</div>' +
+                    '    <div class="car-stat-value suggested">' + suggested + '</div>' +
+                    '  </div>' +
+                    '</div>';
+
+                card.addEventListener('click', function (e) {
+                    if (e.target.tagName !== 'BUTTON') selectCar(lp);
+                });
+                container.appendChild(card);
+            });
+        });
+
+        function selectCar(licensePlate, event) {
+            if (event) event.stopPropagation();
+            localStorage.setItem('SelectedCar', JSON.stringify(String(licensePlate)));
+            Swal.fire({ title: 'הרכב נבחר!', icon: 'success', timer: 1200, showConfirmButton: false })
+                .then(function () { location.reload(); });
+        }
+
+        function deleteCar(licensePlate, nickname, event) {
+            if (event) event.stopPropagation();
+            Swal.fire({
+                title: 'הסר רכב',
+                text: 'האם להסיר את ' + nickname + '?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'הסר',
+                cancelButtonText: 'בטל',
+                confirmButtonColor: '#C2410C'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                var cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+                cars = cars.filter(function (c) { return String(c.licensePlate) !== String(licensePlate); });
+                localStorage.setItem('UserCarlist', JSON.stringify(cars));
+                if (String(JSON.parse(localStorage.getItem('SelectedCar'))) === String(licensePlate)) {
+                    localStorage.removeItem('SelectedCar');
+                }
+                location.reload();
+            });
+        }
+
+        function addNewCar() {
+            Swal.fire({
+                title: 'הוספת רכב חדש',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1E5A82',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'הוסף רכב חדש',
+                cancelButtonText: 'בטל',
+            }).then(function (result) {
+                if (result.isConfirmed) { window.location.href = 'addCarPage.html'; }
+            });
+        }
+    </script>
+</body>
+</html>
