@@ -42,6 +42,41 @@ def register_user(user: UserCreate):
         conn.close()
 
 
+@router.post("/google-login", response_model=UserResponse)
+def google_login(user: UserCreate):
+    """Login or auto-register a user authenticated via Google.
+    Looks up by email; creates the user (no password) if they don't exist yet."""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        # Does this email already exist?
+        cursor.execute(
+            "SELECT Email, FirstName, FamilyName, PhoneNum, Verified FROM Users WHERE Email = ?",
+            user.email
+        )
+        row = cursor.fetchone()
+        if row:
+            return UserResponse(
+                email=row[0], first_name=row[1], family_name=row[2],
+                phone_num=row[3], verified=bool(row[4])
+            )
+        # New Google user — create them (Google accounts are considered verified)
+        cursor.execute(
+            "INSERT INTO Users (Email, FirstName, FamilyName, Password, PhoneNum, Verified) "
+            "VALUES (?, ?, ?, ?, ?, 1)",
+            user.email, user.first_name, user.family_name, "", (user.phone_num or "")
+        )
+        conn.commit()
+        return UserResponse(
+            email=user.email, first_name=user.first_name,
+            family_name=user.family_name, phone_num=(user.phone_num or ""), verified=True
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
 @router.post("/login", response_model=UserResponse)
 def login(credentials: UserLogin):
     try:

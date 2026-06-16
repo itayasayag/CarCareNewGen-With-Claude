@@ -930,19 +930,64 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
     font-size: 16px;
 }
 
-/* The location row has THREE columns (icon + city + garage) — share the line with spacing */
+/* Location row: .row containing icon col + city col + garage col.
+   Force one horizontal flex line with proper spacing. */
+#AddCareDiv .row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    margin: 10px 14px !important;
+    gap: 8px;
+}
+/* icon column: fixed width, no grow */
+#AddCareDiv .row .col-3:not(.rounded-input) {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 0 !important;
+}
+#AddCareDiv .row .col-3:not(.rounded-input) .img-care {
+    width: clamp(38px, 11vw, 48px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* city box */
 #AddCareDiv .row .col-3.rounded-input,
-#AddCareDiv .row .col-6.rounded-input {
+#CityList {
     flex: 1 1 0 !important;
     min-width: 0;
-    margin: 0 0 0 8px !important;   /* gap to the left (RTL) between city & garage */
-    padding: 6px 12px !important;
+    padding: 6px 10px !important;
+    margin: 0 !important;
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--cc-shadow-sm);
+    box-sizing: border-box;
 }
-#AddCareDiv .row .col-6.rounded-input { margin-left: 0 !important; }
-#AddCareDiv .row { gap: 8px; }
-/* selects inside those columns fill them */
-#AddCareDiv .row .carcare-select,
-#AddCareDiv .row select { width: 100% !important; }
+/* garage box (wider) */
+#AddCareDiv .row .col-6.rounded-input,
+#GarageList {
+    flex: 1.4 1 0 !important;
+    min-width: 0;
+    padding: 4px 8px !important;
+    margin: 0 !important;
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-line) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--cc-shadow-sm);
+    box-sizing: border-box;
+}
+/* selects inside city/garage fill their box */
+#CityList select, #GarageList select,
+#CityList .carcare-select, #GarageList .carcare-select {
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    padding: 4px 2px !important;
+    margin: 0 !important;
+}
 /* textarea grows naturally inside its rounded box */
 #AddCareDiv .row .rounded-input textarea {
     width: 100%;

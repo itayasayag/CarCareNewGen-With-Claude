@@ -224,22 +224,23 @@
             else {
 
                 if (tempUser.email != null) {
-                    if ($("#date-input").val() == '' || $("#kilometers").val() == '' || $("#selectedgarage").val() == '' || $("#selectedtype").val() == '' || $("#cost").val() == '') {//TBD איתי חושב שסלקט זה נאלים
+                    if ($("#date-input").val() == '' || $("#kilometers").val() == '' || $("#selectedtype").val() == null || $("#selectedtype").val() == '' || $("#cost").val() == '') {
                         Swal.fire({
                             title: "מידע חסר",
-                            text: "ודא/י שלא פספסת כלום",
+                            text: "ודא/י שמילאת תאריך, קילומטראז', סוג טיפול ועלות",
                             icon: "question"
                         })
                     }
                     else {
                         uploadInvoice();
+                        var garageVal = $("#selectedgarage").val();
                         LogRecord = {
                             /*                            logID: 0,*/
                             userEmail: tempUser.email,
                             licensePlate: parseInt(selectedCar),
                             recordDate: $("#date-input").val(),
                             currentKM: $("#kilometers").val(),
-                            garageID: $("#selectedgarage").val(),
+                            garageID: (garageVal && garageVal !== '0' && garageVal !== '') ? garageVal : null,
                             careID: $("#selectedtype").val(),
                             cost: $("#cost").val(),
                             notes: $("#notes").val(),
@@ -501,7 +502,7 @@
     </div>
     <div>
         <div id="footerCarCare" class="footer">
-            <button type="submit" class="btn btn-primary rounded-pill" id="AddCareButton">הוסף תיעוד</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="AddCareButton">הוסף תיעוד</button>
         </div>
     </div>
 </body>

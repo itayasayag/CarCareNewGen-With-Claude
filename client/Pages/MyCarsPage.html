@@ -146,7 +146,27 @@
     <div class="header" id="header">
         <div id="top">
             <h1 class="h1header">הרכבים שלי</h1>
-            <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+            <div id="BackBTN" onclick="history.back()" title="חזור" style="
+                position: fixed;
+                top: calc(16px + env(safe-area-inset-top));
+                left: 14px;
+                z-index: 2147483001;
+                width: 44px; height: 44px;
+                background: rgba(0,0,0,.16);
+                border-radius: 12px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 1px 3px rgba(16,42,67,.2);
+            ">
+                <span style="
+                    display:inline-block;
+                    width:12px; height:12px;
+                    border-top: 2.5px solid #fff;
+                    border-right: 2.5px solid #fff;
+                    transform: rotate(45deg);
+                    margin-right: 3px;
+                "></span>
+            </div>
         </div>
     </div>
 
