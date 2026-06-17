@@ -187,61 +187,6 @@
 
 
         });
-        function promptUploadInvoice(logId) {
-            // Load the log record so UpdateLogRecord has the right data in sessionStorage
-            var api2 = server + "/api/logs/by-id/" + logId;
-            ajaxCall("GET", api2, "", function(suc) {
-                sessionStorage.setItem('TemplogRecord', JSON.stringify(suc));
-                Swal.fire({
-                    title: 'לא הועלתה קבלה',
-                    text: 'לא צורפה קבלה לטיפול זה. האם ברצונך להעלות עכשיו?',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'בחר קובץ',
-                    cancelButtonText: 'בטל',
-                    confirmButtonColor: '#1E5A82',
-                    html:
-                        '<p style="text-align:right;direction:rtl;margin-bottom:16px;">לא צורפה קבלה לטיפול זה.</p>' +
-                        '<div style="text-align:center">' +
-                        '  <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;width:80px;" />' +
-                        '  <input type="file" id="imgupload" style="display:none;" accept="image/*,.pdf" />' +
-                        '  <p id="chosenFileName" style="font-size:13px;color:#1E5A82;margin-top:8px;"></p>' +
-                        '</div>',
-                    didOpen: function() {
-                        document.getElementById('uploadreciptswal').addEventListener('click', function() {
-                            document.getElementById('imgupload').click();
-                        });
-                        document.getElementById('imgupload').addEventListener('change', function() {
-                            var fn = this.files[0] ? this.files[0].name : '';
-                            document.getElementById('chosenFileName').textContent = fn ? '✓ ' + fn : '';
-                        });
-                    },
-                    preConfirm: function() {
-                        var files = document.getElementById('imgupload').files;
-                        if (!files || files.length === 0) {
-                            Swal.showValidationMessage('יש לבחור קובץ להעלאה');
-                            return false;
-                        }
-                        return true;
-                    }
-                }).then(function(result) {
-                    if (!result.isConfirmed) return;
-                    var rec = JSON.parse(sessionStorage.getItem('TemplogRecord'))[0];
-                    uploadInvoice();
-                    // Wait for upload to complete (uploadInvoice is async via jQuery ajax)
-                    // We hook into the success callback via a small delay
-                    setTimeout(function() {
-                        if (newName && newName !== "ללא תמונה") {
-                            UpdateLogRecord(rec.logID, rec.currentKM, rec.cost, rec.notes, rec.careID, newName);
-                        }
-                    }, 1500);
-                });
-            }, function(err) {
-                console.error(err);
-                Swal.fire({ title: 'שגיאה', text: 'לא ניתן לטעון את הטיפול', icon: 'error' });
-            });
-        }
-
         function setImageSrc(element) {
             var imageSrc = element.dataset.src1
             document.getElementById('modalImage').src = imageSrc;
@@ -273,7 +218,7 @@
                         logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server+ /images/ + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
                     }
                     else {
-                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/uploadrecipt.png" style="opacity:0.35;cursor:pointer;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
+                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" style="cursor:pointer;width:30px;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
                     }
                     logSTR += '</tr>';
                     document.getElementById("carBookTbl").innerHTML += logSTR;
@@ -416,9 +361,26 @@
             window.addEventListener('resize', updateActive);
             // Center the first treatment card (index 1, skipping KM) once laid out
             function initCarousel() {
-                var target = cards[1] || cards[0];
+                // Priority 1: find an overdue card (red text inside lowerline)
+                var target = null;
+                cards.forEach(function(c) {
+                    if (!target) {
+                        var lower = c.querySelector('.lowerline');
+                        if (lower && lower.querySelector('[style*="color: red"], [style*="color:red"]')) {
+                            target = c;
+                        }
+                    }
+                });
+                // Priority 2: the yearly test card (CareType5)
+                if (!target) {
+                    cards.forEach(function(c) {
+                        if (!target && c.querySelector('#CareType5')) target = c;
+                    });
+                }
+                // Fallback: second card (skip KM)
+                if (!target) target = cards[1] || cards[0];
+
                 if (target) {
-                    // center without smooth (instant) on load
                     var rect = carousel.getBoundingClientRect();
                     var r = target.getBoundingClientRect();
                     var delta = (r.left + r.width / 2) - (rect.left + rect.width / 2);
@@ -704,6 +666,26 @@
     
            
 
+        }
+
+        // Clicking the red "no receipt" icon — offer to upload a receipt
+        function promptUploadInvoice(logId) {
+            Swal.fire({
+                title: 'לא הועלתה קבלה',
+                text: 'לטיפול זה לא צורפה קבלה. האם ברצונך להעלות אחת עכשיו?',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'העלה קבלה',
+                cancelButtonText: 'סגור',
+                confirmButtonColor: '#1E5A82'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    // Open the existing edit/upload popup for this log record,
+                    // where the user can pick a file; saving updates the record
+                    // and the icon becomes the normal blue invoice icon.
+                    editCare(logId);
+                }
+            });
         }
         function swalFunction(index) {
 

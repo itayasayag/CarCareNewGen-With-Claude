@@ -70,13 +70,23 @@ def create_log(log: LogRecordCreate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
+
+        # Garages now come from the gov.il API, so their IDs won't exist in the
+        # local Garage table. Only keep garage_id if it actually exists locally;
+        # otherwise store NULL to avoid a foreign-key violation.
+        garage_id = log.garage_id
+        if garage_id is not None:
+            cursor.execute("SELECT 1 FROM Garage WHERE Id = ?", garage_id)
+            if cursor.fetchone() is None:
+                garage_id = None
+
         cursor.execute(
             """INSERT INTO Log_Record
                (CurrentKM, RecordDate, WarrantyExpirationDate, Cost, Notes,
                 Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             log.current_km, log.record_date, log.warranty_expiration_date,
-            log.cost, log.notes, log.garage_id, log.care_id,
+            log.cost, log.notes, garage_id, log.care_id,
             log.user_email, log.license_plate, log.invoice_file_name
         )
         conn.commit()
