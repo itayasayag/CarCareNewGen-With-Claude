@@ -204,6 +204,17 @@ body, body.mainpage {
     padding-bottom: env(safe-area-inset-bottom);
     z-index: 900;
 }
+/* Re-enable clicks on any interactive element inside a footer
+   (e.g. הוסף תיעוד button, the + button) — without this they inherit
+   pointer-events:none and clicks pass right through them. */
+.footer button,
+.footer a,
+.footer .plus,
+.footer input,
+#footerCarCare button,
+#footerCarCare {
+    pointer-events: auto !important;
+}
 .plus {
     width: 60px !important;
     height: 60px !important;
@@ -1148,4 +1159,43 @@ html.cc-dark #MyCarsBtn {
     background: var(--cc-surface) !important;
     border-color: var(--cc-line) !important;
     color: var(--cc-primary) !important;
+}
+
+/* ============================================================
+   SignUpPage footer — fit Google + Guest buttons (was 8% fixed height,
+   which clipped the extra buttons off-screen)
+   ============================================================ */
+.footersignup {
+    position: static !important;       /* flow normally instead of pinned bottom bar */
+    height: auto !important;
+    background: transparent !important;
+    margin: 20px auto 30px !important;
+    padding: 10px 0 !important;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.footersignup .btn-primary,
+.footersignup .btn-secondary {
+    width: 80%;
+    max-width: 340px;
+    margin: 0 auto !important;
+}
+#googleBtnWrap {
+    width: 100%;
+    display: flex !important;
+    justify-content: center;
+    margin: 4px auto !important;
+}
+/* Make sure the page body can scroll so nothing is cut off */
+body {
+    overflow-y: auto !important;
+    min-height: 100vh;
+}
+/* Give the form area breathing room above the buttons */
+.SignupForm, .container.RollDown {
+    padding-bottom: 20px;
 }
