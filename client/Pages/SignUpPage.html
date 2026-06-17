@@ -8,6 +8,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <meta charset="utf-8" />
 
     <title>התחברות / הרשמה</title>
@@ -181,6 +182,64 @@
             })
         }
 
+        // ============================================================
+        //  GOOGLE SIGN-IN
+        //  Replace GOOGLE_CLIENT_ID with your real client ID from:
+        //  https://console.cloud.google.com → APIs & Services → Credentials
+        // ============================================================
+        var GOOGLE_CLIENT_ID = "174633607793-reips6q2jhc5k2p8mvn0f49ku9rgvs29.apps.googleusercontent.com";
+
+        function parseJwt(token) {
+            var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c){
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+        }
+
+        function handleGoogleLogin(response) {
+            var profile = parseJwt(response.credential);
+            var googleUser = {
+                firstName: profile.given_name || "",
+                familyName: profile.family_name || "",
+                email: profile.email,
+                password: "",
+                phoneNum: ""
+            };
+            var api = server + "/api/users/google-login";
+            ajaxCall("POST", api, JSON.stringify(googleUser), function(res) {
+                localStorage.setItem('LogInUser', JSON.stringify(res));
+                ReadUserCarByEmail(res.email);
+                ReadUserCarCareByEmail(res.email);
+                Swal.fire({ title: "ברוך הבא, " + (profile.given_name || "") + "!", icon: "success" })
+                    .then(function(){ window.location = "HomePage.html"; });
+            }, function(err) {
+                console.log("google login error:", err);
+                localStorage.setItem('LogInUser', JSON.stringify({
+                    email: googleUser.email, firstName: googleUser.firstName, familyName: googleUser.familyName
+                }));
+                Swal.fire({ title: "ברוך הבא, " + (profile.given_name || "") + "!", icon: "success" })
+                    .then(function(){ window.location = "HomePage.html"; });
+            });
+        }
+
+        window.addEventListener('load', function() {
+            function tryInit() {
+                if (window.google && google.accounts && google.accounts.id) {
+                    google.accounts.id.initialize({
+                        client_id: GOOGLE_CLIENT_ID,
+                        callback: handleGoogleLogin
+                    });
+                    google.accounts.id.renderButton(
+                        document.getElementById("g_id_signin"),
+                        { theme: "outline", size: "large", text: "signin_with", locale: "he", width: 280 }
+                    );
+                } else {
+                    setTimeout(tryInit, 300);
+                }
+            }
+            tryInit();
+        });
+
 
     </script>
     <style>
@@ -339,6 +398,10 @@
         <div class="footersignup">
             <button type="submit" class="btn btn-primary rounded-pill" id="RegBtn">הרשמה</button>
             <button type="submit" class="btn btn-primary rounded-pill" id="loginBtn">התחבר</button>
+            <!-- Google Sign-In button -->
+            <div id="googleBtnWrap" style="display:flex;justify-content:center;margin:8px auto 0;">
+                <div id="g_id_signin"></div>
+            </div>
             <button type="button" class="btn-secondary rounded-button" id="Guestlogin" style="width:80%;margin:10px auto 0;display:block;">התחבר כאורח</button>
         </div>
     </div>

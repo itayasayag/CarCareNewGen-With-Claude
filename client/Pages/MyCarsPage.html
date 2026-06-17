@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>הרכבים שלי</title>
     <script src="../JS/CarCareFunctions.js"></script>
+    <script src="../JS/ajaxCall.js"></script>
     <link href="../CSS/StyleSheet.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -286,8 +287,8 @@
         function deleteCar(licensePlate, nickname, event) {
             if (event) event.stopPropagation();
             Swal.fire({
-                title: 'הסר רכב',
-                text: 'האם להסיר את ' + nickname + '?',
+                title: 'הסרת רכב',
+                text: 'האם להסיר את ' + nickname + ' מהרשימה שלך? הרכב יישאר במערכת.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'הסר',
@@ -295,13 +296,22 @@
                 confirmButtonColor: '#C2410C'
             }).then(function (result) {
                 if (!result.isConfirmed) return;
-                var cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
-                cars = cars.filter(function (c) { return String(c.licensePlate) !== String(licensePlate); });
-                localStorage.setItem('UserCarlist', JSON.stringify(cars));
-                if (String(JSON.parse(localStorage.getItem('SelectedCar'))) === String(licensePlate)) {
-                    localStorage.removeItem('SelectedCar');
-                }
-                location.reload();
+                var email = JSON.parse(localStorage.getItem('LogInUser')).email;
+                // Detach from user via API — does NOT delete from DB
+                var url = server + "/api/usercars/deactivate/" + email + "/" + licensePlate;
+                ajaxCall("PUT", url, "", function(suc) {
+                    var cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+                    cars = cars.filter(function (c) { return String(c.licensePlate) !== String(licensePlate); });
+                    localStorage.setItem('UserCarlist', JSON.stringify(cars));
+                    if (String(JSON.parse(localStorage.getItem('SelectedCar'))) === String(licensePlate)) {
+                        localStorage.removeItem('SelectedCar');
+                    }
+                    Swal.fire({ title: 'הרכב הוסר מהרשימה שלך', icon: 'success', timer: 1400, showConfirmButton: false })
+                        .then(function(){ location.reload(); });
+                }, function(err) {
+                    console.error("deactivate error:", err);
+                    Swal.fire({ title: 'שגיאה בהסרת הרכב', icon: 'error' });
+                });
             });
         }
 

@@ -1157,3 +1157,34 @@ html.cc-dark #MyCarsBtn {
     border-color: var(--cc-line) !important;
     color: var(--cc-primary) !important;
 }
+
+/* ============================================================
+   SignUpPage — footersignup was 8% fixed height, cutting off
+   Google + guest buttons. Make it auto-height, flow normally.
+   ============================================================ */
+.footersignup {
+    position: static !important;
+    height: auto !important;
+    background: transparent !important;
+    margin: 20px auto 30px !important;
+    padding: 10px 0 !important;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.footersignup .btn-primary,
+.footersignup .btn-secondary,
+.footersignup .rounded-button {
+    width: 80% !important;
+    max-width: 340px;
+    margin: 0 auto !important;
+}
+#googleBtnWrap {
+    width: 100%;
+    display: flex !important;
+    justify-content: center;
+    margin: 4px auto !important;
+}
