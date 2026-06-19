@@ -628,11 +628,12 @@
                 title: " הטיפול עודכן בהצלחה!",
                 icon: "success"
             }).then(() => {
-                // Actions to perform after the success alert is closed
-                ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
-                ReadLogRecordByID(JSON.parse(sessionStorage.getItem('TemplogRecord')).logID);
-                getLastCareInfo();
-                location.reload(); // Reload the page
+                // Wait for the fresh log list to actually land in localStorage
+                // before reloading — otherwise the reload can render stale data
+                // (e.g. the receipt icon staying red until a manual refresh).
+                ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email, function () {
+                    location.reload();
+                });
             });
 
         }

@@ -72,13 +72,14 @@ function SaveCarsToLocalStorage(CarList) {
 }
 
 //קריאת רשימת טיפולים של משתמש ללוקאל
-function ReadUserCarCareByEmail(email) {
+function ReadUserCarCareByEmail(email, onDone) {
     api = server + "/api/logs/" + email;
-    ajaxCall("GET", api, "", getCCSCB, getCCECB);
+    ajaxCall("GET", api, "", function (suc) { getCCSCB(suc, onDone); }, getCCECB);
 }
 
-function getCCSCB(suc) {
+function getCCSCB(suc, onDone) {
     localStorage.setItem('UserCarCarelist', JSON.stringify(suc))
+    if (typeof onDone === 'function') onDone();
 }
 
 function getCCECB(err) {
