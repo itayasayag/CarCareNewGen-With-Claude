@@ -188,8 +188,13 @@
 
         });
         function setImageSrc(element) {
-            var imageSrc = element.dataset.src1
-            document.getElementById('modalImage').src = imageSrc;
+            var imageSrc = element.dataset.src1;
+            var imgEl = document.getElementById('modalImage');
+            imgEl.style.display = '';
+            // Remove any previous error message
+            var errMsg = document.getElementById('modalImageError');
+            if (errMsg) errMsg.remove();
+            imgEl.src = imageSrc;
         }
 
         function getLastCareInfo() {
@@ -215,10 +220,10 @@
 
                     logSTR += '<td>' + tmpCarelist[i].currentKM + '</td>';
                     if (tmpCarelist[i].invoiceFileName && tmpCarelist[i].invoiceFileName != "ללא תמונה" && tmpCarelist[i].invoiceFileName != "null") {
-                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server + '/api/upload/' + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
+                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" style="cursor:pointer;width:35px;height:35px;" data-src1="'+ server + '/api/upload/' + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
                     }
                     else {
-                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" style="cursor:pointer;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
+                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" style="cursor:pointer;width:35px;height:35px;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
                     }
                     logSTR += '</tr>';
                     document.getElementById("carBookTbl").innerHTML += logSTR;
@@ -945,7 +950,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <img id="modalImage" src="" class="img-fluid" alt="Large Image">
+                    <img id="modalImage" src="" class="img-fluid" alt="Large Image" onerror="this.style.display='none'; if(!document.getElementById('modalImageError')) this.insertAdjacentHTML('afterend', '<p id=&quot;modalImageError&quot; style=&quot;text-align:center;color:#999;padding:40px;&quot;>לא ניתן לטעון את הקבלה — הקובץ לא נמצא בשרת</p>')">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
