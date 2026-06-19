@@ -8,7 +8,8 @@ router = APIRouter(prefix="/api/usercars", tags=["User Cars"])
 def row_to_usercar(r) -> dict:
     return {
         "license_plate": r[0], "nick_name": r[1], "current_km": r[2],
-        "pic_url": r[3], "user_email": r[4], "is_verified": bool(r[5])
+        "pic_url": r[3], "user_email": r[4], "is_verified": bool(r[5]),
+        "is_active": bool(r[6])
     }
 
 
@@ -17,7 +18,10 @@ def get_all_user_cars():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified FROM UserCar")
+        cursor.execute(
+            "SELECT LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive "
+            "FROM UserCar WHERE IsActive = 1"
+        )
         return [row_to_usercar(r) for r in cursor.fetchall()]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -31,8 +35,8 @@ def get_user_cars_by_email(email: str):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified "
-            "FROM UserCar WHERE UserEmail = ?", email
+            "SELECT LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive "
+            "FROM UserCar WHERE UserEmail = ? AND IsActive = 1", email
         )
         return [row_to_usercar(r) for r in cursor.fetchall()]
     except Exception as e:
@@ -68,13 +72,32 @@ def add_user_car(car: UserCarCreate):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO UserCar (LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "SELECT IsActive FROM UserCar WHERE UserEmail=? AND LicensePlate=?",
+            car.user_email, car.license_plate
+        )
+        existing = cursor.fetchone()
+        if existing is not None:
+            if existing[0]:
+                raise HTTPException(status_code=409, detail="Car already exists for this user")
+            # Previously detached — reactivate instead of inserting a duplicate row.
+            cursor.execute(
+                "UPDATE UserCar SET IsActive=1, NickName=?, CurrentKM=?, PicURL=? "
+                "WHERE UserEmail=? AND LicensePlate=?",
+                car.nick_name, car.current_km, car.pic_url, car.user_email, car.license_plate
+            )
+            conn.commit()
+            return {"message": "Car reactivated successfully"}
+
+        cursor.execute(
+            "INSERT INTO UserCar (LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive) "
+            "VALUES (?, ?, ?, ?, ?, ?, 1)",
             car.license_plate, car.nick_name, car.current_km,
             car.pic_url, car.user_email, car.is_verified
         )
         conn.commit()
         return {"message": "Car added successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -109,11 +132,11 @@ def deactivate_car(email: str, license_plate: int):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE UserCar SET IsVerified=0 WHERE UserEmail=? AND LicensePlate=?",
+            "UPDATE UserCar SET IsActive=0 WHERE UserEmail=? AND LicensePlate=?",
             email, license_plate
         )
         conn.commit()
-        return {"message": "Car deactivated"}
+        return {"message": "Car removed from your garage"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:

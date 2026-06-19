@@ -50,6 +50,7 @@ class UserCarBase(CamelModel):
     pic_url: Optional[str] = None
     user_email: str
     is_verified: bool = False
+    is_active: bool = True
 
 class UserCarCreate(UserCarBase):
     pass
