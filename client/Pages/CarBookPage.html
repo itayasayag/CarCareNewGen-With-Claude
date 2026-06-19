@@ -735,7 +735,8 @@
          </div>
          <br>
            <div style="text-align: center;">
-             <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;" />
+             <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;width:60px;" />
+             <div style="font-size:13px;color:#1E5A82;margin-top:4px;">לחץ להעלאת קבלה</div>
          </div>
 
      `,
@@ -743,14 +744,17 @@
                 showCancelButton: true,
                 confirmButtonText: 'שמור',
                 cancelButtonText: 'בטל',
-
+                preConfirm: function () {
+                    return {
+                        cost: document.getElementById('Lcost').value,
+                        notes: document.getElementById('Lnotes').value
+                    };
+                }
 
             }).then((result) => {
                 if (result.isConfirmed) {
                     uploadInvoice();
-                    const cost = document.getElementById('Lcost').value;
-                    const notes = document.getElementById('Lnotes').value;
-                    UpdateLogRecord(index, TempLogRecord[0].currentKM, cost, notes, TempLogRecord[0].careID, newName)
+                    UpdateLogRecord(index, TempLogRecord[0].currentKM, result.value.cost, result.value.notes, TempLogRecord[0].careID, newName)
 
                 }
             });
