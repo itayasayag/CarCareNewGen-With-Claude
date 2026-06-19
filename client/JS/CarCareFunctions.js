@@ -2,10 +2,18 @@
     var temp = localStorage.getItem('LogInUser');
     var tempUser = JSON.parse(temp);
     if (localStorage.getItem('UserCarlist') == null) {
-        ReadUserCarByEmail(tempUser.email)
+        // No cached list yet — fetch first, then render once data is back.
+        ReadUserCarByEmail(tempUser.email, RenderCarSelectFromStorage);
+        return;
     }
+    // Render immediately from cache, then refresh in the background so
+    // newly added/removed cars show up without needing a manual reload.
+    RenderCarSelectFromStorage();
+    ReadUserCarByEmail(tempUser.email, RenderCarSelectFromStorage);
+}
+
+function RenderCarSelectFromStorage() {
     var StorageCarlist = JSON.parse(localStorage.getItem('UserCarlist'));
-/*    userEmail = tempUser.email;*/
     var valueCounter = 1;/* משתנה רץ לאופשנס*/
     var str = "<select onchange='changeCarSelect()' class='select-car' id='carSelect' name='carSelect'> <option value='' disabled selected>בחר רכב</option>";
     if (StorageCarlist != null) {
@@ -16,7 +24,12 @@
     str += "<option style='background-color: #99BFD2' value='addCar'>הוסף רכב+ </option></select>";
     document.getElementById("SelectDiv").innerHTML = str;
 
-
+    // Preserve previously selected car in the dropdown, if it still exists in the list.
+    var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
+    if (selectedCarValue !== null && StorageCarlist != null &&
+        StorageCarlist.some(function (c) { return String(c.licensePlate) === String(selectedCarValue); })) {
+        $('#carSelect').val(selectedCarValue);
+    }
 }
 
 
@@ -39,14 +52,15 @@ function AddCarToAlertsListFromStorage() { //טיפה שונה מהוספה רג
 }
 
 
-function ReadUserCarByEmail(email)
+function ReadUserCarByEmail(email, onDone)
 {
     api = server + "/api/usercars/"+email;
-    ajaxCall("GET", api, "", getSCB, getECB);
+    ajaxCall("GET", api, "", function (suc) { getSCB(suc, onDone); }, getECB);
 }
 
-function getSCB(suc) {
+function getSCB(suc, onDone) {
     localStorage.setItem('UserCarlist', JSON.stringify(suc))
+    if (typeof onDone === 'function') onDone();
 }
 
 function getECB(err) {

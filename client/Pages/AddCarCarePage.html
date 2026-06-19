@@ -161,14 +161,58 @@
             }
         };
 
+        var CURRENT_GARAGE_LIST = [];
+
         function AddToGarageList(list) {
-            var str = "<select class='carcare-select' id='selectedgarage' name='garage'> <option value='' disabled selected>בחר מוסך</option>";
-            for (var i = 0; i < list.length; i++) {
-                str += `<option value='${list[i].id}'>` + list[i].shem_mosah + '</option>';
-            }
-            str += "</select>";
-            document.getElementById("GarageList").innerHTML = str;
+            CURRENT_GARAGE_LIST = list || [];
+            var $input = $("#garageSearchInput");
+            $input.prop('disabled', false).val('').attr('placeholder', 'חפש מוסך...');
+            $("#selectedgarage").val('');
+            $("#garageOptionsList").hide();
         }
+
+        function renderGarageOptions(list) {
+            var $list = $("#garageOptionsList");
+            if (!list.length) {
+                $list.html("<div class='garage-option-empty'>לא נמצאו מוסכים</div>").show();
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                html += "<div class='garage-option' data-id='" + list[i].id + "' data-name='" +
+                    String(list[i].shem_mosah || '').replace(/'/g, "&#39;") + "'>" + list[i].shem_mosah + "</div>";
+            }
+            $list.html(html).show();
+        }
+
+        $(document).on('focus', '#garageSearchInput', function () {
+            if (!$(this).prop('disabled')) renderGarageOptions(CURRENT_GARAGE_LIST);
+        });
+
+        $(document).on('input', '#garageSearchInput', function () {
+            var q = $(this).val().trim();
+            $("#selectedgarage").val(''); // typing invalidates previous selection
+            if (!q) { renderGarageOptions(CURRENT_GARAGE_LIST); return; }
+            var filtered = CURRENT_GARAGE_LIST.filter(function (g) {
+                return (g.shem_mosah || '').indexOf(q) !== -1;
+            });
+            renderGarageOptions(filtered);
+        });
+
+        $(document).on('click', '.garage-option', function () {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $("#selectedgarage").val(id);
+            $("#garageSearchInput").val(name);
+            $("#garageOptionsList").hide();
+        });
+
+        // Close the options list when clicking elsewhere on the page
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#GarageList').length) {
+                $("#garageOptionsList").hide();
+            }
+        });
 
 
 
@@ -452,11 +496,11 @@
                 <div class="col-3 rounded-input" id="CityList">
 
                 </div>
-                <div class="col-6 rounded-input" id="GarageList">
-                    <select onchange='ChangeGarageSelect()' class='carcare-select' id='selectedgarage' name='garage'>
-                        <option value=0 disabled selected>בחר מוסך</option>
-                        <option value=1 disabled selected>תחילה בחר עיר</option>
-                    </select>
+                <div class="col-6 rounded-input" id="GarageList" style="position: relative;">
+                    <input type="text" class="carcare-select" id="garageSearchInput"
+                           placeholder="תחילה בחר עיר" disabled autocomplete="off" />
+                    <input type="hidden" id="selectedgarage" name="garage" value="" />
+                    <div id="garageOptionsList" class="garage-options-list"></div>
                 </div>
 
 

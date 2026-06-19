@@ -150,10 +150,11 @@
             <div id="BackBTN" onclick="history.back()" title="חזור" style="
                 position: fixed;
                 top: calc(16px + env(safe-area-inset-top));
-                left: 14px;
+                right: 14px;
                 z-index: 2147483001;
                 width: 44px; height: 44px;
-                background: rgba(0,0,0,.16);
+                background: rgba(255,255,255,.22);
+                border: 1px solid rgba(255,255,255,.35);
                 border-radius: 12px;
                 display: flex; align-items: center; justify-content: center;
                 cursor: pointer;
@@ -164,8 +165,8 @@
                     width:12px; height:12px;
                     border-top: 2.5px solid #fff;
                     border-right: 2.5px solid #fff;
-                    transform: rotate(45deg);
-                    margin-right: 3px;
+                    transform: rotate(135deg);
+                    margin-left: 3px;
                 "></span>
             </div>
         </div>
@@ -198,11 +199,20 @@
         $(document).ready(function () {
             var temp = localStorage.getItem('LogInUser');
             if (!temp) { window.location.href = 'SignUpPage.html'; return; }
+            var tempUser = JSON.parse(temp);
 
+            renderCarsList();
+            // Always refresh from the server too, in case a car was added/removed
+            // elsewhere and localStorage is stale — re-render once fresh data lands.
+            ReadUserCarByEmail(tempUser.email, renderCarsList);
+        });
+
+        function renderCarsList() {
             var cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
             var allLogs = JSON.parse(localStorage.getItem('UserCarCarelist')) || [];
             var selectedCar = String(JSON.parse(localStorage.getItem('SelectedCar')) || '');
             var container = document.getElementById('carsContainer');
+            container.innerHTML = '';
 
             if (cars.length === 0) {
                 container.innerHTML = '<p style="text-align:center;color:var(--cc-muted);margin-top:40px;">אין רכבים רשומים</p>';
@@ -275,7 +285,7 @@
                 });
                 container.appendChild(card);
             });
-        });
+        }
 
         function selectCar(licensePlate, event) {
             if (event) event.stopPropagation();
