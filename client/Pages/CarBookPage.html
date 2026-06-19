@@ -235,17 +235,16 @@
                         if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
 
                             let numOfDays = Math.round((Now - DateString) / (1000 * 60 * 60 * 24));//המרה מ:מילישניות לימים
-                            document.getElementById(divID).innerHTML = '<p>' + formattedDate + '</p>';
-                            tmpstr = '<p';
+                            var dateLine = '<span>' + formattedDate + '</span>';
+                            var daysLine = '';
                             if (numOfDays > 0) {
-                                if (numOfDays > 330) {
-                                    tmpstr += ` style ="color: red; font-weight:bold"`;
-                                }
-                                document.getElementById(divID).innerHTML += tmpstr + '>לפני ' + numOfDays + ' ימים</p>';
+                                var overdueStyle = (numOfDays > 330) ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
+                                daysLine = '<span' + overdueStyle + '>לפני ' + numOfDays + ' ימים</span>';
                             }
                             else {
-                                document.getElementById(divID).innerHTML += '<p>תיעוד עתידי</p>';
+                                daysLine = '<span>תיעוד עתידי</span>';
                             }
+                            document.getElementById(divID).innerHTML = dateLine + '<br>' + daysLine;
 
                         }
 
@@ -371,7 +370,7 @@
                 cards.forEach(function(c) {
                     if (!target) {
                         var lower = c.querySelector('.lowerline');
-                        if (lower && lower.querySelector('[style*="color: red"], [style*="color:red"]')) {
+                        if (lower && lower.querySelector('[style*="color:#E5484D"], [style*="color: #E5484D"], [style*="color: red"], [style*="color:red"]')) {
                             target = c;
                         }
                     }

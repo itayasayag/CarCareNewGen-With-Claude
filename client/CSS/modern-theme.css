@@ -91,6 +91,7 @@ body, body.mainpage {
     backdrop-filter: blur(4px);
 }
 .select-car option { color: var(--cc-ink); }
+.select-car option[disabled] { color: var(--cc-muted); }
 
 /* ---- Main action tiles ---- */
 .flextest { margin-top: 18px !important; gap: 16px; }
@@ -573,6 +574,15 @@ html.cc-dark input::placeholder { color: var(--cc-muted) !important; }
 
 /* Native date picker icon visible in dark */
 html.cc-dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+/* Car selector dropdown: <option> backgrounds aren't stylable cross-browser
+   and render on the OS's (light) native dropdown surface, so the "בחר רכב"
+   placeholder needs a darker grey here, not the near-white --cc-ink/--cc-muted
+   used for dark-mode page text, or it becomes unreadable. */
+html.cc-dark .select-car option[disabled],
+html.cc-dark .carcare-select option[disabled] {
+    color: #6B7780 !important;
+}
 
 /* SweetAlert popups in dark */
 html.cc-dark .swal2-popup { background: var(--cc-surface) !important; color: var(--cc-ink) !important; }
