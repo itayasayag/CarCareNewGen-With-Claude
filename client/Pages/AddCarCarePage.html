@@ -315,7 +315,29 @@
             console.log(res);
             Swal.fire({
                 title: "נוסף תיעוד טיפול",
-                icon: "success"
+                icon: "success",
+                showDenyButton: true,
+                confirmButtonText: 'חזרה לדף הבית',
+                denyButtonText: 'הוסף טיפול נוסף',
+                confirmButtonColor: '#1E5A82',
+                denyButtonColor: '#2C7DB3'
+            }).then(function (result) {
+                if (result.isDenied) {
+                    // Clear the form for a new entry
+                    $("#date-input").val('');
+                    $("#kilometers").val('');
+                    $("#cost").val('');
+                    $("#notes").val('');
+                    $("#selectedtype").prop('selectedIndex', 0);
+                    $("#garageSearchInput").val('').attr('placeholder', 'תחילה בחר עיר').prop('disabled', true);
+                    $("#selectedgarage").val('');
+                    $("#garageOptionsList").hide();
+                    $("#uploadrecipt").attr('src', 'images/uploadrecipt.png');
+                    $("#imgupload").val('');
+                    newName = "ללא תמונה";
+                } else {
+                    window.location.href = 'HomePage.html';
+                }
             });
 
         }
