@@ -165,8 +165,8 @@
                     width:12px; height:12px;
                     border-top: 2.5px solid #fff;
                     border-right: 2.5px solid #fff;
-                    transform: rotate(135deg);
-                    margin-left: 3px;
+                    transform: rotate(-135deg);
+                    margin-right: 3px;
                 "></span>
             </div>
         </div>
@@ -290,8 +290,21 @@
         function selectCar(licensePlate, event) {
             if (event) event.stopPropagation();
             localStorage.setItem('SelectedCar', JSON.stringify(String(licensePlate)));
-            Swal.fire({ title: 'הרכב נבחר!', icon: 'success', timer: 1200, showConfirmButton: false })
-                .then(function () { location.reload(); });
+            Swal.fire({
+                title: 'הרכב הוחלף בהצלחה!',
+                icon: 'success',
+                showDenyButton: true,
+                confirmButtonText: 'המשך בעמוד זה',
+                denyButtonText: 'מעבר לספר הרכב',
+                confirmButtonColor: '#1E5A82',
+                denyButtonColor: '#2C7DB3'
+            }).then(function (result) {
+                if (result.isDenied) {
+                    window.location.href = 'CarBookPage.html';
+                } else {
+                    location.reload();
+                }
+            });
         }
 
         function deleteCar(licensePlate, nickname, event) {
