@@ -809,8 +809,9 @@ th {
 }
 
 .invoiceIcon {
-    max-width: 50px;
-    max-height: 50px;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }
 
 
