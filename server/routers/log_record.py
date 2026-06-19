@@ -24,7 +24,8 @@ def get_logs_by_email(email: str):
         cursor.execute(
             """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
                       lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
-                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName, g.Shem_mosah
+                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName,
+                      COALESCE(lr.GarageName, g.Shem_mosah) AS GarageName
                FROM Log_Record lr
                LEFT JOIN CareType ct ON lr.CareID = ct.CareID
                LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
@@ -46,7 +47,8 @@ def get_log_by_id(log_id: int):
         cursor.execute(
             """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
                       lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
-                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName, g.Shem_mosah
+                      lr.LicensePlate, lr.InvoiceFileName, ct.CareName,
+                      COALESCE(lr.GarageName, g.Shem_mosah) AS GarageName
                FROM Log_Record lr
                LEFT JOIN CareType ct ON lr.CareID = ct.CareID
                LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
@@ -83,11 +85,12 @@ def create_log(log: LogRecordCreate):
         cursor.execute(
             """INSERT INTO Log_Record
                (CurrentKM, RecordDate, WarrantyExpirationDate, Cost, Notes,
-                Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName, GarageName)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             log.current_km, log.record_date, log.warranty_expiration_date,
             log.cost, log.notes, garage_id, log.care_id,
-            log.user_email, log.license_plate, log.invoice_file_name
+            log.user_email, log.license_plate, log.invoice_file_name,
+            log.garage_name
         )
         conn.commit()
         return {"message": "Log record created successfully"}

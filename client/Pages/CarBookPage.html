@@ -214,8 +214,8 @@
                     logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" style="border:none; background:none; padding:0; margin:0; font-family:inherit; font-size:inherit; cursor:pointer;">' + tmpCarelist[i].careName +  '</button> </td>'
 
                     logSTR += '<td>' + tmpCarelist[i].currentKM + '</td>';
-                    if (tmpCarelist[i].invoiceFileName != "ללא תמונה") {
-                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server+ /images/ + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
+                    if (tmpCarelist[i].invoiceFileName && tmpCarelist[i].invoiceFileName != "ללא תמונה" && tmpCarelist[i].invoiceFileName != "null") {
+                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server + '/api/upload/' + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
                     }
                     else {
                         logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" style="cursor:pointer;width:30px;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
@@ -708,7 +708,7 @@
          <br>
            <div style="align-items: center;">
              <label for="cost">מוסך </label>
-            <span> ${TempLogRecord[0].garageName} </span>
+            <span> ${TempLogRecord[0].garageName || 'לא צוין'} </span>
          </div>
            <br>
              <div style="align-items: center;">
@@ -731,7 +731,6 @@
          <br>
            <div style="text-align: center;">
              <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;" />
-             <input type="file" id="imgupload" style="display:none;" />
          </div>
 
      `,
@@ -835,6 +834,7 @@
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
 <body>
+    <input type="file" id="imgupload" style="display:none;" />
     <div id="top">
         <div class="header" , id="header">
             <div id="VerifyPicture">

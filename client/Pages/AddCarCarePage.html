@@ -52,7 +52,7 @@
                 $('#carSelect').val(selectedCarValue);//השמת הערך בבחירה
             }
             /* פותח הוספת קובץ*/
-            $("#uploadrecipt").click(function () { $("#imgupload").trigger('click'); })
+            $("#uplodePicture").click(function () { $("#imgupload").trigger('click'); })
 
 
             ReadCity();
@@ -278,6 +278,11 @@
                     else {
                         uploadInvoice();
                         var garageVal = $("#selectedgarage").val();
+                        var garageName = "";
+                        if (garageVal) {
+                            var match = CURRENT_GARAGE_LIST.find(function(g) { return String(g.id) === String(garageVal); });
+                            if (match) garageName = match.shem_mosah || "";
+                        }
                         LogRecord = {
                             /*                            logID: 0,*/
                             userEmail: tempUser.email,
@@ -291,7 +296,7 @@
                             warrantyExpirationDate: $("#date-input").val(),
                             invoiceFileName: newName /*uploadrecipt.toString()*/,
                             careName: "",
-                            garagename:""
+                            garageName: garageName
                         }
 
                         api = server + "/api/logs/";

@@ -105,6 +105,7 @@ class LogRecordBase(CamelModel):
     cost: Optional[int] = None
     notes: Optional[str] = None
     garage_id: Optional[int] = None
+    garage_name: Optional[str] = None
     care_id: int
     user_email: str
     license_plate: int
@@ -126,7 +127,6 @@ class LogRecordUpdate(CamelModel):
 class LogRecordResponse(LogRecordBase):
     log_id: int
     care_name: Optional[str] = None
-    garage_name: Optional[str] = None
 
 
 # ── Reminder ──────────────────────────────────────────────────────────────────
