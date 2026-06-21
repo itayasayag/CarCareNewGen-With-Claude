@@ -418,7 +418,7 @@ textarea::placeholder { color: var(--cc-muted); }
 /* Dropdowns inside content (care type, garage, car) */
 .carcare-select {
     background: var(--cc-surface) !important;
-    border: 1px solid var(--cc-line) !important;
+    border: 1px solid transparent !important;
     border-radius: 14px !important;
     padding: 12px 14px !important;
     box-shadow: var(--cc-shadow-sm);
@@ -768,16 +768,22 @@ body {
 .row .rounded-input, .row .rounded-input-Garage {
     margin: 0 !important;
     width: 100%;
+    max-width: 100%;
     min-height: 52px;
     display: flex;
     align-items: center;
     flex-direction: row;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 .row .rounded-input input, .row .rounded-input-Garage input,
 .row .rounded-input textarea, .row .rounded-input select,
 .row .carcare-select {
     text-align: right;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
 }
 /* when a select IS the col-9 directly */
 .row .col-9.carcare-select { padding: 12px 14px !important; }

@@ -62,9 +62,12 @@
             // Custom date picker — always shows/lets the user pick dd/mm/yyyy,
             // regardless of browser/OS locale. The real value sent to the
             // backend (ISO yyyy-mm-dd) is kept in the hidden #date-input field.
-            flatpickr("#date-input-display", {
+            var dateFP = flatpickr("#date-input-display", {
                 dateFormat: "d/m/Y",
                 altInput: false,
+                allowInput: true,
+                clickOpens: true,
+                static: false,
                 maxDate: "today",
                 onChange: function (selectedDates, dateStr) {
                     if (selectedDates[0]) {
@@ -77,6 +80,11 @@
                         $("#date-input").val('');
                     }
                 }
+            });
+            // Belt-and-suspenders: explicitly open the calendar on click,
+            // in case the field's own focus/click binding doesn't fire it.
+            $("#date-input-display").on('click', function () {
+                if (dateFP) dateFP.open();
             });
 
             ReadCity();
@@ -530,7 +538,7 @@
                     <img class="img-care" src="images/calendar.png" />
                 </div>
                 <div class="col-9 rounded-input">
-                    <input id="date-input-display" type="text" placeholder="dd/mm/yyyy" autocomplete="off" readonly />
+                    <input id="date-input-display" type="text" placeholder="dd/mm/yyyy" autocomplete="off" style="cursor:pointer;" />
                     <input id="date-input" type="hidden" name="date" />
                 </div>
             </div>
