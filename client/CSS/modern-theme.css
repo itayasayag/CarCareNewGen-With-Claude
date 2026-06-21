@@ -33,6 +33,17 @@ body, body.mainpage {
 
 .header {
     height: auto !important;
+    border: none !important;        /* legacy "border: solid, 1px" left a stray
+                                         white line under the header (visible on
+                                         dark backgrounds) — remove it entirely */
+    background: transparent !important;
+}
+
+/* The inner wrapper holding the h1, logo, and car-select dropdown becomes the
+   positioning context for .select-car, instead of falling back to <body>
+   (which made the dropdown drift outside the header's rounded edge). */
+.header-inner {
+    position: relative;
 }
 
 .h1header {
