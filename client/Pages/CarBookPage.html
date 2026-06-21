@@ -198,6 +198,7 @@
         }
 
         function getLastCareInfo() {
+            window.__insuranceExpired = false;
             //השמת ערך תאריך טסט הבא (careID 5 = טסט שנתי)
             if (localStorage.getItem('vehicleDetails') != null) {
                 document.getElementById("CareType5").innerHTML = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
@@ -232,7 +233,24 @@
 
                     if (document.getElementById(divID) != null) {
                         divIdValue = document.getElementById(divID).innerHTML;
-                        if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
+
+                        // Insurance (careID 10) is special: the date is an END date.
+                        // A date in the PAST means the insurance has expired (red);
+                        // a future date is fine. This is the opposite of normal
+                        // maintenance, where a past date is the last service.
+                        if (tmpCarelist[i].careID == 10) {
+                            if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
+                                var insExpired = (DateString < Now);
+                                var insStyle = insExpired ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
+                                var insLabel = insExpired ? 'הביטוח הסתיים' : 'בתוקף';
+                                document.getElementById(divID).innerHTML =
+                                    '<span' + insStyle + '>סיום ביטוח</span><br>' +
+                                    '<span' + insStyle + '>' + formattedDate + '</span><br>' +
+                                    '<span' + insStyle + '>' + insLabel + '</span>';
+                                if (insExpired) { window.__insuranceExpired = true; }
+                            }
+                        }
+                        else if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
 
                             let numOfDays = Math.round((Now - DateString) / (1000 * 60 * 60 * 24));//המרה מ:מילישניות לימים
                             var dateLine = '<span>' + formattedDate + '</span>';
@@ -262,7 +280,19 @@
             }
             document.getElementById("CareType9").innerHTML = MaxKM + ' ק"מ ';
 
-
+            // If the insurance has expired, alert the user immediately on load.
+            if (window.__insuranceExpired && !window.__insuranceAlertShown) {
+                window.__insuranceAlertShown = true;
+                setTimeout(function () {
+                    Swal.fire({
+                        title: 'הביטוח הסתיים!',
+                        text: 'תוקף הביטוח של הרכב עבר. מומלץ לחדש אותו.',
+                        icon: 'warning',
+                        confirmButtonText: 'הבנתי',
+                        confirmButtonColor: '#E5484D'
+                    });
+                }, 400);
+            }
 
         }
 
@@ -318,8 +348,8 @@
             5: "טסט שנתי",
             6: "החלפת מצבר",
             7: "מילוי נוזל קירור",
-            8: "החלפת פילטר אוויר",
-            9: "בדיקת מזגן"
+            9: "בדיקת מזגן",
+            10: "ביטוח"
         };
 
         function wireTreatmentCards() {
@@ -912,9 +942,9 @@
                 <p id="CareType6" class="lowerline">טרם תועד</p>
             </div>
             <div class="mainscreenimg">
-                <img id="carBookCoolantIMG" class="fleximgCarBook" src="images/car-insurance.png" />
-                <p class="carbookheadline">מילוי נוזל קירור</p>
-                <p id="CareType7" class="lowerline">טרם תועד</p>
+                <img id="carBookInsuranceIMG" class="fleximgCarBook" src="images/car-insurance.png" />
+                <p class="carbookheadline">ביטוח</p>
+                <p id="CareType10" class="lowerline">טרם תועד</p>
             </div>
         </div>
 
