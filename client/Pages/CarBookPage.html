@@ -68,7 +68,24 @@
 
             // Click a maintenance card → quick add treatment of that type
             wireTreatmentCards();
-            
+
+            // Refresh care-list data from the server on load — localStorage
+            // may be stale (e.g. insurance expired since the last fetch),
+            // which previously meant the red/expired insurance card and its
+            // warning popup wouldn't show until something else happened to
+            // refresh the data first. Re-run the date logic + carousel
+            // centering once the fresh data has actually landed.
+            if (temp !== null) {
+                ReadUserCarCareByEmail(tempUser.email, function () {
+                    document.getElementById("carBookTbl").innerHTML = "";
+                    getLastCareInfo();
+                    if (typeof window.recenterCarousel === 'function') {
+                        window.recenterCarousel();
+                    }
+                });
+            }
+
+
            
             $("#logoutBTN").click(function () {
                 localStorage.removeItem('LogInUser');
@@ -422,6 +439,9 @@
                 }
                 updateActive();
             }
+            // Expose so callers (e.g. after a fresh data refresh) can
+            // re-center the carousel on whichever card is now overdue/expired.
+            window.recenterCarousel = initCarousel;
             // run a few times as layout/fonts settle
             setTimeout(initCarousel, 60);
             setTimeout(updateActive, 300);
