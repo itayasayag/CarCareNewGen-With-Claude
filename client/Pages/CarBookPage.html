@@ -70,11 +70,8 @@
             wireTreatmentCards();
 
             // Refresh care-list data from the server on load — localStorage
-            // may be stale (e.g. insurance expired since the last fetch),
-            // which previously meant the red/expired insurance card and its
-            // warning popup wouldn't show until something else happened to
-            // refresh the data first. Re-run the date logic + carousel
-            // centering once the fresh data has actually landed.
+            // may be stale (e.g. insurance expired since the last fetch).
+            // Re-run the date logic + carousel centering once fresh data lands.
             if (temp !== null) {
                 ReadUserCarCareByEmail(tempUser.email, function () {
                     document.getElementById("carBookTbl").innerHTML = "";
@@ -84,8 +81,7 @@
                     }
                 });
             }
-
-
+            
            
             $("#logoutBTN").click(function () {
                 localStorage.removeItem('LogInUser');
@@ -224,6 +220,9 @@
             var selectedCar = JSON.parse(localStorage.getItem('SelectedCar'));
             var MaxKM = document.getElementById("CareType9").innerHTML;
             var logSTR = "";
+            // Track the most recent insurance record (careID 10) so that when a
+            // car has several insurance entries we use the latest one for the card.
+            var latestInsuranceFilledDate = null;
             for (var i = 0; i < tmpCarelist.length; i++) {
                 if (tmpCarelist[i].licensePlate == selectedCar) {
 
@@ -251,20 +250,13 @@
                     if (document.getElementById(divID) != null) {
                         divIdValue = document.getElementById(divID).innerHTML;
 
-                        // Insurance (careID 10) is special: the date is an END date.
-                        // A date in the PAST means the insurance has expired (red);
-                        // a future date is fine. This is the opposite of normal
-                        // maintenance, where a past date is the last service.
+                        // Insurance (careID 10) is special: the date is an END date
+                        // computed as one year after the filled date, and a car can
+                        // have several insurance records — we keep only the latest
+                        // and render the card once, after the loop.
                         if (tmpCarelist[i].careID == 10) {
-                            if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
-                                var insExpired = (DateString < Now);
-                                var insStyle = insExpired ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
-                                var insLabel = insExpired ? 'הביטוח הסתיים' : 'בתוקף';
-                                document.getElementById(divID).innerHTML =
-                                    '<span' + insStyle + '>סיום ביטוח</span><br>' +
-                                    '<span' + insStyle + '>' + formattedDate + '</span><br>' +
-                                    '<span' + insStyle + '>' + insLabel + '</span>';
-                                if (insExpired) { window.__insuranceExpired = true; }
+                            if (latestInsuranceFilledDate === null || DateString > latestInsuranceFilledDate) {
+                                latestInsuranceFilledDate = DateString;
                             }
                         }
                         else if (divIdValue == "טרם תועד" || divIdValue < tmpCarelist[i].recordDate) {
@@ -296,6 +288,23 @@
                 }
             }
             document.getElementById("CareType9").innerHTML = MaxKM + ' ק"מ ';
+
+            // Render the insurance card (careID 10) from the latest filled date.
+            // The end date shown is exactly one year after the filled date
+            // (e.g. filled 25/08/26 → shows 25/08/27). Expired = end date passed.
+            if (latestInsuranceFilledDate !== null && document.getElementById("CareType10") != null) {
+                var insEnd = new Date(latestInsuranceFilledDate);
+                insEnd.setFullYear(insEnd.getFullYear() + 1);
+                var nowForIns = new Date();
+                var insExpired = (insEnd < nowForIns);
+                var insStyle = insExpired ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
+                var insLabel = insExpired ? 'הביטוח הסתיים' : 'בתוקף';
+                document.getElementById("CareType10").innerHTML =
+                    '<span' + insStyle + '>סיום ביטוח</span><br>' +
+                    '<span' + insStyle + '>' + formatToDDMMYYYY(insEnd) + '</span><br>' +
+                    '<span' + insStyle + '>' + insLabel + '</span>';
+                if (insExpired) { window.__insuranceExpired = true; }
+            }
 
             // If the insurance has expired, alert the user immediately on load.
             if (window.__insuranceExpired && !window.__insuranceAlertShown) {
@@ -439,8 +448,6 @@
                 }
                 updateActive();
             }
-            // Expose so callers (e.g. after a fresh data refresh) can
-            // re-center the carousel on whichever card is now overdue/expired.
             window.recenterCarousel = initCarousel;
             // run a few times as layout/fonts settle
             setTimeout(initCarousel, 60);

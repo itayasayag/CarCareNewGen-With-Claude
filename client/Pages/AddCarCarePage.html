@@ -235,7 +235,7 @@
 
 
         function AddToCareList(list) {
-            var str = "<select class='carcare-select' id='selectedtype' name = 'Type' > <option value='' disabled selected>סוג טיפול</option>";
+            var str = "<select onchange='changeCareTypeSelect()' class='carcare-select' id='selectedtype' name = 'Type' > <option value='' disabled selected>סוג טיפול</option>";
             for (var i = 0; i < list.length; i++) {
                 {
                     str += `<option value='${list[i].careID}'>` + list[i].careName + '</option>';
@@ -244,6 +244,21 @@
             }
             str += "</select>";
             document.getElementById("Type").innerHTML = str;
+        }
+
+        // Insurance (careID 10) doesn't need a garage/location — hide that row
+        // and make garage non-mandatory. For any other care type, show it again
+        // and restore it as required.
+        function changeCareTypeSelect() {
+            var careId = $("#selectedtype").val();
+            if (String(careId) === '10') {
+                $("#locationRow").hide();
+                // clear any selected garage so it isn't carried over
+                $("#selectedgarage").val('');
+                $("#garageSearchInput").val('');
+            } else {
+                $("#locationRow").show();
+            }
         }
 
 
@@ -328,6 +343,7 @@
                     $("#cost").val('');
                     $("#notes").val('');
                     $("#selectedtype").prop('selectedIndex', 0);
+                    $("#locationRow").show();   // restore garage line (insurance may have hidden it)
                     $("#garageSearchInput").val('').attr('placeholder', 'תחילה בחר עיר').prop('disabled', true);
                     $("#selectedgarage").val('');
                     $("#garageOptionsList").hide();
@@ -514,7 +530,7 @@
             </div>
 
             <!-- מוסך -->
-            <div class="row">
+            <div class="row" id="locationRow">
 
                 <div class="col-3">
                     <img class="img-care" src="images/location.png" />
