@@ -24,6 +24,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
+    <!-- Custom date picker — guarantees dd/mm/yyyy display regardless of
+         browser/OS locale, unlike native <input type="date"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
     <script src="../JS/ajaxCall.js"></script>
 
@@ -54,6 +59,25 @@
             /* פותח הוספת קובץ*/
             $("#uplodePicture").click(function () { $("#imgupload").trigger('click'); })
 
+            // Custom date picker — always shows/lets the user pick dd/mm/yyyy,
+            // regardless of browser/OS locale. The real value sent to the
+            // backend (ISO yyyy-mm-dd) is kept in the hidden #date-input field.
+            flatpickr("#date-input-display", {
+                dateFormat: "d/m/Y",
+                altInput: false,
+                maxDate: "today",
+                onChange: function (selectedDates, dateStr) {
+                    if (selectedDates[0]) {
+                        var d = selectedDates[0];
+                        var iso = d.getFullYear() + '-' +
+                            String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                            String(d.getDate()).padStart(2, '0');
+                        $("#date-input").val(iso);
+                    } else {
+                        $("#date-input").val('');
+                    }
+                }
+            });
 
             ReadCity();
 
@@ -325,6 +349,11 @@
                 if (result.isDenied) {
                     // Clear the form for a new entry
                     $("#date-input").val('');
+                    if (document.getElementById('date-input-display')._flatpickr) {
+                        document.getElementById('date-input-display')._flatpickr.clear();
+                    } else {
+                        $("#date-input-display").val('');
+                    }
                     $("#kilometers").val('');
                     $("#cost").val('');
                     $("#notes").val('');
@@ -501,7 +530,8 @@
                     <img class="img-care" src="images/calendar.png" />
                 </div>
                 <div class="col-9 rounded-input">
-                    <input id="date-input" type="date" name="date" min="1" max="8" />
+                    <input id="date-input-display" type="text" placeholder="dd/mm/yyyy" autocomplete="off" readonly />
+                    <input id="date-input" type="hidden" name="date" />
                 </div>
             </div>
             <!-- קילומטראז -->

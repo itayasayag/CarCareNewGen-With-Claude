@@ -112,7 +112,7 @@
 
                 // Add a date and time stamp
                 const currentDate = new Date();
-                const dateString = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
+                const dateString = `${formatToDDMMYYYY(currentDate)} ${currentDate.toLocaleTimeString('he-IL')}`;
 
                 // Generate the images for the divs
                 divIds.forEach(id => {
@@ -211,7 +211,7 @@
 
                     let DateString = new Date(tmpCarelist[i].recordDate);
                     let Now = new Date();
-                    let formattedDate = DateString.toLocaleDateString();
+                    let formattedDate = formatToDDMMYYYY(DateString);
                     divID = "CareType" + tmpCarelist[i].careID;
 
                     logSTR += '<tr>';
@@ -849,7 +849,7 @@
             <div id="VerifyPicture">
                 <img class="hiddenApproved" id="approvedIMG" src="images/Approved.png" />
             </div>
-            <div class="header-inner">
+            <div>
                 <h1 class="h1header">
                     <span id="helloUser">CarCare</span>
                 </h1>

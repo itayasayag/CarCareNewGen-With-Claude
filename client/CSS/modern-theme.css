@@ -33,17 +33,6 @@ body, body.mainpage {
 
 .header {
     height: auto !important;
-    border: none !important;        /* legacy "border: solid, 1px" left a stray
-                                         white line under the header (visible on
-                                         dark backgrounds) — remove it entirely */
-    background: transparent !important;
-}
-
-/* The inner wrapper holding the h1, logo, and car-select dropdown becomes the
-   positioning context for .select-car, instead of falling back to <body>
-   (which made the dropdown drift outside the header's rounded edge). */
-.header-inner {
-    position: relative;
 }
 
 .h1header {
@@ -583,7 +572,8 @@ html.cc-dark .carcare-select, html.cc-dark .form-control {
 html.cc-dark .form-control::placeholder,
 html.cc-dark input::placeholder { color: var(--cc-muted) !important; }
 
-/* Native date picker icon visible in dark */
+/* Native date picker icon visible in dark (still used on AlertsPage,
+   CarBookPage, HomePage — AddCarCarePage now uses a custom flatpickr picker) */
 html.cc-dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
 /* Car selector dropdown: <option> backgrounds aren't stylable cross-browser
