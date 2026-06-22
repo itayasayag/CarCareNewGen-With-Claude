@@ -87,6 +87,19 @@
                 .catch(function (e) { console.log("gov city error", e); });
         }
 
+        // Position a fixed dropdown directly under its trigger input,
+        // escaping any overflow:hidden ancestor.
+        function positionDropdown(inputId, listId) {
+            var input = document.getElementById(inputId);
+            var list = document.getElementById(listId);
+            if (!input || !list) return;
+            var rect = input.getBoundingClientRect();
+            list.style.top = (rect.bottom + 2) + 'px';
+            list.style.right = (window.innerWidth - rect.right) + 'px';
+            list.style.left = 'auto';
+            list.style.width = rect.width + 'px';
+        }
+
         var CITY_LIST = [];
 
         function AddToListCity(list) {
@@ -104,7 +117,9 @@
                 filtered.map(function (c) {
                     return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
                 }).join('')
-            ).show();
+            );
+            positionDropdown('citySearchInput', 'cityOptionsList');
+            $("#cityOptionsList").show();
         });
 
         $(document).on('focus', '#citySearchInput', function () {
@@ -205,6 +220,7 @@
         function renderGarageOptions(list) {
             var $list = $("#garageOptionsList");
             if (!list.length) {
+                positionDropdown('garageSearchInput', 'garageOptionsList');
                 $list.html("<div class='garage-option-empty'>לא נמצאו מוסכים</div>").show();
                 return;
             }
@@ -213,11 +229,15 @@
                 html += "<div class='garage-option' data-id='" + list[i].id + "' data-name='" +
                     String(list[i].shem_mosah || '').replace(/'/g, "&#39;") + "'>" + list[i].shem_mosah + "</div>";
             }
+            positionDropdown('garageSearchInput', 'garageOptionsList');
             $list.html(html).show();
         }
 
         $(document).on('focus', '#garageSearchInput', function () {
-            if (!$(this).prop('disabled')) renderGarageOptions(CURRENT_GARAGE_LIST);
+            if (!$(this).prop('disabled')) {
+                positionDropdown('garageSearchInput', 'garageOptionsList');
+                renderGarageOptions(CURRENT_GARAGE_LIST);
+            }
         });
 
         $(document).on('input', '#garageSearchInput', function () {
@@ -554,6 +574,21 @@
                 </div>
             </div>
 
+            <!--סוג רשומה-->
+            <div class="row" id="careTypeRow">
+                <div class="col-3">
+                    <img class="img-care" src="images/wrench (2).png" />
+                </div>
+                <div class="col-9 rounded-input" id="Type">
+                    <select class="carcare-select" name="Type">
+                        <option value="" disabled selected>סוג טיפול</option>
+                        <option value="טיפול">טיפול</option>
+                        <option value="תקלה">תקלה</option>
+                        <option value="טסט">טסט</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- מוסך -->
             <div class="row" id="locationRow">
 
@@ -573,20 +608,6 @@
                 </div>
 
 
-            </div>
-            <!--סוג רשומה-->
-            <div class="row">
-                <div class="col-3">
-                    <img class="img-care" src="images/wrench (2).png" />
-                </div>
-                <div class="col-9 rounded-input" id="Type">
-                    <select class="carcare-select" name="Type">
-                        <option value="" disabled selected>סוג טיפול</option>
-                        <option value="טיפול">טיפול</option>
-                        <option value="תקלה">תקלה</option>
-                        <option value="טסט">טסט</option>
-                    </select>
-                </div>
             </div>
             <!-- עלות -->
             <div class="row">
