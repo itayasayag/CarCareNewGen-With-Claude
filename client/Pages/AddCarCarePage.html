@@ -292,16 +292,19 @@
             document.getElementById("Type").innerHTML = str;
         }
 
-        // Insurance (careID 10) doesn't need a garage/location — hide that row
-        // and make garage non-mandatory. For any other care type, show it again
-        // and restore it as required.
+        // Insurance doesn't need a garage/location — hide that row.
+        // Match by careID=10 OR by name containing 'ביטוח' as a safety net.
         function changeCareTypeSelect() {
             var careId = $("#selectedtype").val();
-            if (String(careId) === '10') {
+            var careName = $("#selectedtype option:selected").text().trim();
+            var isInsurance = (String(careId) === '10') || (careName.indexOf('ביטוח') !== -1);
+            if (isInsurance) {
                 $("#locationRow").hide();
-                // clear any selected garage so it isn't carried over
+                $("#cityOptionsList").hide();
+                $("#garageOptionsList").hide();
                 $("#selectedgarage").val('');
                 $("#garageSearchInput").val('');
+                $("#citySearchInput").val('');
             } else {
                 $("#locationRow").show();
             }
