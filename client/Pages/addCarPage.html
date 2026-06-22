@@ -82,7 +82,9 @@
         }
 
 
+        // DISABLED: car license upload feature — re-enable when needed (remove the return below)
         function uploadPIC() {
+            return; // DISABLED
             if (!addCarSucceed) {
                 Swal.fire({
                     title: "לא בוצעה הוספת רכב",
@@ -292,8 +294,8 @@
 
             // Replace AddCar button with updateCarDetails button
             $('#AddCarBTN').replaceWith('<button type="submit" class="btn btn-primary rounded-pill" id="updateCarDetails">עדכן פרטי רכב</button>');
-                document.getElementById("carPhoto").innerHTML = `יש להעלות/לסרוק צילום רשיון רכב לאימות בעלות על הרכב`;
-                $('#plussign').show()
+                // DISABLED: document.getElementById("carPhoto").innerHTML = `יש להעלות/לסרוק צילום רשיון רכב לאימות בעלות על הרכב`;
+                // DISABLED: $('#plussign').show()
             // Click event for the new button
             $('#updateCarDetails').click(fixfunctionForUpdate);
 
@@ -435,6 +437,7 @@
 
         
         //פונקציה לבדיקה הנתונים שחוזרים מהOCR 
+        // DISABLED: called only from uploadPIC which now returns early
         function CheckOcrResult(vehicleDetailsArry) {
             let OCRresult = sessionStorage.getItem('ocrResult');
             let check = true;
@@ -752,6 +755,7 @@
             </div>
         </div>
     </div>
+    <!-- DISABLED: car license upload feature — re-enable when needed
     <div>
         <div class="footer">
             <label for="file-input">
@@ -770,6 +774,7 @@
         </p>
 
     </div>
+    END DISABLED -->
 
 
 </body>
