@@ -87,24 +87,56 @@
                 .catch(function (e) { console.log("gov city error", e); });
         }
 
+        var CITY_LIST = [];
+
         function AddToListCity(list) {
-            var str = "<select onchange='changeCitySelect()' class='carcare-select' id='selectedcity' name='city'> <option value='city' selected='selected'>עיר</option>";
-            for (var i = 0; i < list.length; i++) {
-                str += `<option value='${list[i]}'>` + list[i] + '</option>';
-            }
-            str += "</select>";
-            document.getElementById("CityList").innerHTML = str;
+            CITY_LIST = list || [];
+            // City input is already in the HTML — just wire it up
+            $("#cityOptionsList").hide();
         }
 
-        function changeCitySelect() {
-            if ($("#selectedcity").val() != "city") {
-                ReadGarageFromDB();
-            }
+        $(document).on('input', '#citySearchInput', function () {
+            var q = $(this).val().trim();
+            if (!q) { $("#cityOptionsList").hide(); return; }
+            var filtered = CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 40);
+            if (!filtered.length) { $("#cityOptionsList").hide(); return; }
+            $("#cityOptionsList").html(
+                filtered.map(function (c) {
+                    return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
+                }).join('')
+            ).show();
+        });
+
+        $(document).on('focus', '#citySearchInput', function () {
+            var q = $(this).val().trim();
+            if (q && CITY_LIST.length) $(this).trigger('input');
+        });
+
+        $(document).on('click', '.city-option-item, #cityOptionsList .garage-option', function () {
+            var city = $(this).data('city') || $(this).text().trim();
+            $("#citySearchInput").val(city);
+            $("#cityOptionsList").hide();
+            // Reset and load garages for the new city
+            $("#garageSearchInput").val('').attr('placeholder', 'טוען מוסכים...').prop('disabled', true);
+            $("#selectedgarage").val('');
+            $("#garageOptionsList").hide();
+            // Store chosen city and fetch garages
+            changeCitySelect(city);
+        });
+
+        // Close dropdowns when clicking elsewhere
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#CityList').length) { $("#cityOptionsList").hide(); }
+            if (!$(e.target).closest('#GarageList').length) { $("#garageOptionsList").hide(); }
+        });
+
+        function changeCitySelect(city) {
+            if (!city) city = $("#citySearchInput").val().trim();
+            if (city) { ReadGarageFromDB(city); }
         }
 
-        //READ GARAGES for the chosen city from the gov dataset
-        function ReadGarageFromDB() {
-            var chosenCity = $("#selectedcity").val();
+        function ReadGarageFromDB(chosenCity) {
+            if (!chosenCity) chosenCity = $("#citySearchInput").val().trim();
             var url = GOV_GARAGE_URL + "?resource_id=" + GOV_GARAGE_RESOURCE +
                       "&q=" + encodeURIComponent(chosenCity) + "&limit=32000";
             fetch(url)
@@ -167,7 +199,7 @@
             var $input = $("#garageSearchInput");
             $input.prop('disabled', false).val('').attr('placeholder', 'חפש מוסך...');
             $("#selectedgarage").val('');
-            $("#garageOptionsList").hide();
+            renderGarageOptions(CURRENT_GARAGE_LIST);
         }
 
         function renderGarageOptions(list) {
@@ -206,12 +238,6 @@
             $("#garageOptionsList").hide();
         });
 
-        // Close the options list when clicking elsewhere on the page
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('#GarageList').length) {
-                $("#garageOptionsList").hide();
-            }
-        });
 
 
 
@@ -307,7 +333,6 @@
                             careID: $("#selectedtype").val(),
                             cost: $("#cost").val(),
                             notes: $("#notes").val(),
-                            warrantyExpirationDate: $("#date-input").val(),
                             invoiceFileName: newName /*uploadrecipt.toString()*/,
                             careName: "",
                             garageName: garageName
@@ -535,8 +560,10 @@
                 <div class="col-3">
                     <img class="img-care" src="images/location.png" />
                 </div>
-                <div class="col-3 rounded-input" id="CityList">
-
+                <div class="col-3 rounded-input" id="CityList" style="position:relative;">
+                    <input type="text" class="carcare-select" id="citySearchInput"
+                           placeholder="עיר" autocomplete="off" />
+                    <div id="cityOptionsList" class="garage-options-list"></div>
                 </div>
                 <div class="col-6 rounded-input" id="GarageList" style="position: relative;">
                     <input type="text" class="carcare-select" id="garageSearchInput"

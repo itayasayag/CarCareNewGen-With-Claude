@@ -8,11 +8,11 @@ router = APIRouter(prefix="/api/logs", tags=["Log Records"])
 def row_to_log(r) -> dict:
     return {
         "log_id": r[0], "current_km": r[1], "record_date": r[2],
-        "warranty_expiration_date": r[3], "cost": r[4], "notes": r[5],
-        "garage_id": r[6], "care_id": r[7], "user_email": r[8],
-        "license_plate": r[9], "invoice_file_name": r[10],
-        "care_name": r[11] if len(r) > 11 else None,
-        "garage_name": r[12] if len(r) > 12 else None,
+        "cost": r[3], "notes": r[4],
+        "garage_id": r[5], "care_id": r[6], "user_email": r[7],
+        "license_plate": r[8], "invoice_file_name": r[9],
+        "care_name": r[10] if len(r) > 10 else None,
+        "garage_name": r[11] if len(r) > 11 else None,
     }
 
 
@@ -22,7 +22,7 @@ def get_logs_by_email(email: str):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
+            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate,
                       lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
                       lr.LicensePlate, lr.InvoiceFileName, ct.CareName,
                       COALESCE(lr.GarageName, g.Shem_mosah) AS GarageName
@@ -45,7 +45,7 @@ def get_log_by_id(log_id: int):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate, lr.WarrantyExpirationDate,
+            """SELECT lr.LogID, lr.CurrentKM, lr.RecordDate,
                       lr.Cost, lr.Notes, lr.Mispar_mosah, lr.CareID, lr.UserEmail,
                       lr.LicensePlate, lr.InvoiceFileName, ct.CareName,
                       COALESCE(lr.GarageName, g.Shem_mosah) AS GarageName
@@ -84,10 +84,10 @@ def create_log(log: LogRecordCreate):
 
         cursor.execute(
             """INSERT INTO Log_Record
-               (CurrentKM, RecordDate, WarrantyExpirationDate, Cost, Notes,
+               (CurrentKM, RecordDate, Cost, Notes,
                 Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName, GarageName)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            log.current_km, log.record_date, log.warranty_expiration_date,
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            log.current_km, log.record_date,
             log.cost, log.notes, garage_id, log.care_id,
             log.user_email, log.license_plate, log.invoice_file_name,
             log.garage_name
@@ -107,10 +107,10 @@ def update_log(log_id: int, log: LogRecordUpdate):
         cursor = conn.cursor()
         cursor.execute(
             """UPDATE Log_Record
-               SET CurrentKM=?, RecordDate=?, WarrantyExpirationDate=?,
+               SET CurrentKM=?, RecordDate=?,
                    Cost=?, Notes=?, Mispar_mosah=?, CareID=?, InvoiceFileName=?
                WHERE LogID=?""",
-            log.current_km, log.record_date, log.warranty_expiration_date,
+            log.current_km, log.record_date,
             log.cost, log.notes, log.garage_id, log.care_id,
             log.invoice_file_name, log_id
         )

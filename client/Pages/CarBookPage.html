@@ -495,6 +495,14 @@
                     '  <input type="number" id="t_km" class="swal2-input" placeholder="ק\'\'מ">' +
                     '  <label style="font-weight:600;">עלות (₪)</label>' +
                     '  <input type="number" id="t_cost" class="swal2-input" placeholder="0">' +
+                    '  <label style="font-weight:600;">עיר</label>' +
+                    '  <input type="text" id="t_city" class="swal2-input" placeholder="הקלד עיר..." autocomplete="off">' +
+                    '  <div id="t_city_results" style="max-height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;display:none;background:#fff;text-align:right;direction:rtl;"></div>' +
+                    '  <label style="font-weight:600;">מוסך</label>' +
+                    '  <input type="text" id="t_garage_display" class="swal2-input" placeholder="בחר עיר תחילה..." autocomplete="off" disabled>' +
+                    '  <input type="hidden" id="t_garage_id" value="">' +
+                    '  <input type="hidden" id="t_garage_name" value="">' +
+                    '  <div id="t_garage_results" style="max-height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;display:none;background:#fff;text-align:right;direction:rtl;"></div>' +
                     '  <label style="font-weight:600;">הערות</label>' +
                     '  <textarea id="t_notes" class="swal2-input" placeholder="הערות"></textarea>' +
                     '</div>',
@@ -503,6 +511,50 @@
                 cancelButtonText: 'בטל',
                 confirmButtonColor: '#1E5A82',
                 focusConfirm: false,
+                didOpen: function () {
+                    // City search — filter from already-loaded CITY_LIST global
+                    document.getElementById('t_city').addEventListener('input', function () {
+                        var q = this.value.trim();
+                        var box = document.getElementById('t_city_results');
+                        if (!q || !window.QUICK_CITY_LIST) { box.style.display = 'none'; return; }
+                        var filtered = window.QUICK_CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 30);
+                        if (!filtered.length) { box.style.display = 'none'; return; }
+                        box.innerHTML = filtered.map(function (c) {
+                            return '<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="quickSelectCity(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
+                        }).join('');
+                        box.style.display = 'block';
+                    });
+                    // Garage search — filter from already-loaded list for chosen city
+                    document.getElementById('t_garage_display').addEventListener('input', function () {
+                        var q = this.value.trim();
+                        document.getElementById('t_garage_id').value = '';
+                        document.getElementById('t_garage_name').value = '';
+                        var box = document.getElementById('t_garage_results');
+                        if (!window.QUICK_GARAGE_LIST || !window.QUICK_GARAGE_LIST.length) { box.style.display = 'none'; return; }
+                        var filtered = q
+                            ? window.QUICK_GARAGE_LIST.filter(function (g) { return (g.shem_mosah || '').includes(q); })
+                            : window.QUICK_GARAGE_LIST;
+                        if (!filtered.length) { box.style.display = 'none'; return; }
+                        box.innerHTML = filtered.map(function (g) {
+                            return '<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="quickSelectGarage(' + g.id + ',\'' + (g.shem_mosah || '').replace(/'/g, "\\'") + '\')">' + (g.shem_mosah || '') + '</div>';
+                        }).join('');
+                        box.style.display = 'block';
+                    });
+                    // Pre-load cities
+                    if (!window.QUICK_CITY_LIST) {
+                        var GOV_RES = 'bb68386a-a331-4bbc-b668-bba2766d517d';
+                        fetch('https://data.gov.il/api/3/action/datastore_search?resource_id=' + GOV_RES + '&fields=yishuv&limit=32000')
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                var seen = {}, cities = [];
+                                (data.result.records || []).forEach(function (rec) {
+                                    var c = (rec.yishuv || '').trim();
+                                    if (c && !seen[c]) { seen[c] = true; cities.push(c); }
+                                });
+                                window.QUICK_CITY_LIST = cities.sort(function (a, b) { return a.localeCompare(b, 'he'); });
+                            }).catch(function () {});
+                    }
+                },
                 preConfirm: function () {
                     var date = document.getElementById('t_date').value;
                     if (!date) { Swal.showValidationMessage('יש לבחור תאריך'); return false; }
@@ -510,12 +562,45 @@
                         date: date,
                         km: parseInt(document.getElementById('t_km').value) || 0,
                         cost: parseInt(document.getElementById('t_cost').value) || 0,
-                        notes: document.getElementById('t_notes').value || ""
+                        notes: document.getElementById('t_notes').value || "",
+                        garageId: document.getElementById('t_garage_id').value || null,
+                        garageName: document.getElementById('t_garage_name').value || ""
                     };
                 }
             }).then(function (result) {
                 if (result.isConfirmed) { saveTreatment(careId, result.value); }
             });
+        }
+
+        function quickSelectCity(city) {
+            document.getElementById('t_city').value = city;
+            document.getElementById('t_city_results').style.display = 'none';
+            // Load garages for chosen city
+            var el = document.getElementById('t_garage_display');
+            el.disabled = true; el.placeholder = 'טוען מוסכים...';
+            window.QUICK_GARAGE_LIST = [];
+            var GOV_RES = 'bb68386a-a331-4bbc-b668-bba2766d517d';
+            fetch('https://data.gov.il/api/3/action/datastore_search?resource_id=' + GOV_RES + '&q=' + encodeURIComponent(city) + '&limit=32000')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var seen = {}, garages = [];
+                    (data.result.records || []).forEach(function (rec) {
+                        if ((rec.yishuv || '').trim() !== city) return;
+                        if (rec.mispar_mosah && !seen[rec.mispar_mosah]) {
+                            seen[rec.mispar_mosah] = true;
+                            garages.push({ id: rec.mispar_mosah, shem_mosah: rec.shem_mosah });
+                        }
+                    });
+                    window.QUICK_GARAGE_LIST = garages.sort(function (a, b) { return (a.shem_mosah || '').localeCompare(b.shem_mosah || '', 'he'); });
+                    el.disabled = false; el.placeholder = 'חפש מוסך...'; el.focus();
+                }).catch(function () { el.disabled = false; el.placeholder = 'שגיאה בטעינת מוסכים'; });
+        }
+
+        function quickSelectGarage(id, name) {
+            document.getElementById('t_garage_display').value = name;
+            document.getElementById('t_garage_id').value = id;
+            document.getElementById('t_garage_name').value = name;
+            document.getElementById('t_garage_results').style.display = 'none';
         }
 
         function saveTreatment(careId, data) {
@@ -524,11 +609,11 @@
                 licensePlate: parseInt(JSON.parse(localStorage.getItem('SelectedCar'))),
                 recordDate: new Date(data.date).toISOString(),
                 currentKM: data.km,
-                garageID: null,
+                garageID: data.garageId || null,
+                garageName: data.garageName || null,
                 careID: careId,
                 cost: data.cost,
                 notes: data.notes,
-                warrantyExpirationDate: null,
                 invoiceFileName: null
             };
             api = server + "/api/logs/";
@@ -554,7 +639,6 @@
                 careID: 9,
                 cost: 0,
                 notes: "תיעוד מהיר",
-                warrantyExpirationDate: null,
                 invoiceFileName: null,
             }
 
@@ -667,7 +751,6 @@
                 careID: CAREID,
                 cost: COST,
                 notes: NOTES,
-                warrantyExpirationDate: "2024-08-10T23:06:06.229Z",
                 invoiceFileName: INVOIEFILENAME /*uploadrecipt.toString()*/,
                 careName: "",
                 garagename: ""

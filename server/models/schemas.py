@@ -101,7 +101,6 @@ class CareTypeResponse(CamelModel):
 class LogRecordBase(CamelModel):
     current_km: int
     record_date: datetime
-    warranty_expiration_date: Optional[datetime] = None
     cost: Optional[int] = None
     notes: Optional[str] = None
     garage_id: Optional[int] = None
@@ -117,7 +116,6 @@ class LogRecordCreate(LogRecordBase):
 class LogRecordUpdate(CamelModel):
     current_km: Optional[int] = None
     record_date: Optional[datetime] = None
-    warranty_expiration_date: Optional[datetime] = None
     cost: Optional[int] = None
     notes: Optional[str] = None
     garage_id: Optional[int] = None
