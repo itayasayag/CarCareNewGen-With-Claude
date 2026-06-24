@@ -485,6 +485,18 @@
                 return;
             }
             var today = new Date().toISOString().split('T')[0];
+            // Insurance (careID 10 / name containing ביטוח) has no garage.
+            var isInsurance = (String(careId) === '10') || (careName.indexOf('ביטוח') !== -1);
+            var garageBlock = isInsurance ? '' : (
+                    '  <label class="swal-field-label">עיר</label>' +
+                    '  <input type="text" id="t_city" class="swal2-input" placeholder="הקלד עיר..." autocomplete="off">' +
+                    '  <div id="t_city_results" class="swal-search-results"></div>' +
+                    '  <label class="swal-field-label">מוסך</label>' +
+                    '  <input type="text" id="t_garage_display" class="swal2-input" placeholder="בחר עיר תחילה..." autocomplete="off" disabled>' +
+                    '  <input type="hidden" id="t_garage_id" value="">' +
+                    '  <input type="hidden" id="t_garage_name" value="">' +
+                    '  <div id="t_garage_results" class="swal-search-results"></div>'
+            );
             Swal.fire({
                 title: 'הוספת טיפול מהיר: ' + careName,
                 html:
@@ -495,14 +507,7 @@
                     '  <input type="number" id="t_km" class="swal2-input" placeholder="ק\'\'מ">' +
                     '  <label class="swal-field-label">עלות (₪)</label>' +
                     '  <input type="number" id="t_cost" class="swal2-input" placeholder="0">' +
-                    '  <label class="swal-field-label">עיר</label>' +
-                    '  <input type="text" id="t_city" class="swal2-input" placeholder="הקלד עיר..." autocomplete="off">' +
-                    '  <div id="t_city_results" class="swal-search-results"></div>' +
-                    '  <label class="swal-field-label">מוסך</label>' +
-                    '  <input type="text" id="t_garage_display" class="swal2-input" placeholder="בחר עיר תחילה..." autocomplete="off" disabled>' +
-                    '  <input type="hidden" id="t_garage_id" value="">' +
-                    '  <input type="hidden" id="t_garage_name" value="">' +
-                    '  <div id="t_garage_results" class="swal-search-results"></div>' +
+                    garageBlock +
                     '  <label class="swal-field-label">הערות</label>' +
                     '  <textarea id="t_notes" class="swal2-input" placeholder="הערות"></textarea>' +
                     '</div>',
@@ -512,6 +517,8 @@
                 confirmButtonColor: '#1E5A82',
                 focusConfirm: false,
                 didOpen: function () {
+                    // Insurance has no city/garage fields — skip wiring them.
+                    if (isInsurance) return;
                     // City search — filter from already-loaded CITY_LIST global
                     document.getElementById('t_city').addEventListener('input', function () {
                         var q = this.value.trim();
@@ -563,8 +570,8 @@
                         km: parseInt(document.getElementById('t_km').value) || 0,
                         cost: parseInt(document.getElementById('t_cost').value) || 0,
                         notes: document.getElementById('t_notes').value || "",
-                        garageId: document.getElementById('t_garage_id').value || null,
-                        garageName: document.getElementById('t_garage_name').value || ""
+                        garageId: isInsurance ? null : (document.getElementById('t_garage_id').value || null),
+                        garageName: isInsurance ? "" : (document.getElementById('t_garage_name').value || "")
                     };
                 }
             }).then(function (result) {
