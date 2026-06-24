@@ -233,14 +233,14 @@
 
                     logSTR += '<tr>';
                     logSTR += '<td>' + formattedDate + '</td>';
-                    logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" style="border:none; background:none; padding:0; margin:0; font-family:inherit; font-size:inherit; cursor:pointer;">' + tmpCarelist[i].careName +  '</button> </td>'
+                    logSTR += '<td> <button onclick="editCare(' + tmpCarelist[i].logID +')" class="care-name-btn">' + tmpCarelist[i].careName +  '</button> </td>'
 
                     logSTR += '<td>' + tmpCarelist[i].currentKM + '</td>';
                     if (tmpCarelist[i].invoiceFileName && tmpCarelist[i].invoiceFileName != "ללא תמונה" && tmpCarelist[i].invoiceFileName != "null") {
-                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" style="cursor:pointer;width:35px;height:35px;" data-src1="'+ server + '/api/upload/' + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
+                        logSTR += '<td><img class="invoiceIcon" src="images/invoice1.png" data-src1="'+ server + '/api/upload/' + tmpCarelist[i].invoiceFileName + '" data-toggle="modal" data-target="#imageModal" onclick="setImageSrc(this)"></td>';
                     }
                     else {
-                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" style="cursor:pointer;width:35px;height:35px;" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
+                        logSTR += '<td><img class="invoiceIcon invoiceEmpty" src="images/no_invoice.png" onclick="promptUploadInvoice(' + tmpCarelist[i].logID + ')" title="לא הועלתה קבלה — לחץ להעלאה"></td>';
                     }
                     logSTR += '</tr>';
                     document.getElementById("carBookTbl").innerHTML += logSTR;
@@ -265,7 +265,7 @@
                             var dateLine = '<span>' + formattedDate + '</span>';
                             var daysLine = '';
                             if (numOfDays > 0) {
-                                var overdueStyle = (numOfDays > 330) ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
+                                var overdueStyle = (numOfDays > 330) ? ' class="overdue-text"' : '';
                                 daysLine = '<span' + overdueStyle + '>לפני ' + numOfDays + ' ימים</span>';
                             }
                             else {
@@ -297,7 +297,7 @@
                 insEnd.setFullYear(insEnd.getFullYear() + 1);
                 var nowForIns = new Date();
                 var insExpired = (insEnd < nowForIns);
-                var insStyle = insExpired ? ' style="color:#E5484D !important; font-weight:bold;"' : '';
+                var insStyle = insExpired ? ' class="overdue-text"' : '';
                 var insLabel = insExpired ? 'הביטוח הסתיים' : 'בתוקף';
                 document.getElementById("CareType10").innerHTML =
                     '<span' + insStyle + '>סיום ביטוח</span><br>' +
@@ -488,22 +488,22 @@
             Swal.fire({
                 title: 'הוספת טיפול מהיר: ' + careName,
                 html:
-                    '<div style="text-align:right; direction:rtl;">' +
-                    '  <label style="font-weight:600;">תאריך</label>' +
+                    '<div class="swal-rtl-block">' +
+                    '  <label class="swal-field-label">תאריך</label>' +
                     '  <input type="date" id="t_date" class="swal2-input" value="' + today + '">' +
-                    '  <label style="font-weight:600;">קילומטראז\' נוכחי</label>' +
+                    '  <label class="swal-field-label">קילומטראז\' נוכחי</label>' +
                     '  <input type="number" id="t_km" class="swal2-input" placeholder="ק\'\'מ">' +
-                    '  <label style="font-weight:600;">עלות (₪)</label>' +
+                    '  <label class="swal-field-label">עלות (₪)</label>' +
                     '  <input type="number" id="t_cost" class="swal2-input" placeholder="0">' +
-                    '  <label style="font-weight:600;">עיר</label>' +
+                    '  <label class="swal-field-label">עיר</label>' +
                     '  <input type="text" id="t_city" class="swal2-input" placeholder="הקלד עיר..." autocomplete="off">' +
-                    '  <div id="t_city_results" style="max-height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;display:none;background:#fff;text-align:right;direction:rtl;"></div>' +
-                    '  <label style="font-weight:600;">מוסך</label>' +
+                    '  <div id="t_city_results" class="swal-search-results"></div>' +
+                    '  <label class="swal-field-label">מוסך</label>' +
                     '  <input type="text" id="t_garage_display" class="swal2-input" placeholder="בחר עיר תחילה..." autocomplete="off" disabled>' +
                     '  <input type="hidden" id="t_garage_id" value="">' +
                     '  <input type="hidden" id="t_garage_name" value="">' +
-                    '  <div id="t_garage_results" style="max-height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;display:none;background:#fff;text-align:right;direction:rtl;"></div>' +
-                    '  <label style="font-weight:600;">הערות</label>' +
+                    '  <div id="t_garage_results" class="swal-search-results"></div>' +
+                    '  <label class="swal-field-label">הערות</label>' +
                     '  <textarea id="t_notes" class="swal2-input" placeholder="הערות"></textarea>' +
                     '</div>',
                 showCancelButton: true,
@@ -520,7 +520,7 @@
                         var filtered = window.QUICK_CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 30);
                         if (!filtered.length) { box.style.display = 'none'; return; }
                         box.innerHTML = filtered.map(function (c) {
-                            return '<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="quickSelectCity(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
+                            return '<div class="search-result-item" onclick="quickSelectCity(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
                         }).join('');
                         box.style.display = 'block';
                     });
@@ -536,7 +536,7 @@
                             : window.QUICK_GARAGE_LIST;
                         if (!filtered.length) { box.style.display = 'none'; return; }
                         box.innerHTML = filtered.map(function (g) {
-                            return '<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onclick="quickSelectGarage(' + g.id + ',\'' + (g.shem_mosah || '').replace(/'/g, "\\'") + '\')">' + (g.shem_mosah || '') + '</div>';
+                            return '<div class="search-result-item" onclick="quickSelectGarage(' + g.id + ',\'' + (g.shem_mosah || '').replace(/'/g, "\\'") + '\')">' + (g.shem_mosah || '') + '</div>';
                         }).join('');
                         box.style.display = 'block';
                     });
@@ -846,37 +846,37 @@
                 html: `
 
         
-         <div style="align-items: center;">
+         <div class="swal-detail-row">
              <span> ${formattedDate} </span>
        
          </div>
          <br>
-           <div style="align-items: center;">
+           <div class="swal-detail-row">
              <label for="cost">מוסך </label>
             <span> ${TempLogRecord[0].garageName || 'לא צוין'} </span>
          </div>
            <br>
-             <div style="align-items: center;">
+             <div class="swal-detail-row">
                  <label for="cost">ק"מ</label>
                  <span>${TempLogRecord[0].currentKM}</span>
              </div>
          <br>
-         <div style="align-items: center;">
+         <div class="swal-detail-row">
            <label for="cost">מחיר</label>
            <input type="number" id="Lcost" class="swal2-input" value="${TempLogRecord[0].cost}" min="0" step="0.01">
        </div>
      
          <br>
 
-         <div style="align-items: center;">
+         <div class="swal-detail-row">
              <label for="notes">הערה</label>
               <textarea id="Lnotes" class="swal2-input"  > ${TempLogRecord[0].notes} </textarea>
         
          </div>
          <br>
-           <div style="text-align: center;">
-             <img id="uploadreciptswal" src="images/uploadrecipt.png" style="cursor:pointer;width:60px;" />
-             <div style="font-size:13px;color:#1E5A82;margin-top:4px;">לחץ להעלאת קבלה</div>
+           <div class="swal-center">
+             <img id="uploadreciptswal" src="images/uploadrecipt.png" class="swal-upload-icon" />
+             <div class="swal-upload-hint">לחץ להעלאת קבלה</div>
          </div>
 
      `,
@@ -983,7 +983,7 @@
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
 <body>
-    <input type="file" id="imgupload" style="display:none;" />
+    <input type="file" id="imgupload" class="is-hidden" />
     <div id="top">
         <div class="header" , id="header">
             <div id="VerifyPicture">
@@ -1094,7 +1094,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <img id="modalImage" src="" class="img-fluid" alt="Large Image" onerror="this.style.display='none'; if(!document.getElementById('modalImageError')) this.insertAdjacentHTML('afterend', '<p id=&quot;modalImageError&quot; style=&quot;text-align:center;color:#999;padding:40px;&quot;>לא ניתן לטעון את הקבלה — הקובץ לא נמצא בשרת</p>')">
+                    <img id="modalImage" src="" class="img-fluid" alt="Large Image" onerror="this.style.display='none'; if(!document.getElementById('modalImageError')) this.insertAdjacentHTML('afterend', '<p id=&quot;modalImageError&quot; class=&quot;receipt-error-msg&quot;>לא ניתן לטעון את הקבלה — הקובץ לא נמצא בשרת</p>')">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

@@ -1208,3 +1208,66 @@ html.cc-dark #MyCarsBtn {
     justify-content: center;
     margin: 4px auto !important;
 }
+
+/* ============================================================
+   Utility classes — replacing former inline styles (CarBookPage)
+   ============================================================ */
+
+/* Care-name button in the log table (looks like plain text) */
+.care-name-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+/* Receipt icons in the table */
+.invoiceIcon {
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+}
+
+/* Overdue / expired text emphasis (insurance, late maintenance) */
+.overdue-text {
+    color: #E5484D !important;
+    font-weight: bold;
+}
+
+/* Quick-add swal field labels and layout */
+.swal-rtl-block { text-align: right; direction: rtl; }
+.swal-field-label { font-weight: 600; }
+
+/* Search result dropdowns inside swals (city / garage) */
+.swal-search-results {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: none;
+    background: #fff;
+    text-align: right;
+    direction: rtl;
+}
+.swal-search-results .search-result-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Detail swal rows */
+.swal-detail-row { align-items: center; }
+.swal-center { text-align: center; }
+
+/* Upload-receipt icon inside the detail swal */
+.swal-upload-icon { cursor: pointer; width: 60px; }
+.swal-upload-hint { font-size: 13px; color: #1E5A82; margin-top: 4px; }
+
+/* Receipt modal error message */
+.receipt-error-msg { text-align: center; color: #999; padding: 40px; }
+
+/* Generic hidden element (file inputs etc.) */
+.is-hidden { display: none !important; }
