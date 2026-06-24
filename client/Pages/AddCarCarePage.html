@@ -297,20 +297,22 @@
         }
 
         // Insurance doesn't need a garage/location — hide that row.
-        // Match by careID=10 OR by name containing 'ביטוח' as a safety net.
+        // NOTE: .hide()/.show() won't work here because #AddCareDiv .row has
+        // display:flex !important in CSS which beats jQuery's inline style.
+        // We use a .row-hidden CSS class that also carries !important to win.
         function changeCareTypeSelect() {
             var careId = $("#selectedtype").val();
             var careName = $("#selectedtype option:selected").text().trim();
             var isInsurance = (String(careId) === '10') || (careName.indexOf('ביטוח') !== -1);
             if (isInsurance) {
-                $("#locationRow").hide();
+                $("#locationRow").addClass('row-hidden');
                 $("#cityOptionsList").hide();
                 $("#garageOptionsList").hide();
                 $("#selectedgarage").val('');
                 $("#garageSearchInput").val('');
                 $("#citySearchInput").val('');
             } else {
-                $("#locationRow").show();
+                $("#locationRow").removeClass('row-hidden');
             }
         }
 
@@ -395,7 +397,7 @@
                     $("#cost").val('');
                     $("#notes").val('');
                     $("#selectedtype").prop('selectedIndex', 0);
-                    $("#locationRow").show();   // restore garage line (insurance may have hidden it)
+                    $("#locationRow").removeClass('row-hidden');   // restore garage line
                     $("#garageSearchInput").val('').attr('placeholder', 'תחילה בחר עיר').prop('disabled', true);
                     $("#selectedgarage").val('');
                     $("#garageOptionsList").hide();

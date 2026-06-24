@@ -964,6 +964,10 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
     margin: 10px 14px !important;
     gap: 8px;
 }
+/* Allows JS to hide a row even though #AddCareDiv .row forces display:flex !important */
+#AddCareDiv .row.row-hidden {
+    display: none !important;
+}
 /* icon column: fixed width, no grow */
 #AddCareDiv .row .col-3:not(.rounded-input) {
     flex: 0 0 auto !important;
