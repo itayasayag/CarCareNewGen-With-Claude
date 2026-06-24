@@ -58,6 +58,10 @@
 
             ReadCarCareFromDB();
 
+            // Event delegation: reliably fires for the #selectedtype <select>
+            // even though it's built dynamically after the page loads.
+            $(document).on('change', '#selectedtype', changeCareTypeSelect);
+
             $("#AddCareButton").click(AddCarCare);
 
         });
@@ -281,7 +285,7 @@
 
 
         function AddToCareList(list) {
-            var str = "<select onchange='changeCareTypeSelect()' class='carcare-select' id='selectedtype' name = 'Type' > <option value='' disabled selected>סוג טיפול</option>";
+            var str = "<select class='carcare-select' id='selectedtype' name = 'Type' > <option value='' disabled selected>סוג טיפול</option>";
             for (var i = 0; i < list.length; i++) {
                 {
                     str += `<option value='${list[i].careID}'>` + list[i].careName + '</option>';
