@@ -204,7 +204,7 @@
                 var phone = (user && user.phoneNum) ? String(user.phoneNum).trim() : '';
 
                 // If no phone, ask user and save to DB first
-                function generateSaleAd(phoneNum) {
+                function generateSaleAd(phoneNum, contactName) {
                     var careList = (JSON.parse(localStorage.getItem('UserCarCarelist')) || [])
                         .filter(function (c) { return String(c.licensePlate) === String(selectedCar); });
 
@@ -247,6 +247,7 @@
                     document.getElementById('adDocumented').textContent = documented;
                     document.getElementById('adNextTest').textContent = nextTest;
                     document.getElementById('adPhone').textContent = phoneNum;
+                    document.getElementById('adContactName').textContent = contactName || '';
 
                     var tpl = document.getElementById('saleAdTemplate');
                     html2canvas(tpl, { scale: 2, backgroundColor: null }).then(function (canvas) {
@@ -264,25 +265,51 @@
                 }
 
                 if (phone) {
-                    generateSaleAd(phone);
+                    // Phone is known — just ask for the name to show on the ad
+                    Swal.fire({
+                        title: 'שם ליצירת קשר',
+                        text: 'איזה שם להציג לצד מספר הטלפון במודעה?',
+                        input: 'text',
+                        inputValue: (user.firstName || '') + (user.familyName ? ' ' + user.familyName : ''),
+                        inputPlaceholder: 'שם מלא',
+                        showCancelButton: true,
+                        confirmButtonText: 'הפק מודעה',
+                        cancelButtonText: 'בטל',
+                        confirmButtonColor: '#1E5A82'
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        generateSaleAd(phone, result.value.trim());
+                    });
                 } else {
                     Swal.fire({
-                        title: 'מספר טלפון ליצירת קשר',
-                        text: 'לא נמצא מספר טלפון בפרופיל שלך. הוסף מספר שיופיע במודעה:',
-                        input: 'tel',
-                        inputPlaceholder: '05X-XXXXXXX',
-                        inputAttributes: { dir: 'ltr' },
+                        title: 'פרטי ליצירת קשר',
+                        html:
+                            '<div style="text-align:right;direction:rtl;">' +
+                            '<label style="font-weight:600;">מספר טלפון</label>' +
+                            '<input id="swal-phone" type="tel" class="swal2-input" placeholder="05X-XXXXXXX" dir="ltr">' +
+                            '<label style="font-weight:600;">שם ליצירת קשר</label>' +
+                            '<input id="swal-name" type="text" class="swal2-input" placeholder="שם מלא" value="' +
+                            ((user.firstName || '') + (user.familyName ? ' ' + user.familyName : '')).replace(/"/g, '&quot;') + '">' +
+                            '</div>',
                         showCancelButton: true,
                         confirmButtonText: 'שמור והפק',
                         cancelButtonText: 'בטל',
                         confirmButtonColor: '#1E5A82',
-                        inputValidator: function (val) {
-                            if (!val || val.trim().length < 9) return 'נא להזין מספר טלפון תקין';
+                        focusConfirm: false,
+                        preConfirm: function () {
+                            var p = document.getElementById('swal-phone').value.trim();
+                            var n = document.getElementById('swal-name').value.trim();
+                            if (!p || p.length < 9) {
+                                Swal.showValidationMessage('נא להזין מספר טלפון תקין');
+                                return false;
+                            }
+                            return { phone: p, name: n };
                         }
                     }).then(function (result) {
                         if (!result.isConfirmed) return;
-                        var newPhone = result.value.trim();
-                        // Save to DB via PUT /api/users/{email}
+                        var newPhone = result.value.phone;
+                        var newName = result.value.name;
+                        // Save phone to DB
                         var updatedUser = {
                             firstName: user.firstName,
                             familyName: user.familyName,
@@ -291,15 +318,13 @@
                         };
                         ajaxCall("PUT", server + "/api/users/" + user.email, JSON.stringify(updatedUser),
                             function () {
-                                // Update localStorage so next export uses the new number
                                 user.phoneNum = newPhone;
                                 localStorage.setItem('LogInUser', JSON.stringify(user));
-                                generateSaleAd(newPhone);
+                                generateSaleAd(newPhone, newName);
                             },
                             function (err) {
                                 console.error("Phone save error:", err);
-                                // Save failed but still generate the ad with the entered number
-                                generateSaleAd(newPhone);
+                                generateSaleAd(newPhone, newName);
                             }
                         );
                     });
@@ -1263,6 +1288,9 @@
                 <div class="sale-ad-stat-num" id="adNextTest">—</div>
                 <div class="sale-ad-stat-label">טסט הבא</div>
             </div>
+        </div>
+        <div class="sale-ad-contact">
+            <span id="adContactName"></span>
         </div>
         <div class="sale-ad-phone" id="adPhone"></div>
         <div class="sale-ad-footer">well treated in carcare</div>

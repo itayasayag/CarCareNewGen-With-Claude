@@ -1299,65 +1299,86 @@ html.cc-dark #MyCarsBtn {
     width: 1123px;
     height: 794px;
     box-sizing: border-box;
-    padding: 60px 80px;
-    background: linear-gradient(135deg, #1E5A82 0%, #2C7DB3 100%);
-    color: #fff;
+    padding: 50px 80px;
+    background: #ffffff;
+    color: #1E5A82;
     font-family: 'Assistant', Calibri, sans-serif;
     direction: rtl;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    border: 4px solid #1E5A82;
 }
 .sale-ad-header {
     display: flex;
     align-items: center;
     gap: 14px;
     align-self: flex-start;
+    margin-bottom: 10px;
 }
-.sale-ad-logo { width: 64px; height: 64px; }
-.sale-ad-brand { font-size: 34px; font-weight: 700; }
+.sale-ad-logo { width: 52px; height: 52px; }
+.sale-ad-brand { font-size: 28px; font-weight: 700; color: #1E5A82; }
 .sale-ad-title {
-    font-size: 78px;
-    font-weight: 800;
-    margin: 30px 0 6px;
-    letter-spacing: 1px;
+    font-size: 80px;
+    font-weight: 900;
+    margin: 0 0 4px;
+    color: #1E5A82;
+    letter-spacing: 2px;
 }
 .sale-ad-carname {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 600;
-    opacity: .95;
-    margin-bottom: 40px;
+    color: #2C7DB3;
+    margin-bottom: 28px;
 }
 .sale-ad-stats {
     display: flex;
     justify-content: center;
-    gap: 32px;
+    gap: 28px;
     width: 100%;
-    margin-bottom: 36px;
+    margin-bottom: 28px;
 }
 .sale-ad-stat {
-    background: rgba(255,255,255,.14);
-    border: 2px solid rgba(255,255,255,.28);
-    border-radius: 24px;
-    padding: 30px 24px;
+    background: #f4f8fb;
+    border: 2px solid #1E5A82;
+    border-radius: 20px;
+    padding: 24px 18px;
     flex: 1;
     max-width: 210px;
 }
-.sale-ad-stat-num { font-size: 48px; font-weight: 800; line-height: 1.1; }
-.sale-ad-stat-label { font-size: 20px; margin-top: 10px; opacity: .9; }
-.sale-ad-phone {
-    font-size: 36px;
+.sale-ad-stat-num { font-size: 46px; font-weight: 800; color: #1E5A82; line-height: 1.1; }
+.sale-ad-stat-label { font-size: 18px; margin-top: 8px; color: #2C7DB3; }
+.sale-ad-contact {
+    font-size: 28px;
     font-weight: 700;
+    color: #1E5A82;
+    margin-bottom: 10px;
+    direction: rtl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.sale-ad-phone {
+    font-size: 34px;
+    font-weight: 800;
     direction: ltr;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+    color: #1E5A82;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
 }
 .sale-ad-footer {
     margin-top: auto;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 700;
     font-style: italic;
     letter-spacing: 1px;
     direction: ltr;
+    color: #93A6B3;
+    border-top: 1px solid #E5EBF0;
+    padding-top: 14px;
+    width: 100%;
+    text-align: center;
 }
