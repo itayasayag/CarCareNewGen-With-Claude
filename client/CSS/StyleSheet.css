@@ -884,11 +884,15 @@ th {
 }
 
 #exportPDF {
-    height: 45px;
+    height: 40px;
     position: absolute;
-    right: 112px;
-    top: 67%;
+    left: 60px;
+    top: 68%;
+    cursor: pointer;
+    opacity: .85;
+    transition: opacity .2s, transform .2s;
 }
+#exportPDF:hover { opacity: 1; transform: scale(1.08); }
 div#carPhoto{
     margin-bottom: 65px;
 }
