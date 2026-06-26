@@ -57,6 +57,9 @@ app = FastAPI(
 )
 
 # ── CORS (must be before CamelCaseMiddleware) ─────────────────────────────────
+# Currently allows all origins ("*") which is fine for local dev and first deploy.
+# When going live, replace "*" with your specific origins, e.g.:
+#   allow_origins=["https://itayasayag.github.io", "http://localhost:5500"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
