@@ -193,6 +193,119 @@
                 });
             });
 
+            // ===== Sale-ad PDF =====
+            $("#saleAdBtn").click(function () {
+                var selectedCar = JSON.parse(localStorage.getItem('SelectedCar'));
+                if (!selectedCar || selectedCar === 'null') {
+                    Swal.fire({ title: "בחר/י רכב קודם", icon: "info" });
+                    return;
+                }
+                var user = JSON.parse(localStorage.getItem('LogInUser'));
+                var phone = (user && user.phoneNum) ? String(user.phoneNum).trim() : '';
+
+                // If no phone, ask user and save to DB first
+                function generateSaleAd(phoneNum) {
+                    var careList = (JSON.parse(localStorage.getItem('UserCarCarelist')) || [])
+                        .filter(function (c) { return String(c.licensePlate) === String(selectedCar); });
+
+                    var careCount = careList.length;
+                    var documented = careList.filter(function (c) {
+                        return c.invoiceFileName && c.invoiceFileName !== "ללא תמונה" && c.invoiceFileName !== "null";
+                    }).length;
+                    var maxKM = 0;
+                    careList.forEach(function (c) { if (c.currentKM && c.currentKM > maxKM) maxKM = c.currentKM; });
+                    var kmStr = maxKM ? maxKM.toLocaleString('he-IL') : '—';
+
+                    // Next test: dd/mm/yy
+                    var nextTest = '—';
+                    try {
+                        var vd = JSON.parse(localStorage.getItem('vehicleDetails'));
+                        if (vd && vd[0] && vd[0].tokef_dt) {
+                            var td = new Date(vd[0].tokef_dt);
+                            if (!isNaN(td)) {
+                                nextTest = String(td.getDate()).padStart(2,'0') + '/' +
+                                           String(td.getMonth()+1).padStart(2,'0') + '/' +
+                                           String(td.getFullYear()).slice(-2);
+                            } else { nextTest = vd[0].tokef_dt; }
+                        }
+                    } catch(e) {}
+
+                    // Car name
+                    var carName = 'רכב ' + selectedCar;
+                    try {
+                        var d = JSON.parse(localStorage.getItem('vehicleDetails'));
+                        if (d && d[0]) {
+                            var parts = [d[0].tozeret_nm, d[0].kinuy_mishari, d[0].shnat_yitzur].filter(Boolean);
+                            if (parts.length) carName = parts.join(' ') + ' · ' + selectedCar;
+                        }
+                    } catch(e) {}
+
+                    // Populate template
+                    document.getElementById('adCarName').textContent = carName;
+                    document.getElementById('adKM').textContent = kmStr;
+                    document.getElementById('adCareCount').textContent = careCount;
+                    document.getElementById('adDocumented').textContent = documented;
+                    document.getElementById('adNextTest').textContent = nextTest;
+                    document.getElementById('adPhone').textContent = phoneNum;
+
+                    var tpl = document.getElementById('saleAdTemplate');
+                    html2canvas(tpl, { scale: 2, backgroundColor: null }).then(function (canvas) {
+                        var imgData = canvas.toDataURL('image/png');
+                        const { jsPDF } = window.jspdf;
+                        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                        var pageW = doc.internal.pageSize.getWidth();
+                        var pageH = doc.internal.pageSize.getHeight();
+                        doc.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+                        doc.save('CarCare-מודעת-מכירה-' + selectedCar + '.pdf');
+                    }).catch(function (err) {
+                        console.error('Sale ad PDF error:', err);
+                        Swal.fire({ title: "שגיאה בהפקת המודעה", icon: "error" });
+                    });
+                }
+
+                if (phone) {
+                    generateSaleAd(phone);
+                } else {
+                    Swal.fire({
+                        title: 'מספר טלפון ליצירת קשר',
+                        text: 'לא נמצא מספר טלפון בפרופיל שלך. הוסף מספר שיופיע במודעה:',
+                        input: 'tel',
+                        inputPlaceholder: '05X-XXXXXXX',
+                        inputAttributes: { dir: 'ltr' },
+                        showCancelButton: true,
+                        confirmButtonText: 'שמור והפק',
+                        cancelButtonText: 'בטל',
+                        confirmButtonColor: '#1E5A82',
+                        inputValidator: function (val) {
+                            if (!val || val.trim().length < 9) return 'נא להזין מספר טלפון תקין';
+                        }
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        var newPhone = result.value.trim();
+                        // Save to DB via PUT /api/users/{email}
+                        var updatedUser = {
+                            firstName: user.firstName,
+                            familyName: user.familyName,
+                            phoneNum: newPhone,
+                            password: user.password || ""
+                        };
+                        ajaxCall("PUT", server + "/api/users/" + user.email, JSON.stringify(updatedUser),
+                            function () {
+                                // Update localStorage so next export uses the new number
+                                user.phoneNum = newPhone;
+                                localStorage.setItem('LogInUser', JSON.stringify(user));
+                                generateSaleAd(newPhone);
+                            },
+                            function (err) {
+                                console.error("Phone save error:", err);
+                                // Save failed but still generate the ad with the entered number
+                                generateSaleAd(newPhone);
+                            }
+                        );
+                    });
+                }
+            });
+
 
 
             ReadUserCarByEmail(tempUser.email);
@@ -214,7 +327,19 @@
             window.__insuranceExpired = false;
             //השמת ערך תאריך טסט הבא (careID 5 = טסט שנתי)
             if (localStorage.getItem('vehicleDetails') != null) {
-                document.getElementById("CareType5").innerHTML = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
+                var rawDate = JSON.parse(localStorage.getItem('vehicleDetails'))[0].tokef_dt;
+                // Format as dd/mm/yy (gov.il returns yyyy-mm-dd or similar)
+                var formattedTokef = rawDate;
+                try {
+                    var td = new Date(rawDate);
+                    if (!isNaN(td)) {
+                        formattedTokef =
+                            String(td.getDate()).padStart(2,'0') + '/' +
+                            String(td.getMonth()+1).padStart(2,'0') + '/' +
+                            String(td.getFullYear()).slice(-2);
+                    }
+                } catch(e) {}
+                document.getElementById("CareType5").innerHTML = formattedTokef;
             }
             var tmpCarelist = JSON.parse(localStorage.getItem('UserCarCarelist'));
             var selectedCar = JSON.parse(localStorage.getItem('SelectedCar'));
@@ -1013,7 +1138,7 @@
             <img id="editcars" alt="עדכון פרטי רכב" src="images/edit.png" />
             <img id="showDetails" alt="הצג פרטי רכב" src="images/CARINFO.png" />
             <img id="exportPDF" src="images/picture-as-pdf-red.png" alt="Export to PDF" />
-
+            <img id="saleAdBtn" src="images/deal.png" alt="מודעת מכירה" title="הפק מודעת מכירה" />
         </div>
     </div>
     <div class="RollDownCarBook">
@@ -1112,6 +1237,36 @@
 
 
 
+
+    <!-- Hidden sale-ad template — positioned off-screen, captured by html2canvas -->
+    <div id="saleAdTemplate" class="sale-ad" aria-hidden="true">
+        <div class="sale-ad-header">
+            <img src="images/LOGO ROUND WHITE BG.png" class="sale-ad-logo" alt="CarCare" />
+            <span class="sale-ad-brand">CarCare</span>
+        </div>
+        <h1 class="sale-ad-title">רכב למכירה</h1>
+        <div class="sale-ad-carname" id="adCarName">—</div>
+        <div class="sale-ad-stats">
+            <div class="sale-ad-stat">
+                <div class="sale-ad-stat-num" id="adKM">—</div>
+                <div class="sale-ad-stat-label">קילומטראז'</div>
+            </div>
+            <div class="sale-ad-stat">
+                <div class="sale-ad-stat-num" id="adCareCount">—</div>
+                <div class="sale-ad-stat-label">טיפולים מתועדים</div>
+            </div>
+            <div class="sale-ad-stat">
+                <div class="sale-ad-stat-num" id="adDocumented">—</div>
+                <div class="sale-ad-stat-label">טיפולים עם קבלה</div>
+            </div>
+            <div class="sale-ad-stat">
+                <div class="sale-ad-stat-num" id="adNextTest">—</div>
+                <div class="sale-ad-stat-label">טסט הבא</div>
+            </div>
+        </div>
+        <div class="sale-ad-phone" id="adPhone"></div>
+        <div class="sale-ad-footer">well treated in carcare</div>
+    </div>
 
 </body >
 </html >
