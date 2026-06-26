@@ -898,25 +898,19 @@
             });
         }
 
-        function UpdateLogRecord(logID,KM,COST,NOTES,CAREID,INVOIEFILENAME ) {
-            UpdateLogRecord = {
-                userEmail: "",
-                licensePlate: 0,
-                recordDate: "2024-08-10T23:06:06.229Z",
+        function UpdateLogRecord(logID, KM, COST, NOTES, CAREID, INVOIEFILENAME, DATE, GARAGEID) {
+            var payload = {
+                recordDate: DATE,
                 currentKM: KM,
-                garageID: 371,
+                garageID: GARAGEID || null,
                 careID: CAREID,
                 cost: COST,
                 notes: NOTES,
-                invoiceFileName: INVOIEFILENAME /*uploadrecipt.toString()*/,
-                careName: "",
-                garagename: ""
-            }
+                invoiceFileName: INVOIEFILENAME
+            };
 
-
-        api = server + "/api/logs/" + logID;
-            ajaxCall("PUT", api, JSON.stringify(UpdateLogRecord), UpdateLogRecordSCB, UpdateLogRecordECB);
-
+            api = server + "/api/logs/" + logID;
+            ajaxCall("PUT", api, JSON.stringify(payload), UpdateLogRecordSCB, UpdateLogRecordECB);
         }
 
         function UpdateLogRecordSCB(suc) {
@@ -1051,7 +1045,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     uploadInvoice();
-                    UpdateLogRecord(index, TempLogRecord[0].currentKM, result.value.cost, result.value.notes, TempLogRecord[0].careID, newName)
+                    UpdateLogRecord(index, TempLogRecord[0].currentKM, result.value.cost, result.value.notes, TempLogRecord[0].careID, newName, TempLogRecord[0].recordDate, TempLogRecord[0].garageId)
 
                 }
             });
