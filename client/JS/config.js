@@ -11,4 +11,4 @@
 //                 the frontend is hosted
 // ============================================================
 
-var PRODUCTION_API = "";   // ← change this when going live
+var PRODUCTION_API = "https://carcarenewgen-with-claude-production.up.railway.app";   // ← change this when going live
