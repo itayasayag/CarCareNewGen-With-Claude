@@ -57,13 +57,19 @@ app = FastAPI(
 )
 
 # ── CORS (must be before CamelCaseMiddleware) ─────────────────────────────────
-# Currently allows all origins ("*") which is fine for local dev and first deploy.
-# When going live, replace "*" with your specific origins, e.g.:
-#   allow_origins=["https://itayasayag.github.io", "http://localhost:5500"]
+# NOTE: allow_origins=["*"] together with allow_credentials=True is invalid per
+# the CORS spec — browsers reject it and no Access-Control-Allow-Origin header
+# is sent. We list the real origins explicitly and keep credentials off.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        "https://itayasayag.github.io",   # GitHub Pages frontend
+        "http://localhost:5500",          # local dev (Live Server)
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
