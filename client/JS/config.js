@@ -8,4 +8,4 @@
 //  PRODUCTION : Railway backend URL
 // ============================================================
 
-var PRODUCTION_API = "https://carcarenewgen-with-claude-production.up.railway.app";
+var PRODUCTION_API = "https://carcareil.up.railway.app";
