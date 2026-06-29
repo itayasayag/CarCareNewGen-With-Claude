@@ -1,653 +1,682 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <script src="../JS/CarCareFunctions.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--ספריית התראות מתוקות-->
+    <title>הוסף רכב חדש</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <meta charset="utf-8" />
-    <title>תיעוד טיפול רכב</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <!--תוספות אביעד-->
-    <meta charset="UTF-8">
+    <meta name="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!--סוף תוספות אביעד-->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-
-
     <script src="../JS/config.js"></script>
     <script src="../JS/ajaxCall.js"></script>
+    <script src="../JS/CarCareFunctions.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.1/dist/tesseract.min.js"></script>
 
-    <style>
-    </style>
     <script>
-
-        var newName = "ללא תמונה";
+        var addCarSucceed = false;
+        var imageFilename = "";
+        var currentUserEmail = "";
 
         $(document).ready(function () {
-            //let port = "7024";
-            //server = `https://localhost:${port}`;
+            addCarSucceed = false;
 
-            /*            $('#garage').hide();*/
+            $('#AddCarBTN').click(fixfunctionForAdd);
+            $('#DeleteCarBTN').click(fixfunctionForDeActivate);
+            $('#DeleteCarBTN').hide();
+
             var temp = localStorage.getItem('LogInUser');
-            var tempUser = JSON.parse(temp);
-            if (temp !== null) {
+            var tempUser = temp ? JSON.parse(temp) : null;
+
+            if (tempUser && tempUser.email) {
+                currentUserEmail = tempUser.email;
                 document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
             }
-            AddCarToListFromStorage();
 
+            var editmode = JSON.parse(localStorage.getItem('editMode'));
+            var LplateEditedcar = JSON.parse(localStorage.getItem('SelectedCar'));
 
-
-            var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
-            if (selectedCarValue != null) {
-                $('#carSelect').val(selectedCarValue);//השמת הערך בבחירה
-            }
-            /* פותח הוספת קובץ*/
-            $("#uplodePicture").click(function () { $("#imgupload").trigger('click'); })
-
-            ReadCity();
-
-            ReadCarCareFromDB();
-
-            // Event delegation: reliably fires for the #selectedtype <select>
-            // even though it's built dynamically after the page loads.
-            $(document).on('change', '#selectedtype', changeCareTypeSelect);
-
-            $("#AddCareButton").click(AddCarCare);
-
-        });
-
-
-        // ====== Garages from data.gov.il (official garages dataset) ======
-        var GOV_GARAGE_RESOURCE = "bb68386a-a331-4bbc-b668-bba2766d517d";
-        var GOV_GARAGE_URL = "https://data.gov.il/api/3/action/datastore_search";
-
-        //READ CITY LIST from the gov dataset (distinct yishuv values)
-        function ReadCity() {
-            // ask for many rows but only the yishuv field, then dedupe client-side
-            var url = GOV_GARAGE_URL + "?resource_id=" + GOV_GARAGE_RESOURCE +
-                      "&fields=yishuv&limit=32000";
-            fetch(url)
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (!data.success) { console.log("gov city fetch failed"); return; }
-                    var seen = {}, cities = [];
-                    data.result.records.forEach(function (rec) {
-                        var c = (rec.yishuv || "").trim();
-                        if (c && !seen[c]) { seen[c] = true; cities.push(c); }
-                    });
-                    cities.sort(function (a, b) { return a.localeCompare(b, 'he'); });
-                    AddToListCity(cities);
-                })
-                .catch(function (e) { console.log("gov city error", e); });
-        }
-
-        // Position a fixed dropdown directly under its trigger input,
-        // escaping any overflow:hidden ancestor.
-        function positionDropdown(inputId, listId) {
-            var input = document.getElementById(inputId);
-            var list = document.getElementById(listId);
-            if (!input || !list) return;
-            var rect = input.getBoundingClientRect();
-            list.style.top = (rect.bottom + 2) + 'px';
-            list.style.right = (window.innerWidth - rect.right) + 'px';
-            list.style.left = 'auto';
-            list.style.width = rect.width + 'px';
-        }
-
-        var CITY_LIST = [];
-
-        function AddToListCity(list) {
-            CITY_LIST = list || [];
-            // City input is already in the HTML — just wire it up
-            $("#cityOptionsList").hide();
-        }
-
-        $(document).on('input', '#citySearchInput', function () {
-            var q = $(this).val().trim();
-            if (!q) { $("#cityOptionsList").hide(); return; }
-            var filtered = CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 40);
-            if (!filtered.length) { $("#cityOptionsList").hide(); return; }
-            $("#cityOptionsList").html(
-                filtered.map(function (c) {
-                    return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
-                }).join('')
-            );
-            positionDropdown('citySearchInput', 'cityOptionsList');
-            $("#cityOptionsList").show();
-        });
-
-        $(document).on('focus', '#citySearchInput', function () {
-            var q = $(this).val().trim();
-            if (q && CITY_LIST.length) $(this).trigger('input');
-        });
-
-        $(document).on('click', '.city-option-item, #cityOptionsList .garage-option', function () {
-            var city = $(this).data('city') || $(this).text().trim();
-            $("#citySearchInput").val(city);
-            $("#cityOptionsList").hide();
-            // Reset and load garages for the new city
-            $("#garageSearchInput").val('').attr('placeholder', 'טוען מוסכים...').prop('disabled', true);
-            $("#selectedgarage").val('');
-            $("#garageOptionsList").hide();
-            // Store chosen city and fetch garages
-            changeCitySelect(city);
-        });
-
-        // Close dropdowns when clicking elsewhere
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('#CityList').length) { $("#cityOptionsList").hide(); }
-            if (!$(e.target).closest('#GarageList').length) { $("#garageOptionsList").hide(); }
-        });
-
-        function changeCitySelect(city) {
-            if (!city) city = $("#citySearchInput").val().trim();
-            if (city) { ReadGarageFromDB(city); }
-        }
-
-        function ReadGarageFromDB(chosenCity) {
-            if (!chosenCity) chosenCity = $("#citySearchInput").val().trim();
-            var url = GOV_GARAGE_URL + "?resource_id=" + GOV_GARAGE_RESOURCE +
-                      "&q=" + encodeURIComponent(chosenCity) + "&limit=32000";
-            fetch(url)
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (!data.success) { console.log("gov garage fetch failed"); return; }
-                    // exact-match the city + dedupe by mispar_mosah (dataset has 1 row per profession)
-                    var seen = {}, garages = [];
-                    data.result.records.forEach(function (rec) {
-                        if ((rec.yishuv || "").trim() !== chosenCity) return;
-                        var id = rec.mispar_mosah;
-                        if (id && !seen[id]) {
-                            seen[id] = true;
-                            garages.push({
-                                id: id,
-                                shem_mosah: rec.shem_mosah,
-                                ktovet: rec.ktovet,
-                                telephone: rec.telephone,
-                                sug_mosah: rec.sug_mosah
-                            });
-                        }
-                    });
-                    garages.sort(function (a, b) {
-                        return (a.shem_mosah || "").localeCompare(b.shem_mosah || "", 'he');
-                    });
-                    AddToGarageList(garages);
-                })
-                .catch(function (e) { console.log("gov garage error", e); });
-        }
-
-        function changeCarSelect() {//הוספת רכב ושמירת בחירה בזיכרון
-
-            if ($("#carSelect").val() == "addCar") {
-                Swal.fire({
-                    title: "האם ברצונך להוסיף רכב חדש?",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonColor: "#235978",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "הוסף רכב חדש",
-                    cancelButtonText: "בטל",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "addCarPage.html";
-                    }
-                });
-                $('#carSelect').prop('selectedIndex', 0);
-            }
-            else {
-                localStorage.setItem('SelectedCar', JSON.stringify($("#carSelect").val()));
-                showApprovedTag();
-                console.log($("#carSelect").val());
-            }
-        };
-
-        var CURRENT_GARAGE_LIST = [];
-
-        function AddToGarageList(list) {
-            CURRENT_GARAGE_LIST = list || [];
-            var $input = $("#garageSearchInput");
-            $input.prop('disabled', false).val('').attr('placeholder', 'חפש מוסך...');
-            $("#selectedgarage").val('');
-            renderGarageOptions(CURRENT_GARAGE_LIST);
-        }
-
-        function renderGarageOptions(list) {
-            var $list = $("#garageOptionsList");
-            if (!list.length) {
-                positionDropdown('garageSearchInput', 'garageOptionsList');
-                $list.html("<div class='garage-option-empty'>לא נמצאו מוסכים</div>").show();
-                return;
-            }
-            var html = '';
-            for (var i = 0; i < list.length; i++) {
-                html += "<div class='garage-option' data-id='" + list[i].id + "' data-name='" +
-                    String(list[i].shem_mosah || '').replace(/'/g, "&#39;") + "'>" + list[i].shem_mosah + "</div>";
-            }
-            positionDropdown('garageSearchInput', 'garageOptionsList');
-            $list.html(html).show();
-        }
-
-        $(document).on('focus', '#garageSearchInput', function () {
-            if (!$(this).prop('disabled')) {
-                positionDropdown('garageSearchInput', 'garageOptionsList');
-                renderGarageOptions(CURRENT_GARAGE_LIST);
+            if (editmode) {
+                ChangePageAfterAdd();
+                $('#DeleteCarBTN').show();
+                addCarSucceed = true;
+                $('#IDlicenseNum').val(LplateEditedcar);
+                GetCarDetails(LplateEditedcar);
+                $("#IDnickname").val(returnCarNickname(LplateEditedcar));
+                $("#IDkilometer").val(returnCarKM(LplateEditedcar));
+                localStorage.setItem('editMode', JSON.stringify(false));
             }
         });
 
-        $(document).on('input', '#garageSearchInput', function () {
-            var q = $(this).val().trim();
-            $("#selectedgarage").val(''); // typing invalidates previous selection
-            if (!q) { renderGarageOptions(CURRENT_GARAGE_LIST); return; }
-            var filtered = CURRENT_GARAGE_LIST.filter(function (g) {
-                return (g.shem_mosah || '').indexOf(q) !== -1;
-            });
-            renderGarageOptions(filtered);
-        });
-
-        $(document).on('click', '.garage-option', function () {
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            $("#selectedgarage").val(id);
-            $("#garageSearchInput").val(name);
-            $("#garageOptionsList").hide();
-        });
-
-
-
-
-        //Read CarCare
-        function ReadCarCareFromDB() {
-            api = server + "/api/caretypes/";
-            ajaxCall("GET", api, "", getcaretypeSCB, getcaretypeECB);
-        }
-
-
-
-        function getcaretypeSCB(suc) {
-            AddToCareList(suc);
-            console.log(suc);
-
-        }
-
-        function getcaretypeECB(err) {
-            console.log(err);
-        }
-
-
-        function AddToCareList(list) {
-            var str = "<select class='carcare-select' id='selectedtype' name = 'Type' > <option value='' disabled selected>סוג טיפול</option>";
-            for (var i = 0; i < list.length; i++) {
-                {
-                    str += `<option value='${list[i].careID}'>` + list[i].careName + '</option>';
-
+        function returnCarNickname(Lplate) {
+            var Cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+            for (var i = 0; i < Cars.length; i++) {
+                if (String(Cars[i].licensePlate) === String(Lplate)) {
+                    return Cars[i].nickName;
                 }
             }
-            str += "</select>";
-            document.getElementById("Type").innerHTML = str;
+            return null;
         }
 
-        // Insurance doesn't need a garage/location — hide that row.
-        // NOTE: .hide()/.show() won't work here because #AddCareDiv .row has
-        // display:flex !important in CSS which beats jQuery's inline style.
-        // We use a .row-hidden CSS class that also carries !important to win.
-        function changeCareTypeSelect() {
-            var careId = $("#selectedtype").val();
-            var careName = $("#selectedtype option:selected").text().trim();
-            var isInsurance = (String(careId) === '10') || (careName.indexOf('ביטוח') !== -1);
-            if (isInsurance) {
-                $("#locationRow").addClass('row-hidden');
-                $("#cityOptionsList").hide();
-                $("#garageOptionsList").hide();
-                $("#selectedgarage").val('');
-                $("#garageSearchInput").val('');
-                $("#citySearchInput").val('');
-            } else {
-                $("#locationRow").removeClass('row-hidden');
-            }
-        }
-
-
-
-
-
-        function AddCarCare() {
-
-            var temp = localStorage.getItem('LogInUser');
-            var tempUser = JSON.parse(temp);
-
-            var TempselectedCar = localStorage.getItem('SelectedCar');
-            var selectedCar = JSON.parse(TempselectedCar);
-            if (selectedCar == null) {
-                Swal.fire({
-                    title: "לא נבחר רכב",
-                    text: "לא נבחר רכב עבורו נדרש להוסיף תיעוד",
-                    icon: "question"
-                })
-            }
-            else {
-
-                if (tempUser.email != null) {
-                    if ($("#date-input").val() == '' || $("#kilometers").val() == '' || $("#selectedtype").val() == null || $("#selectedtype").val() == '' || $("#cost").val() == '') {
-                        Swal.fire({
-                            title: "מידע חסר",
-                            text: "ודא/י שמילאת תאריך, קילומטראז', סוג טיפול ועלות",
-                            icon: "question"
-                        })
-                    }
-                    else {
-                        uploadInvoice();
-                        var garageVal = $("#selectedgarage").val();
-                        var garageName = "";
-                        if (garageVal) {
-                            var match = CURRENT_GARAGE_LIST.find(function(g) { return String(g.id) === String(garageVal); });
-                            if (match) garageName = match.shem_mosah || "";
-                        }
-                        LogRecord = {
-                            /*                            logID: 0,*/
-                            userEmail: tempUser.email,
-                            licensePlate: parseInt(selectedCar),
-                            recordDate: $("#date-input").val(),
-                            currentKM: $("#kilometers").val(),
-                            garageID: (garageVal && garageVal !== '0' && garageVal !== '') ? garageVal : null,
-                            careID: $("#selectedtype").val(),
-                            cost: $("#cost").val(),
-                            notes: $("#notes").val(),
-                            invoiceFileName: newName /*uploadrecipt.toString()*/,
-                            careName: "",
-                            garageName: garageName
-                        }
-
-                        api = server + "/api/logs/";
-                        ajaxCall("POST", api, JSON.stringify(LogRecord), postSCB, postECB);
-                    }
-                }
-                else Swal.fire({
-                    title: "אינך מחובר למערכת",
-                    icon: "info"
-                });
-            }
-        }
-
-        function postSCB(res) {
-            ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
-            console.log(res);
-            Swal.fire({
-                title: "נוסף תיעוד טיפול",
-                icon: "success",
-                showDenyButton: true,
-                confirmButtonText: 'חזרה לדף הבית',
-                denyButtonText: 'הוסף טיפול נוסף',
-                confirmButtonColor: '#1E5A82',
-                denyButtonColor: '#2C7DB3'
-            }).then(function (result) {
-                if (result.isDenied) {
-                    // Clear the form for a new entry
-                    $("#date-input").val('');
-                    $("#kilometers").val('');
-                    $("#cost").val('');
-                    $("#notes").val('');
-                    $("#selectedtype").prop('selectedIndex', 0);
-                    $("#locationRow").removeClass('row-hidden');   // restore garage line
-                    $("#garageSearchInput").val('').attr('placeholder', 'תחילה בחר עיר').prop('disabled', true);
-                    $("#selectedgarage").val('');
-                    $("#garageOptionsList").hide();
-                    $("#uploadrecipt").attr('src', 'images/uploadrecipt.png');
-                    $("#imgupload").val('');
-                    newName = "ללא תמונה";
-                } else {
-                    window.location.href = 'HomePage.html';
-                }
-            });
-
-        }
-
-        function postECB(err) {
-            console.log(err);
-            Swal.fire({
-                title: "כשל בהוספת טיפול",
-                text: "אנא בדוק את הפרטים שהוזנו במערכת",
-                icon: "warning"
-            });
-
-        }
-
-
-
-        //טיפול בתמונות
-        function uploadInvoice() {
-
-            var data = new FormData();
-            var files = $("#imgupload").get(0).files;
-
-            // Add the uploaded file to the form data collection
-            if (files.length > 0) {
-                for (f = 0; f < files.length; f++) {
-                    var renamedFile = renameFile(files[f]);
-                    data.append("files", renamedFile);
+        function returnCarKM(Lplate) {
+            var Cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+            for (var i = 0; i < Cars.length; i++) {
+                if (String(Cars[i].licensePlate) === String(Lplate)) {
+                    return Cars[i].currentKM;
                 }
             }
-            else {
-                return false;
-            }
-            api = server + "/api/upload/";
-            imageFolder = server + "/api/upload/";
-
-
-            // Ajax upload
-            $.ajax({
-                type: "POST",
-                url: api,
-                contentType: false,
-                processData: false,
-                data: data,
-                success: showImages,
-                error: error
-            });
-            /*return false;*/
-
+            return null;
         }
 
-        // Function to rename the file
+        function uploadPIC() {
+            return;
+        }
+
         function renameFile(file) {
             var temp = localStorage.getItem('LogInUser');
             var tempUser = JSON.parse(temp);
-            var createTime = new Date();
-            var currentCar = localStorage.getItem('SelectedCar');
-            // Get the file extension
             var ext = file.name.split('.').pop();
-            newName = tempUser.email + "_" + parseInt(currentCar.replace(/"/g, '')) + 'invoice' + "_" + createTime.getTime() + '.' + ext;
+            var newName = tempUser.email + $("#IDlicenseNum").val() + 'license' + '.' + ext;
             imageFilename = newName;
-            // Create a new File object with the new name
             return new File([file], newName, { type: file.type });
         }
 
         function showImages(data) {
             console.log(data);
-            if (data && data.uploadedFiles) data = data.uploadedFiles; // FastAPI returns {uploadedFiles: [...]}
-
+            if (data && data.uploadedFiles) data = data.uploadedFiles;
+            updateCarDetails();
 
             var imgStr = "";
-
             if (Array.isArray(data)) {
-
                 for (var i = 0; i < data.length; i++) {
                     src = imageFolder + data[i];
-                    /*imgStr += `<img src='${src}'/>`;*/
                     imgStr += `<img src='${src}'/>`;
                 }
-
-            }
-
-            else { // just in case you have an api returning a single string
+            } else {
                 src = imageFolder + data;
-                imgStr = `<img src='${src}'/>`;
+                imgStr = `<img class="smallImg" src='${src}'/>`;
             }
-            document.getElementById("uploadrecipt").src = src;
-            /*document.getElementById("uplodePicture").innerHTML = imgStr;*/
 
-            Swal.fire({
-                title: "העלאת קובץ בוצעה בהצלחה!",
-                icon: "success"
-            });
+            document.getElementById("carPhoto").innerHTML = imgStr;
         }
 
         function error(data) {
             console.log(data);
         }
 
-        //סוף טיפול בתמונות
+        function fixfunctionForAdd() {
+            AddCar();
+            return false;
+        }
 
+        function fixfunctionForUpdate() {
+            updateCarDetails();
+            return false;
+        }
 
+        function fixfunctionForDeActivate() {
+            DeActivateUserCar();
+            return false;
+        }
+
+        function AddCar() {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = temp ? JSON.parse(temp) : null;
+
+            if (!tempUser || !tempUser.email) {
+                Swal.fire({
+                    title: "אינך מחובר למערכת",
+                    icon: "info"
+                });
+                return;
+            }
+
+            if ($("#IDlicenseNum").val() == '' || $("#IDnickname").val() == '' || $("#IDkilometer").val() == '') {
+                Swal.fire({
+                    title: "מידע חסר",
+                    text: "ודא/י שלא פספסת כלום",
+                    icon: "question"
+                });
+                return;
+            }
+
+            var car = {
+                licensePlate: parseInt($("#IDlicenseNum").val(), 10),
+                nickName: $("#IDnickname").val(),
+                currentKM: parseInt($("#IDkilometer").val(), 10),
+                picURL: null,
+                userEmail: tempUser.email,
+                isVerified: false,
+                isActive: true
+            };
+
+            currentUserEmail = tempUser.email;
+            api = server + "/api/usercars/";
+            ajaxCall("POST", api, JSON.stringify(car), postSCB, postECB);
+        }
+
+        function postSCB(res) {
+            console.log(res);
+
+            Swal.fire({
+                title: "הרכב נוסף בהצלחה!",
+                icon: "success"
+            });
+
+            addCarSucceed = true;
+            ReadUserCarByEmail(currentUserEmail);
+            ChangePageAfterAdd();
+        }
+
+        function postECB(err) {
+            console.log(err);
+
+            if (err && err.status === 409) {
+                Swal.fire({
+                    title: "רכב קיים",
+                    text: "הרכב קיים במערכת תחת משתמש זה",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            var message = "אירעה שגיאה בחיבור לשרת או לבסיס הנתונים";
+            if (err && err.responseJSON && err.responseJSON.detail) {
+                message = err.responseJSON.detail;
+            } else if (err && err.responseText) {
+                message = err.responseText;
+            }
+
+            Swal.fire({
+                title: "שגיאה בהוספת הרכב",
+                text: message,
+                icon: "error"
+            });
+        }
+
+        function ChangePageAfterAdd() {
+            $('#IDlicenseNum').prop('readonly', true);
+
+            if ($('#updateCarDetails').length === 0) {
+                $('#AddCarBTN').replaceWith('<button type="submit" class="btn btn-primary rounded-pill" id="updateCarDetails">עדכן פרטי רכב</button>');
+                $('#updateCarDetails').click(fixfunctionForUpdate);
+            }
+        }
+
+        function updateCarDetails() {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = temp ? JSON.parse(temp) : null;
+
+            if (!tempUser || !tempUser.email) {
+                Swal.fire({
+                    title: "אינך מחובר למערכת",
+                    icon: "info"
+                });
+                return;
+            }
+
+            var updatecar = {
+                licensePlate: parseInt($("#IDlicenseNum").val(), 10),
+                nickName: $("#IDnickname").val(),
+                currentKM: parseInt($("#IDkilometer").val(), 10),
+                picURL: imageFilename ? server + "/api/upload/" + imageFilename : null,
+                userEmail: tempUser.email
+            };
+
+            var email = tempUser.email;
+            var licence_plate = $("#IDlicenseNum").val();
+            api = server + "/api/usercars/" + email + "/" + licence_plate;
+            ajaxCall("PUT", api, JSON.stringify(updatecar), putSCB, putECB);
+        }
+
+        function putSCB(suc) {
+            console.log(suc);
+
+            Swal.fire({
+                title: "פרטי הרכב עודכנו בהצלחה!",
+                icon: "success"
+            });
+
+            ReadUserCarByEmail(currentUserEmail);
+        }
+
+        function putECB(err) {
+            console.log(err);
+
+            var message = "אירעה שגיאה בעדכון פרטי הרכב";
+            if (err && err.responseJSON && err.responseJSON.detail) {
+                message = err.responseJSON.detail;
+            }
+
+            Swal.fire({
+                title: "שגיאה",
+                text: message,
+                icon: "error"
+            });
+        }
+
+        function DeActivateUserCar() {
+            Swal.fire({
+                title: "האם ברצונך להסיר רכב זה?",
+                text: "לאחר ביצוע הפעולה, יהיה ניתן להוסיפו שוב בהמשך",
+                icon: "warning",
+                showDenyButton: true,
+                confirmButtonText: "מחק רכב",
+                denyButtonText: `בטל`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var temp = localStorage.getItem('LogInUser');
+                    var tempUser = temp ? JSON.parse(temp) : null;
+
+                    if (!tempUser || !tempUser.email) {
+                        Swal.fire({
+                            title: "אינך מחובר למערכת",
+                            icon: "info"
+                        });
+                        return false;
+                    }
+
+                    currentUserEmail = tempUser.email;
+                    var email = tempUser.email;
+                    var licence_plate = $("#IDlicenseNum").val();
+                    api = server + "/api/usercars/deactivate/" + email + "/" + licence_plate;
+                    ajaxCall("PUT", api, "", deacticeSCB, deacticeECB);
+                } else if (result.isDenied) {
+                    Swal.fire("הסרת הרכב בוטלה", "", "info");
+                }
+
+                return false;
+            });
+
+            return false;
+        }
+
+        function deacticeSCB(suc) {
+            console.log(suc);
+            ReadUserCarByEmail(currentUserEmail);
+
+            Swal.fire({
+                title: "הרכב הוסר בהצלחה! ",
+                icon: "success",
+                showDenyButton: true,
+                confirmButtonText: "למסך הבית",
+                denyButtonText: `הוסף רכב חדש`,
+                confirmButtonColor: '#235978',
+                denyButtonColor: '#8CD4F5'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "HomePage.html";
+                } else if (result.isDenied) {
+                    window.location.href = "addCarPage.html";
+                }
+            });
+        }
+
+        function deacticeECB(err) {
+            console.log(err);
+
+            var message = "אירעה שגיאה בהסרת הרכב";
+            if (err && err.responseJSON && err.responseJSON.detail) {
+                message = err.responseJSON.detail;
+            }
+
+            Swal.fire({
+                title: "שגיאה",
+                text: message,
+                icon: "error"
+            });
+        }
+
+        function GetCarDetails(LPlate) {
+            var misparRechev = String(LPlate || "").trim();
+
+            if (misparRechev === "") {
+                return;
+            }
+
+            var resourceId = "053cea08-09bc-40ec-8f7a-156f0677aff3";
+            var url = `https://data.gov.il/api/3/action/datastore_search?resource_id=${resourceId}&q=${misparRechev}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success || !data.result || !Array.isArray(data.result.records) || data.result.records.length === 0) {
+                        Swal.fire({
+                            title: "מספר רישוי זה אינו מופיע במערכת",
+                            icon: "error"
+                        }).then(function () {
+                            $("#IDlicenseNum").val("");
+                        });
+                        return;
+                    }
+
+                    const records = data.result.records;
+                    localStorage.setItem('vehicleDetails', JSON.stringify(records));
+                    ShowCarDetails(records);
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    Swal.fire({
+                        title: "שגיאה בבדיקת מספר הרכב",
+                        text: "נסה/י שוב בעוד רגע",
+                        icon: "error"
+                    });
+                });
+        }
+
+        function CheckOcrResult(vehicleDetailsArry) {
+            let OCRresult = sessionStorage.getItem('ocrResult');
+            let check = true;
+            tmpstr = "<div class='ocrAlert'>";
+
+            if (OCRresult !== null) {
+                console.log("Retrieved string:", OCRresult);
+                OCRresult = OCRresult.replace(/\s+/g, '');
+            } else {
+                console.log("No string found in localStorage under 'OCRresult'.");
+                check = false;
+            }
+
+            if (OCRresult.includes('רישיוןרכב')) {
+                tmpstr += '<pre>' + "✅ רישיון רכב" + '</pre>';
+            } else {
+                tmpstr += '<pre>' + "❌ רישיון רכב" + '</pre>';
+                check = false;
+            }
+
+            if (OCRresult.includes(vehicleDetailsArry[0].tozeret_cd)) {
+                tmpstr += '<pre>' + "✅ ארץ ייצור" + '</pre>';
+            } else {
+                tmpstr += '<pre>' + "❌ ארץ ייצור" + '</pre>';
+                check = false;
+            }
+
+            if (OCRresult.includes(vehicleDetailsArry[0].degem_manoa)) {
+                tmpstr += '<pre>' + "✅ דגם מנוע" + '</pre>';
+            } else {
+                tmpstr += '<pre>' + "❌ דגם מנוע" + '</pre>';
+                check = false;
+            }
+
+            if (OCRresult.includes(vehicleDetailsArry[0].mispar_rechev)) {
+                tmpstr += '<pre>' + "✅ מספר רכב" + '</pre>';
+            } else {
+                tmpstr += '<pre>' + "❌ מספר רכב" + '</pre>';
+                check = false;
+            }
+
+            tmpstr += '</div>';
+            localStorage.setItem('Verifiedvehicle', check);
+
+            if (check) {
+                temp1 = localStorage.getItem('LogInUser');
+                tempUser = JSON.parse(temp1);
+                api = server + "/api/usercars/verify/" + tempUser.email + "/" + vehicleDetailsArry[0].mispar_rechev;
+                ajaxCall("PUT", api, "", verSCB, verECB);
+
+                function verSCB(suc) {
+                    console.log("1");
+                }
+
+                function verECB(err) {
+                    console.log(err);
+                }
+
+                Swal.fire({
+                    title: "האימות הצליח",
+                    html: tmpstr,
+                    icon: "success"
+                });
+            } else {
+                Swal.fire({
+                    title: "האימות נכשל",
+                    html: tmpstr,
+                    icon: "error"
+                });
+            }
+        }
+
+        function ShowCarDetails(CarDetails) {
+            if (!CarDetails || !CarDetails[0]) {
+                return;
+            }
+
+            document.getElementById("IDmanufacturer").innerHTML = CarDetails[0].tozeret_nm || "";
+            document.getElementById("IDmodel").innerHTML = CarDetails[0].kinuy_mishari || "";
+            document.getElementById("IDSubModel").innerHTML = CarDetails[0].ramat_gimur || "";
+            document.getElementById("IDYearOfManu").innerHTML = CarDetails[0].moed_aliya_lakvish || "";
+
+            if (localStorage.getItem('UserCarlist') != null) {
+                var Cars = JSON.parse(localStorage.getItem('UserCarlist')) || [];
+                for (var i = 0; i < Cars.length; i++) {
+                    if (String(Cars[i].licensePlate) === String($("#IDlicenseNum").val()) && Cars[i].isVerified) {
+                        document.getElementById("carPhoto").innerHTML = '<p>בוצע אימות עבור רכב זה</p>';
+                        document.getElementById("carPhoto").innerHTML += `<img src="images/Approved.png" />`;
+                        $('#file-input').hide();
+                        $('#plussign').hide();
+                        break;
+                    }
+                }
+            }
+        }
     </script>
 
     <style>
-
-        .checked {
-            color: orange;
+        body {
+            font-family: Calibri, sans-serif;
+            direction: rtl;
+            text-align: center;
         }
 
-        #rating {
+        input[type="text"],
+        input[type="password"],
+        input[type="submit"],
+        input[type="tel"],
+        input[type="email"],
+        button {
+            width: 70%;
+            height: 50px;
             margin: auto;
-            padding-left: 20%;
+            font-family: Calibri;
+            font-size: 25px;
+            margin: 15px 0;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            border-radius: 25px;
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f0f0f0b0;
+            color: #235978;
         }
 
-        #city {
+        input::placeholder {
+            text-align: right;
+            font-size: 22px;
+            color: #235978;
         }
 
-        #cityANDrate {
-            width: 60%;
-            margin-right: 35%;
-            margin-left: 200px;
+        header {
+            height: 8%;
+            background-color: #235978;
         }
 
-        img {
-            max-height: 100px;
-            max-width: 100px;
+        .footer {
+            height: 8%;
+            position: fixed;
+            background-color: #235978;
+            bottom: 0px;
+            width: 100%;
+        }
+
+        #logo {
+            width: 50px;
+            position: relative;
+            bottom: 25px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .plus {
+            width: 100px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #btngrp {
+            width: 90%;
+            margin-bottom: 30px;
+        }
+
+        #logoutBTN {
+            color: white;
+            background-color: #235978;
+            font-family: Calibri, sans-serif;
+            font-size: 22px;
+            text-align: left;
+            width: 98%;
+        }
+
+        #AddCarBTN,
+        #updateCarDetails {
+            vertical-align: central;
+            background-color: #55a35d;
+            font-size: 22px;
+            border: solid;
+            border-width: 2px;
+            border-color: #e5e5e5;
+            bottom: 92%;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        #DeleteCarBTN {
+            display: none;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        #carPhoto > img {
+            max-height: 30%;
+            max-width: 40%;
+        }
+
+        #loader {
+            display: none;
+            position: fixed;
+            left: 30%;
+            top: 40%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #235978;
+            border-radius: 50%;
+            border-top: 16px solid #e6eef2;
+            width: 150px;
+            height: 150px;
+            animation: spin 7s linear infinite;
+            text-align: center;
+            line-height: 25px;
+            color: #235978;
+            font-size: 30px;
+            place-content: center;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #progressText {
+            position: absolute;
+            top: calc(50% + 70px);
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #3498db;
+            font-size: 18px;
         }
     </style>
+
     <script src="../JS/menu.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
+
 <body>
     <div id="top">
-
         <div id="header" class="header">
-
             <h1 class="h1header">
                 <span id="helloUser">CarCare</span>
             </h1>
-
+            <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
             <div>
                 <img onclick="document.location='HomePage.html'" id="logo" src="images/LOGO ROUND WHITE BG.png" />
-                <img onclick="history.back()" id="BackBTN" src="images/back.png" />
-                <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
-            </div>
-            <div id="SelectDiv">
-                <!--דיב שמוסיפים אליו את כל הרכבים-->
+                <img id="BackBTN" onclick="history.back()" src="images/back.png" />
             </div>
         </div>
     </div>
 
     <div class="RollDown">
-        <!--תוכן העמוד-->
-        <h2 id="h2carcare">תיעוד טיפול</h2>
-        <input type="file" id="imgupload" style="display:none" />
-        <div id="AddCareDiv">
-            <!--תאריך-->
+        <div class="container">
+            <form id="registrationForm" method="post" action="#">
+                <div class="form-group">
+                    <input onfocusout="GetCarDetails($(this).val())" type="number" class="form-control" id="IDlicenseNum" name="licenseNum" placeholder="מספר רישוי" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="IDnickname" name="nickname" placeholder="כינוי רכב" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" class="form-control" id="IDkilometer" name="kilometer" placeholder="קילומטר נוכחי" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary rounded-pill" id="AddCarBTN">הוסף רכב</button>
+                <button type="submit" class="btn btn-danger rounded-pill" id="DeleteCarBTN">הסר רכב זה</button>
+            </form>
+        </div>
+
+        <div id="CarDetails" class="container">
             <div class="row">
-                <div class="col-3">
-                    <img class="img-care" src="images/calendar.png" />
+                <div class="col-6">
+                    <p><b>יצרן</b>:&nbsp;<span id="IDmanufacturer">  </span></p>
+                    <p><b>דגם</b>:&nbsp; <span id="IDmodel"></span></p>
                 </div>
-                <div class="col-9 rounded-input">
-                    <input id="date-input" type="date" name="date" />
+                <div class="col-6">
+                    <p><b>מועד עליה לכביש:</b>&nbsp; <span id="IDYearOfManu"></span></p>
+                    <p><b>תת דגם:</b>&nbsp; <span id="IDSubModel"></span></p>
                 </div>
-            </div>
-            <!-- קילומטראז -->
-            <div class="row">
-                <div class="col-3">
-                    <img class="img-care" src="images/odometer-for-kilometers-and-speed-control (2).png" />
-                </div>
-                <div class="col-9 rounded-input">
-                    <input id="kilometers" type="number" name="kilometrs" placeholder="קילומטראז'" />
-                </div>
-            </div>
-
-            <!--סוג רשומה-->
-            <div class="row" id="careTypeRow">
-                <div class="col-3">
-                    <img class="img-care" src="images/wrench (2).png" />
-                </div>
-                <div class="col-9 rounded-input" id="Type">
-                    <select class="carcare-select" name="Type">
-                        <option value="" disabled selected>סוג טיפול</option>
-                        <option value="טיפול">טיפול</option>
-                        <option value="תקלה">תקלה</option>
-                        <option value="טסט">טסט</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- מוסך -->
-            <div class="row" id="locationRow">
-
-                <div class="col-3">
-                    <img class="img-care" src="images/location.png" />
-                </div>
-                <div class="col-3 rounded-input" id="CityList" style="position:relative;">
-                    <input type="text" class="carcare-select" id="citySearchInput"
-                           placeholder="עיר" autocomplete="off" />
-                    <div id="cityOptionsList" class="garage-options-list"></div>
-                </div>
-                <div class="col-6 rounded-input" id="GarageList" style="position: relative;">
-                    <input type="text" class="carcare-select" id="garageSearchInput"
-                           placeholder="תחילה בחר עיר" disabled autocomplete="off" />
-                    <input type="hidden" id="selectedgarage" name="garage" value="" />
-                    <div id="garageOptionsList" class="garage-options-list"></div>
-                </div>
-
-
-            </div>
-            <!-- עלות -->
-            <div class="row">
-                <div class="col-3">
-                    <img class="img-care" src="images/coins.png" />
-                </div>
-                <div class="col-9 rounded-input">
-                    <input id="cost" type="number" name="cost" placeholder="עלות" />
-                </div>
-            </div>
-            <!--הערות-->
-            <div class="row">
-                <div class="col-3">
-                    <img class="img-care" src="images/notes (1).png" />
-                </div>
-                <div class="col-9 rounded-input">
-                    <textarea id="notes" name="addnotes" placeholder="הוסף הערה" rows="4" cols="30"></textarea>
-                </div>
-            </div>
-            <!--הוספת חשבונית (מתחת להערה)-->
-            <div id="uplodePicture" class="receipt-upload">
-                <img id="uploadrecipt" src="images/uploadrecipt.png" />
-                <span>הוסף חשבונית</span>
             </div>
         </div>
     </div>
+
+    <!-- DISABLED: car license upload feature
     <div>
-        <div id="footerCarCare" class="footer">
-            <button type="button" class="btn btn-primary rounded-pill" id="AddCareButton">הוסף תיעוד</button>
+        <div class="footer">
+            <label for="file-input">
+                <img id="plussign" class="UploadPapers" src="images/UploadCarPapers.png" alt="Upload Image">
+            </label>
+            <input type="file" id="file-input" onchange="uploadPIC()">
         </div>
+        <div id="loader">המסמך בבדיקה</div>
+        <div id="carPhoto"></div>
+        <p id="tmpP"><br /></p>
     </div>
+    END DISABLED -->
 </body>
 </html>

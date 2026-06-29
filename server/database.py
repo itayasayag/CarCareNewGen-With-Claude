@@ -1,28 +1,25 @@
-import pymssql
-from pydantic_settings import BaseSettings
+import urllib.parse
 from functools import lru_cache
 from typing import Optional
-import urllib.parse
+
+import pymssql
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # ── Option A: individual fields (local dev via .env) ─────────────────────
     db_server: Optional[str] = None
     db_name: Optional[str] = None
     db_user: Optional[str] = None
     db_password: Optional[str] = None
-
-    # ── Option B: full connection string (Railway / Azure) ───────────────────
-    # Format: SERVER=x;DATABASE=y;UID=z;PWD=w;Encrypt=yes;...
     database_url: Optional[str] = None
 
-    # ── Other settings ────────────────────────────────────────────────────────
     email_address: str = "carcarereminders@gmail.com"
     email_password: str = ""
     upload_dir: str = "uploadedFiles"
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 @lru_cache()
@@ -30,47 +27,115 @@ def get_settings() -> Settings:
     return Settings()
 
 
-def _parse_odbc_string(odbc: str) -> dict:
-    """Parse a pyodbc-style connection string into a dict."""
+def _parse_odbc_string(value: str) -> dict:
     result = {}
-    for part in odbc.split(";"):
-        part = part.strip()
+    for part in value.split(";"):
         if "=" in part:
-            k, v = part.split("=", 1)
-            result[k.strip().lower()] = v.strip()
+            key, val = part.split("=", 1)
+            result[key.strip().lower()] = val.strip()
     return result
+
+
+def _parse_database_url(value: str) -> dict:
+    value = value.strip()
+
+    if "://" in value:
+        parsed = urllib.parse.urlparse(value)
+        return {
+            "server": parsed.hostname or "",
+            "port": parsed.port,
+            "database": parsed.path.lstrip("/"),
+            "user": urllib.parse.unquote(parsed.username or ""),
+            "password": urllib.parse.unquote(parsed.password or ""),
+        }
+
+    params = _parse_odbc_string(value)
+    server = params.get("server") or params.get("data source") or ""
+    database = params.get("database") or params.get("initial catalog") or ""
+    user = params.get("uid") or params.get("user id") or params.get("user") or ""
+    password = params.get("pwd") or params.get("password") or ""
+    port = params.get("port")
+
+    server = server.replace("tcp:", "")
+    if "," in server:
+        server, parsed_port = server.rsplit(",", 1)
+        port = port or parsed_port
+
+    return {
+        "server": server,
+        "port": int(port) if str(port or "").isdigit() else None,
+        "database": database,
+        "user": user,
+        "password": password,
+    }
+
+
+class PymssqlCursor:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def execute(self, query, *params):
+        query = query.replace("?", "%s")
+        if not params:
+            return self.cursor.execute(query)
+        if len(params) == 1:
+            param = params[0]
+            if isinstance(param, (list, tuple)):
+                return self.cursor.execute(query, tuple(param))
+            return self.cursor.execute(query, (param,))
+        return self.cursor.execute(query, params)
+
+    def __getattr__(self, name):
+        return getattr(self.cursor, name)
+
+
+class PymssqlConnection:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def cursor(self, *args, **kwargs):
+        return PymssqlCursor(self.conn.cursor(*args, **kwargs))
+
+    def __getattr__(self, name):
+        return getattr(self.conn, name)
+
+
+def _connect(server, user, password, database, port=None):
+    if not all([server, user, password, database]):
+        raise RuntimeError("Database credentials are incomplete.")
+
+    kwargs = {
+        "server": server,
+        "user": user,
+        "password": password,
+        "database": database,
+        "tds_version": "7.4",
+    }
+    if port:
+        kwargs["port"] = port
+
+    return PymssqlConnection(pymssql.connect(**kwargs))
 
 
 def get_connection():
     settings = get_settings()
 
     if settings.database_url:
-        # Parse the ODBC-style DATABASE_URL into pymssql params
-        params = _parse_odbc_string(settings.database_url)
-        server = params.get("server", "").replace("tcp:", "").split(",")[0]
-        database = params.get("database", "")
-        user = params.get("uid", "")
-        password = params.get("pwd", "")
-        return pymssql.connect(
-            server=server,
-            user=user,
-            password=password,
-            database=database,
-            tds_version="7.4"
+        params = _parse_database_url(settings.database_url)
+        return _connect(
+            params["server"],
+            params["user"],
+            params["password"],
+            params["database"],
+            params["port"],
         )
 
-    # Local dev: individual fields from .env
     if settings.db_user and settings.db_password:
-        return pymssql.connect(
-            server=settings.db_server,
-            user=settings.db_user,
-            password=settings.db_password,
-            database=settings.db_name,
-            tds_version="7.4"
+        return _connect(
+            settings.db_server,
+            settings.db_user,
+            settings.db_password,
+            settings.db_name,
         )
 
-    # Windows Auth (local only) — pymssql doesn't support Windows Auth,
-    # so fall back to a trusted connection via the env vars
-    raise RuntimeError(
-        "No database credentials found. Set DATABASE_URL or DB_SERVER/DB_USER/DB_PASSWORD in .env"
-    )
+    raise RuntimeError("No database credentials found.")
