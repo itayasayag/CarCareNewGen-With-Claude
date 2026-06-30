@@ -7,16 +7,13 @@ router = APIRouter(prefix="/api/reminders", tags=["Reminders"])
 
 
 def get_care_name(cursor, care_id: int) -> str:
-    cursor.execute("SELECT CareName FROM CareType WHERE CareID = ?", care_id)
+    cursor.execute("SELECT CareName FROM CareType WHERE CareID = %s", care_id)
     row = cursor.fetchone()
     return row[0] if row else ""
 
 
 def get_car_nickname(cursor, email: str, license_plate: int) -> str:
-    cursor.execute(
-        "SELECT NickName FROM UserCar WHERE UserEmail = ? AND LicensePlate = ?",
-        email, license_plate
-    )
+    cursor.execute("SELECT NickName FROM UserCar WHERE UserEmail = %s AND LicensePlate = %s", (email, license_plate))
     row = cursor.fetchone()
     return row[0] if row else ""
 
@@ -32,7 +29,7 @@ def get_reminders_by_email(email: str):
                FROM Reminder r
                LEFT JOIN CareType ct ON r.CareID = ct.CareID
                LEFT JOIN UserCar uc ON r.Email = uc.UserEmail AND r.LicensePlate = uc.LicensePlate
-               WHERE r.Email = ?""",
+               WHERE r.Email = %s""",
             email
         )
         return [
@@ -69,12 +66,8 @@ def create_reminder(reminder: ReminderCreate):
         except Exception as email_err:
             print(f"Email send failed (non-critical): {email_err}")
 
-        cursor.execute(
-            "INSERT INTO Reminder (RemindDate, Notes, Email, CareID, LicensePlate) "
-            "VALUES (?, ?, ?, ?, ?)",
-            reminder.remind_date, reminder.notes,
-            reminder.email, reminder.care_id, reminder.license_plate
-        )
+        cursor.execute("INSERT INTO Reminder (RemindDate, Notes, Email, CareID, LicensePlate) "
+            "VALUES (%s, %s, %s, %s, %s)", (reminder.remind_date, reminder.notes, reminder.email, reminder.care_id, reminder.license_plate))
         conn.commit()
         return {"message": "Reminder created successfully"}
     except Exception as e:
@@ -91,7 +84,7 @@ def update_reminder(reminder_id: int, reminder: ReminderUpdate):
 
         # Fetch current reminder for email sending
         cursor.execute(
-            "SELECT Email, LicensePlate FROM Reminder WHERE ReminderID = ?", reminder_id
+            "SELECT Email, LicensePlate FROM Reminder WHERE ReminderID = %s", reminder_id
         )
         row = cursor.fetchone()
         if not row:
@@ -112,10 +105,7 @@ def update_reminder(reminder_id: int, reminder: ReminderUpdate):
         except Exception as email_err:
             print(f"Email send failed (non-critical): {email_err}")
 
-        cursor.execute(
-            "UPDATE Reminder SET RemindDate=?, Notes=?, CareID=? WHERE ReminderID=?",
-            reminder.remind_date, reminder.notes, reminder.care_id, reminder_id
-        )
+        cursor.execute("UPDATE Reminder SET RemindDate=%s, Notes=%s, CareID=%s WHERE ReminderID=%s", (reminder.remind_date, reminder.notes, reminder.care_id, reminder_id))
         conn.commit()
         return {"message": "Reminder updated successfully"}
     except HTTPException:
@@ -131,7 +121,7 @@ def delete_reminder(reminder_id: int):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM Reminder WHERE ReminderID = ?", reminder_id)
+        cursor.execute("DELETE FROM Reminder WHERE ReminderID = %s", reminder_id)
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Reminder not found")

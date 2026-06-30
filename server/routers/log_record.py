@@ -29,7 +29,7 @@ def get_logs_by_email(email: str):
                FROM Log_Record lr
                LEFT JOIN CareType ct ON lr.CareID = ct.CareID
                LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
-               WHERE lr.UserEmail = ?""",
+               WHERE lr.UserEmail = %s""",
             email
         )
         return [row_to_log(r) for r in cursor.fetchall()]
@@ -52,7 +52,7 @@ def get_log_by_id(log_id: int):
                FROM Log_Record lr
                LEFT JOIN CareType ct ON lr.CareID = ct.CareID
                LEFT JOIN Garage g ON lr.Mispar_mosah = g.Id
-               WHERE lr.LogID = ?""",
+               WHERE lr.LogID = %s""",
             log_id
         )
         rows = cursor.fetchall()
@@ -78,20 +78,14 @@ def create_log(log: LogRecordCreate):
         # otherwise store NULL to avoid a foreign-key violation.
         garage_id = log.garage_id
         if garage_id is not None:
-            cursor.execute("SELECT 1 FROM Garage WHERE Id = ?", garage_id)
+            cursor.execute("SELECT 1 FROM Garage WHERE Id = %s", garage_id)
             if cursor.fetchone() is None:
                 garage_id = None
 
-        cursor.execute(
-            """INSERT INTO Log_Record
+        cursor.execute("""INSERT INTO Log_Record
                (CurrentKM, RecordDate, Cost, Notes,
                 Mispar_mosah, CareID, UserEmail, LicensePlate, InvoiceFileName, GarageName)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            log.current_km, log.record_date,
-            log.cost, log.notes, garage_id, log.care_id,
-            log.user_email, log.license_plate, log.invoice_file_name,
-            log.garage_name
-        )
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (log.current_km, log.record_date, log.cost, log.notes, garage_id, log.care_id, log.user_email, log.license_plate, log.invoice_file_name, log.garage_name))
         conn.commit()
         return {"message": "Log record created successfully"}
     except Exception as e:
@@ -105,15 +99,10 @@ def update_log(log_id: int, log: LogRecordUpdate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            """UPDATE Log_Record
-               SET CurrentKM=?, RecordDate=?,
-                   Cost=?, Notes=?, Mispar_mosah=?, CareID=?, InvoiceFileName=?
-               WHERE LogID=?""",
-            log.current_km, log.record_date,
-            log.cost, log.notes, log.garage_id, log.care_id,
-            log.invoice_file_name, log_id
-        )
+        cursor.execute("""UPDATE Log_Record
+               SET CurrentKM=%s, RecordDate=%s,
+                   Cost=%s, Notes=%s, Mispar_mosah=%s, CareID=%s, InvoiceFileName=%s
+               WHERE LogID=%s""", (log.current_km, log.record_date, log.cost, log.notes, log.garage_id, log.care_id, log.invoice_file_name, log_id))
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Log not found")
@@ -131,7 +120,7 @@ def delete_log(log_id: int):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM Log_Record WHERE LogID = ?", log_id)
+        cursor.execute("DELETE FROM Log_Record WHERE LogID = %s", log_id)
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Log not found")

@@ -29,11 +29,8 @@ def register_user(user: UserCreate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO Users (Email, FirstName, FamilyName, Password, PhoneNum, Verified) "
-            "VALUES (?, ?, ?, ?, ?, 0)",
-            user.email, user.first_name, user.family_name, user.password, user.phone_num
-        )
+        cursor.execute("INSERT INTO Users (Email, FirstName, FamilyName, Password, PhoneNum, Verified) "
+            "VALUES (%s, %s, %s, %s, %s, 0)", (user.email, user.first_name, user.family_name, user.password, user.phone_num))
         conn.commit()
         return {"message": "User registered successfully"}
     except Exception as e:
@@ -51,7 +48,7 @@ def google_login(user: UserCreate):
         cursor = conn.cursor()
         # Does this email already exist?
         cursor.execute(
-            "SELECT Email, FirstName, FamilyName, PhoneNum, Verified FROM Users WHERE Email = ?",
+            "SELECT Email, FirstName, FamilyName, PhoneNum, Verified FROM Users WHERE Email = %s",
             user.email
         )
         row = cursor.fetchone()
@@ -61,11 +58,8 @@ def google_login(user: UserCreate):
                 phone_num=row[3], verified=bool(row[4])
             )
         # New Google user — create them (Google accounts are considered verified)
-        cursor.execute(
-            "INSERT INTO Users (Email, FirstName, FamilyName, Password, PhoneNum, Verified) "
-            "VALUES (?, ?, ?, ?, ?, 1)",
-            user.email, user.first_name, user.family_name, "", (user.phone_num or "")
-        )
+        cursor.execute("INSERT INTO Users (Email, FirstName, FamilyName, Password, PhoneNum, Verified) "
+            "VALUES (%s, %s, %s, %s, %s, 1)", (user.email, user.first_name, user.family_name, "", user.phone_num or ""))
         conn.commit()
         return UserResponse(
             email=user.email, first_name=user.first_name,
@@ -82,11 +76,8 @@ def login(credentials: UserLogin):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT Email, FirstName, FamilyName, PhoneNum, Verified FROM Users "
-            "WHERE Email = ? AND Password = ?",
-            credentials.email, credentials.password
-        )
+        cursor.execute("SELECT Email, FirstName, FamilyName, PhoneNum, Verified FROM Users "
+            "WHERE Email = %s AND Password = %s", (credentials.email, credentials.password))
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -107,10 +98,7 @@ def update_user(email: str, user: UserUpdate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE Users SET FirstName=?, FamilyName=?, PhoneNum=?, Password=? WHERE Email=?",
-            user.first_name, user.family_name, user.phone_num, user.password, email
-        )
+        cursor.execute("UPDATE Users SET FirstName=%s, FamilyName=%s, PhoneNum=%s, Password=%s WHERE Email=%s", (user.first_name, user.family_name, user.phone_num, user.password, email))
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="User not found")
@@ -128,7 +116,7 @@ def delete_user(email: str):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM Users WHERE Email = ?", email)
+        cursor.execute("DELETE FROM Users WHERE Email = %s", email)
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="User not found")

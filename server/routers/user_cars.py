@@ -36,7 +36,7 @@ def get_user_cars_by_email(email: str):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive "
-            "FROM UserCar WHERE UserEmail = ? AND IsActive = 1", email
+            "FROM UserCar WHERE UserEmail = %s AND IsActive = 1", email
         )
         return [row_to_usercar(r) for r in cursor.fetchall()]
     except Exception as e:
@@ -50,10 +50,7 @@ def get_nickname(email: str, license_plate: int):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT NickName FROM UserCar WHERE UserEmail = ? AND LicensePlate = ?",
-            email, license_plate
-        )
+        cursor.execute("SELECT NickName FROM UserCar WHERE UserEmail = %s AND LicensePlate = %s", (email, license_plate))
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Car not found")
@@ -71,29 +68,19 @@ def add_user_car(car: UserCarCreate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT IsActive FROM UserCar WHERE UserEmail=? AND LicensePlate=?",
-            car.user_email, car.license_plate
-        )
+        cursor.execute("SELECT IsActive FROM UserCar WHERE UserEmail=%s AND LicensePlate=%s", (car.user_email, car.license_plate))
         existing = cursor.fetchone()
         if existing is not None:
             if existing[0]:
                 raise HTTPException(status_code=409, detail="Car already exists for this user")
             # Previously detached — reactivate instead of inserting a duplicate row.
-            cursor.execute(
-                "UPDATE UserCar SET IsActive=1, NickName=?, CurrentKM=?, PicURL=? "
-                "WHERE UserEmail=? AND LicensePlate=?",
-                car.nick_name, car.current_km, car.pic_url, car.user_email, car.license_plate
-            )
+            cursor.execute("UPDATE UserCar SET IsActive=1, NickName=%s, CurrentKM=%s, PicURL=%s "
+                "WHERE UserEmail=%s AND LicensePlate=%s", (car.nick_name, car.current_km, car.pic_url, car.user_email, car.license_plate))
             conn.commit()
             return {"message": "Car reactivated successfully"}
 
-        cursor.execute(
-            "INSERT INTO UserCar (LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive) "
-            "VALUES (?, ?, ?, ?, ?, ?, 1)",
-            car.license_plate, car.nick_name, car.current_km,
-            car.pic_url, car.user_email, car.is_verified
-        )
+        cursor.execute("INSERT INTO UserCar (LicensePlate, NickName, CurrentKM, PicURL, UserEmail, IsVerified, IsActive) "
+            "VALUES (%s, %s, %s, %s, %s, %s, 1)", (car.license_plate, car.nick_name, car.current_km, car.pic_url, car.user_email, car.is_verified))
         conn.commit()
         return {"message": "Car added successfully"}
     except HTTPException:
@@ -109,11 +96,8 @@ def update_user_car(email: str, license_plate: int, car: UserCarUpdate):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE UserCar SET NickName=?, CurrentKM=?, PicURL=? "
-            "WHERE UserEmail=? AND LicensePlate=?",
-            car.nick_name, car.current_km, car.pic_url, email, license_plate
-        )
+        cursor.execute("UPDATE UserCar SET NickName=%s, CurrentKM=%s, PicURL=%s "
+            "WHERE UserEmail=%s AND LicensePlate=%s", (car.nick_name, car.current_km, car.pic_url, email, license_plate))
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Car not found")
@@ -131,10 +115,7 @@ def deactivate_car(email: str, license_plate: int):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE UserCar SET IsActive=0 WHERE UserEmail=? AND LicensePlate=?",
-            email, license_plate
-        )
+        cursor.execute("UPDATE UserCar SET IsActive=0 WHERE UserEmail=%s AND LicensePlate=%s", (email, license_plate))
         conn.commit()
         return {"message": "Car removed from your garage"}
     except Exception as e:
@@ -148,10 +129,7 @@ def verify_car(email: str, license_plate: int):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE UserCar SET IsVerified=1 WHERE UserEmail=? AND LicensePlate=?",
-            email, license_plate
-        )
+        cursor.execute("UPDATE UserCar SET IsVerified=1 WHERE UserEmail=%s AND LicensePlate=%s", (email, license_plate))
         conn.commit()
         return {"message": "Car verified"}
     except Exception as e:
@@ -165,10 +143,7 @@ def transfer_car(req: SendCarRequest):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE UserCar SET UserEmail=? WHERE UserEmail=? AND LicensePlate=?",
-            req.new_email, req.old_email, req.license_plate
-        )
+        cursor.execute("UPDATE UserCar SET UserEmail=%s WHERE UserEmail=%s AND LicensePlate=%s", (req.new_email, req.old_email, req.license_plate))
         conn.commit()
         return {"message": "Car transferred successfully"}
     except Exception as e:

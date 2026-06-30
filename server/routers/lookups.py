@@ -11,7 +11,7 @@ def get_car_model(license_plate: int):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT LicensePlate, Manufacturer, Model, YearOfManufacture, SubModelCode "
-            "FROM CarModel WHERE LicensePlate = ?", license_plate
+            "FROM CarModel WHERE LicensePlate = %s", license_plate
         )
         rows = cursor.fetchall()
         return [
@@ -48,7 +48,7 @@ def get_garages_by_city(city: str):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT Id, Shem_mosah, Sug_mosah, Ktovet, Yishuv, Telephone, Rate "
-            "FROM Garage WHERE Yishuv = ?", city
+            "FROM Garage WHERE Yishuv = %s", city
         )
         return [
             {
@@ -68,7 +68,7 @@ def get_garage_by_id(garage_id: int):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT Id, Shem_mosah, Sug_mosah, Ktovet, Yishuv, Telephone, Rate "
-            "FROM Garage WHERE Id = ?", garage_id
+            "FROM Garage WHERE Id = %s", garage_id
         )
         rows = cursor.fetchall()
         return [
@@ -110,7 +110,7 @@ def get_care_type_by_id(care_id: int):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT CareID, CareName, RecDaysForRepeat, RecKMForRepeat "
-            "FROM CareType WHERE CareID = ?", care_id
+            "FROM CareType WHERE CareID = %s", care_id
         )
         rows = cursor.fetchall()
         if not rows:
