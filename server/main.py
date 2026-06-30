@@ -2,9 +2,6 @@ import re
 import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import Response
 from routers import users, user_cars, log_record, reminder, upload
 from routers.lookups import car_model_router, garage_router, care_type_router
 
@@ -25,32 +22,74 @@ def convert_keys_to_camel(obj):
     return obj
 
 
-class CamelCaseMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        # Never touch CORS preflight responses — let them pass through untouched.
-        if request.method == "OPTIONS":
-            return response
-        content_type = response.headers.get("content-type", "")
-        if "application/json" in content_type:
-            body = b""
-            async for chunk in response.body_iterator:
-                body += chunk
-            try:
-                data = json.loads(body)
-                data = convert_keys_to_camel(data)
-                body = json.dumps(data, ensure_ascii=False).encode("utf-8")
-            except Exception:
-                pass
-            headers = dict(response.headers)
-            headers.pop("content-length", None)  # let Response recompute it
-            return Response(
-                content=body,
-                status_code=response.status_code,
-                headers=headers,
-                media_type="application/json"
-            )
-        return response
+class CamelCaseMiddleware:
+    """
+    Pure ASGI middleware that rewrites snake_case JSON response keys to camelCase.
+
+    Implemented at the raw ASGI level (not Starlette's BaseHTTPMiddleware) because
+    BaseHTTPMiddleware wraps responses in a way that interferes with CORSMiddleware's
+    preflight (OPTIONS) handling, stripping Access-Control-* headers. Pure ASGI
+    middleware buffers the body without touching headers added by other middleware,
+    so CORS keeps working.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        # Only transform actual responses, never preflight
+        if scope.get("method") == "OPTIONS":
+            await self.app(scope, receive, send)
+            return
+
+        response_start = {}
+        body_chunks = []
+        is_json = {"value": False}
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                response_start["message"] = message
+                for k, v in message.get("headers", []):
+                    if k.decode("latin-1").lower() == "content-type" and \
+                            "application/json" in v.decode("latin-1").lower():
+                        is_json["value"] = True
+                # Defer sending until we have the full body
+                return
+            elif message["type"] == "http.response.body":
+                body_chunks.append(message.get("body", b""))
+                if message.get("more_body", False):
+                    return
+                # Last chunk — process and flush
+                full_body = b"".join(body_chunks)
+                start_msg = response_start["message"]
+                headers = [
+                    (k, v) for k, v in start_msg.get("headers", [])
+                    if k.decode("latin-1").lower() != "content-length"
+                ]
+                if is_json["value"]:
+                    try:
+                        data = json.loads(full_body)
+                        data = convert_keys_to_camel(data)
+                        full_body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+                    except Exception:
+                        pass
+                headers.append((b"content-length", str(len(full_body)).encode("latin-1")))
+                start_msg["headers"] = headers
+                await send(start_msg)
+                await send({
+                    "type": "http.response.body",
+                    "body": full_body,
+                    "more_body": False,
+                })
+                return
+            else:
+                await send(message)
+
+        await self.app(scope, receive, send_wrapper)
 
 
 app = FastAPI(
@@ -127,9 +166,8 @@ def health_db():
         conn.close()
         return {"database": "connected"}
     except Exception as e:
-        return Response(
-            content=json.dumps({"database": "error", "detail": str(e)}),
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content={"database": "error", "detail": str(e)},
             status_code=500,
-            media_type="application/json",
-            headers={"Access-Control-Allow-Origin": "*"},
         )
