@@ -28,6 +28,9 @@ def convert_keys_to_camel(obj):
 class CamelCaseMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
+        # Never touch CORS preflight responses — let them pass through untouched.
+        if request.method == "OPTIONS":
+            return response
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
             body = b""
@@ -62,10 +65,20 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# ── CORS (must be before CamelCaseMiddleware) ─────────────────────────────────
-# NOTE: allow_origins=["*"] together with allow_credentials=True is invalid per
-# the CORS spec — browsers reject it and no Access-Control-Allow-Origin header
-# is sent. We list the real origins explicitly and keep credentials off.
+# ── Middleware ordering note ──────────────────────────────────────────────────
+# Starlette's app.add_middleware() inserts each middleware at the FRONT of the
+# stack, so the LAST one added is the OUTERMOST layer. CORSMiddleware must be
+# outermost so it can answer preflight OPTIONS requests and attach the
+# Access-Control-* headers to every response — including ones produced by the
+# CamelCaseMiddleware below. Therefore CamelCase is added FIRST (inner) and
+# CORS is added LAST (outer). Reversing this drops CORS headers on preflight.
+
+# ── camelCase response middleware (inner) ─────────────────────────────────────
+app.add_middleware(CamelCaseMiddleware)
+
+# ── CORS (outer — must be added LAST) ─────────────────────────────────────────
+# allow_origins=["*"] together with allow_credentials=True is invalid per the
+# CORS spec, so we list explicit origins and keep credentials off.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -79,9 +92,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ── camelCase response middleware ─────────────────────────────────────────────
-app.add_middleware(CamelCaseMiddleware)
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(users.router)
