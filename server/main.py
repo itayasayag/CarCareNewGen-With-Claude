@@ -148,7 +148,8 @@ def root():
     return {
         "message": "CarCare API is running!",
         "docs": "/docs",
-        "version": "2.0.0"
+        "version": "2.0.0",
+        "build": "cors-asgi-fix-2"   # bump to confirm a fresh deploy is live
     }
 
 
