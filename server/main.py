@@ -54,6 +54,12 @@ app = FastAPI(
     title="CarCare API",
     description="Backend API for CarCare - vehicle maintenance tracking app",
     version="2.0.0",
+    # Disable automatic trailing-slash redirects. FastAPI's 307 redirect
+    # response carries no CORS headers, so a cross-origin call to a path whose
+    # slash doesn't match the route is redirected and then blocked by the
+    # browser as a CORS error. With this off, both /api/users and /api/users/
+    # resolve directly without a redirect.
+    redirect_slashes=False,
 )
 
 # ── CORS (must be before CamelCaseMiddleware) ─────────────────────────────────
@@ -95,3 +101,25 @@ def root():
         "docs": "/docs",
         "version": "2.0.0"
     }
+
+
+# ── Health check that actually tests the DB connection ────────────────────────
+# Hit this to confirm the backend can reach Azure SQL. Returns the real error
+# message if the connection fails, instead of a misleading CORS error.
+@app.get("/health/db")
+def health_db():
+    from database import get_connection
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        conn.close()
+        return {"database": "connected"}
+    except Exception as e:
+        return Response(
+            content=json.dumps({"database": "error", "detail": str(e)}),
+            status_code=500,
+            media_type="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+        )
