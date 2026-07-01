@@ -352,7 +352,14 @@ input::placeholder {
 
 .garage-options-list {
     display: none;
-    position: fixed;
+    /* position:absolute (not fixed) relative to the input's wrapper
+       (#CityList / #GarageList, both position:relative). This tracks the
+       page naturally during scroll/keyboard-open with zero JS, avoiding a
+       known iOS Safari bug where position:fixed elements don't reliably
+       follow the visual viewport while the on-screen keyboard animates. */
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
     z-index: 9999;
     width: 220px;
     max-height: 220px;
@@ -360,7 +367,6 @@ input::placeholder {
     background: #fff;
     border: 2px solid #e5e5e5;
     border-radius: 16px;
-    margin-top: 2px;
     box-shadow: 0 4px 12px rgba(0,0,0,.18);
     text-align: right;
     direction: rtl;

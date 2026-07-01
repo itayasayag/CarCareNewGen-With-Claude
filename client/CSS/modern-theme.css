@@ -628,7 +628,7 @@ html.cc-dark .swal2-popup { background: var(--cc-surface) !important; color: var
     transform: translateX(105%);
     transition: transform .28s cubic-bezier(.4,0,.2,1);
     display: flex; flex-direction: column;
-    padding: calc(70px + env(safe-area-inset-top)) 0 calc(24px + env(safe-area-inset-bottom));
+    padding: calc(24px + env(safe-area-inset-top)) 0 calc(14px + env(safe-area-inset-bottom));
     direction: rtl;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -637,34 +637,34 @@ html.cc-dark .swal2-popup { background: var(--cc-surface) !important; color: var
 
 .cc-drawer-title {
     font-family: var(--cc-font);
-    font-weight: 700; font-size: 20px;
+    font-weight: 700; font-size: 18px;
     color: var(--cc-primary);
-    padding: 0 22px 14px;
+    padding: 0 20px 10px;
     border-bottom: 1px solid var(--cc-line);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .cc-drawer a {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 22px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
     color: var(--cc-ink) !important;
     font-family: var(--cc-font);
-    font-size: 17px; font-weight: 600;
+    font-size: 16px; font-weight: 600;
     text-decoration: none !important;
     transition: background .15s ease;
 }
 .cc-drawer a:hover { background: var(--cc-bg); }
-.cc-drawer a .cc-ico { font-size: 20px; width: 24px; text-align: center; }
+.cc-drawer a .cc-ico { font-size: 18px; width: 22px; text-align: center; }
 
 .cc-drawer-spacer { flex-grow: 1; }
 
 /* Dark-mode toggle row inside drawer */
 .cc-dm-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 22px;
+    padding: 10px 20px;
     border-top: 1px solid var(--cc-line);
-    margin-top: 8px;
-    font-family: var(--cc-font); font-weight: 600; font-size: 16px;
+    margin-top: 4px;
+    font-family: var(--cc-font); font-weight: 600; font-size: 15px;
     color: var(--cc-ink);
 }
 .cc-dm-switch {

@@ -100,30 +100,12 @@
                 .catch(function (e) { console.log("gov city error", e); });
         }
 
-        // Position a fixed dropdown directly under its trigger input,
-        // escaping any overflow:hidden ancestor.
-        function positionDropdown(inputId, listId) {
-            var input = document.getElementById(inputId);
-            var list = document.getElementById(listId);
-            if (!input || !list) return;
-            var rect = input.getBoundingClientRect();
-            list.style.top = (rect.bottom + 2) + 'px';
-            list.style.right = (window.innerWidth - rect.right) + 'px';
-            list.style.left = 'auto';
-            list.style.width = rect.width + 'px';
-        }
-
-        // Keep the open dropdown glued to its input while the mobile keyboard
-        // opens/closes (which resizes the visual viewport) — without this the
-        // fixed-position dropdown appears to "jump" as the keyboard animates.
-        function repositionOpenDropdowns() {
-            if ($("#cityOptionsList").is(':visible')) positionDropdown('citySearchInput', 'cityOptionsList');
-            if ($("#garageOptionsList").is(':visible')) positionDropdown('garageSearchInput', 'garageOptionsList');
-        }
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', repositionOpenDropdowns);
-            window.visualViewport.addEventListener('scroll', repositionOpenDropdowns);
-        }
+        // NOTE: the city/garage dropdowns are positioned purely via CSS now
+        // (position: absolute relative to their input's wrapper). This avoids
+        // a well-known iOS Safari bug where position:fixed elements don't
+        // reliably track the visual viewport while the on-screen keyboard
+        // opens/closes, which caused the dropdown to appear to "jump" to the
+        // wrong spot. No JS recalculation needed — it just follows the page.
 
         var CITY_LIST = [];
 
@@ -143,14 +125,12 @@
                     return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
                 }).join('')
             );
-            positionDropdown('citySearchInput', 'cityOptionsList');
             $("#cityOptionsList").show();
         });
 
         $(document).on('focus', '#citySearchInput', function () {
             var q = $(this).val().trim();
             if (q && CITY_LIST.length) $(this).trigger('input');
-            setTimeout(repositionOpenDropdowns, 300); // after keyboard animation settles
         });
 
         $(document).on('click', '.city-option-item, #cityOptionsList .garage-option', function () {
@@ -246,7 +226,6 @@
         function renderGarageOptions(list) {
             var $list = $("#garageOptionsList");
             if (!list.length) {
-                positionDropdown('garageSearchInput', 'garageOptionsList');
                 $list.html("<div class='garage-option-empty'>לא נמצאו מוסכים</div>").show();
                 return;
             }
@@ -255,15 +234,12 @@
                 html += "<div class='garage-option' data-id='" + list[i].id + "' data-name='" +
                     String(list[i].shem_mosah || '').replace(/'/g, "&#39;") + "'>" + list[i].shem_mosah + "</div>";
             }
-            positionDropdown('garageSearchInput', 'garageOptionsList');
             $list.html(html).show();
         }
 
         $(document).on('focus', '#garageSearchInput', function () {
             if (!$(this).prop('disabled')) {
-                positionDropdown('garageSearchInput', 'garageOptionsList');
                 renderGarageOptions(CURRENT_GARAGE_LIST);
-                setTimeout(repositionOpenDropdowns, 300); // after keyboard animation settles
             }
         });
 
