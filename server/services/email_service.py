@@ -56,7 +56,7 @@ def send_reminder_email(
             part.add_header("Content-Disposition", f'attachment; filename="CarCareReminder.ics"')
             msg.attach(part)
 
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=8) as server:
             server.starttls()
             server.login(from_address, settings.email_password)
             server.sendmail(from_address, to_email, msg.as_string())

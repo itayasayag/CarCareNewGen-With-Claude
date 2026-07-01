@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from database import get_connection
 from models.schemas import ReminderCreate, ReminderUpdate
 from services.email_service import send_reminder_email
@@ -46,7 +46,7 @@ def get_reminders_by_email(email: str):
 
 
 @router.post("/", status_code=201)
-def create_reminder(reminder: ReminderCreate):
+def create_reminder(reminder: ReminderCreate, background_tasks: BackgroundTasks):
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -54,21 +54,21 @@ def create_reminder(reminder: ReminderCreate):
         care_name = get_care_name(cursor, reminder.care_id)
         car_nickname = get_car_nickname(cursor, reminder.email, reminder.license_plate)
 
-        # Send email (non-blocking failure)
-        try:
-            send_reminder_email(
-                to_email=reminder.email,
-                care_name=care_name,
-                car_nickname=car_nickname,
-                remind_date=reminder.remind_date,
-                notes=reminder.notes or ""
-            )
-        except Exception as email_err:
-            print(f"Email send failed (non-critical): {email_err}")
-
         cursor.execute("INSERT INTO Reminder (RemindDate, Notes, Email, CareID, LicensePlate) "
             "VALUES (%s, %s, %s, %s, %s)", (reminder.remind_date, reminder.notes, reminder.email, reminder.care_id, reminder.license_plate))
         conn.commit()
+
+        # Send the confirmation email AFTER responding — SMTP can be slow/unreachable
+        # and must never block the user from seeing "reminder created".
+        background_tasks.add_task(
+            send_reminder_email,
+            to_email=reminder.email,
+            care_name=care_name,
+            car_nickname=car_nickname,
+            remind_date=reminder.remind_date,
+            notes=reminder.notes or ""
+        )
+
         return {"message": "Reminder created successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -77,7 +77,7 @@ def create_reminder(reminder: ReminderCreate):
 
 
 @router.put("/{reminder_id}")
-def update_reminder(reminder_id: int, reminder: ReminderUpdate):
+def update_reminder(reminder_id: int, reminder: ReminderUpdate, background_tasks: BackgroundTasks):
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -94,19 +94,18 @@ def update_reminder(reminder_id: int, reminder: ReminderUpdate):
         care_name = get_care_name(cursor, reminder.care_id) if reminder.care_id else ""
         car_nickname = get_car_nickname(cursor, email, license_plate)
 
-        try:
-            send_reminder_email(
-                to_email=email,
-                care_name=care_name,
-                car_nickname=car_nickname,
-                remind_date=reminder.remind_date,
-                notes=reminder.notes or ""
-            )
-        except Exception as email_err:
-            print(f"Email send failed (non-critical): {email_err}")
-
         cursor.execute("UPDATE Reminder SET RemindDate=%s, Notes=%s, CareID=%s WHERE ReminderID=%s", (reminder.remind_date, reminder.notes, reminder.care_id, reminder_id))
         conn.commit()
+
+        background_tasks.add_task(
+            send_reminder_email,
+            to_email=email,
+            care_name=care_name,
+            car_nickname=car_nickname,
+            remind_date=reminder.remind_date,
+            notes=reminder.notes or ""
+        )
+
         return {"message": "Reminder updated successfully"}
     except HTTPException:
         raise

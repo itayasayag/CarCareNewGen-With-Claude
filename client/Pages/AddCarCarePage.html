@@ -12,7 +12,15 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <!--תוספות אביעד-->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CarCare">
+    <meta name="theme-color" content="#1E5A82">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
+    <link rel="icon" href="images/icon-192.png">
     <title>Registration Form</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -105,6 +113,18 @@
             list.style.width = rect.width + 'px';
         }
 
+        // Keep the open dropdown glued to its input while the mobile keyboard
+        // opens/closes (which resizes the visual viewport) — without this the
+        // fixed-position dropdown appears to "jump" as the keyboard animates.
+        function repositionOpenDropdowns() {
+            if ($("#cityOptionsList").is(':visible')) positionDropdown('citySearchInput', 'cityOptionsList');
+            if ($("#garageOptionsList").is(':visible')) positionDropdown('garageSearchInput', 'garageOptionsList');
+        }
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', repositionOpenDropdowns);
+            window.visualViewport.addEventListener('scroll', repositionOpenDropdowns);
+        }
+
         var CITY_LIST = [];
 
         function AddToListCity(list) {
@@ -130,6 +150,7 @@
         $(document).on('focus', '#citySearchInput', function () {
             var q = $(this).val().trim();
             if (q && CITY_LIST.length) $(this).trigger('input');
+            setTimeout(repositionOpenDropdowns, 300); // after keyboard animation settles
         });
 
         $(document).on('click', '.city-option-item, #cityOptionsList .garage-option', function () {
@@ -242,6 +263,7 @@
             if (!$(this).prop('disabled')) {
                 positionDropdown('garageSearchInput', 'garageOptionsList');
                 renderGarageOptions(CURRENT_GARAGE_LIST);
+                setTimeout(repositionOpenDropdowns, 300); // after keyboard animation settles
             }
         });
 
