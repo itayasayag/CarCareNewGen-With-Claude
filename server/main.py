@@ -143,13 +143,35 @@ app.include_router(reminder.router)
 app.include_router(upload.router)
 
 
+@app.on_event("startup")
+def _prewarm_pool():
+    """
+    Open a couple of DB connections at startup and return them to the pool, so
+    the first real user request doesn't pay the cold-connection handshake cost.
+    Failures here are non-fatal — the pool will lazily connect on demand.
+    """
+    try:
+        from database import get_connection
+        warm = []
+        for _ in range(2):
+            c = get_connection()
+            cur = c.cursor()
+            cur.execute("SELECT 1")
+            cur.fetchone()
+            warm.append(c)
+        for c in warm:
+            c.close()  # returns to pool, ready for real requests
+    except Exception:
+        pass
+
+
 @app.get("/")
 def root():
     return {
         "message": "CarCare API is running!",
         "docs": "/docs",
         "version": "2.0.0",
-        "build": "cors-asgi-fix-2"   # bump to confirm a fresh deploy is live
+        "build": "connection-pool-4"   # bump to confirm a fresh deploy is live
     }
 
 
