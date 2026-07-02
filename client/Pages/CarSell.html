@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CarCare">
+    <meta name="theme-color" content="#1E5A82">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
+    <link rel="icon" href="images/icon-192.png">
+    <title>עולם המכירה</title>
+    <script src="../JS/CarCareFunctions.js"></script>
+    <script src="../JS/config.js"></script>
+    <script src="../JS/ajaxCall.js"></script>
+    <link href="../CSS/StyleSheet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="../CSS/modern-theme.css" rel="stylesheet" />
+    <style>
+        .sell-intro {
+            text-align: center;
+            color: var(--cc-muted);
+            font-family: var(--cc-font);
+            font-size: 15px;
+            margin: 8px 18px 22px;
+        }
+        .sell-options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 0 18px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .sell-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: var(--cc-surface);
+            border: 1px solid var(--cc-line);
+            border-radius: var(--cc-radius);
+            box-shadow: var(--cc-shadow);
+            padding: 26px 18px;
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+        .sell-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(16,42,67,.16);
+            border-color: var(--cc-primary);
+        }
+        .sell-card:active { transform: translateY(0); }
+        .sell-card img { height: 64px; width: auto; }
+        .sell-card-label {
+            font-family: var(--cc-font);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--cc-primary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="top">
+        <div class="header" id="header">
+            <h1 class="h1header">
+                <span>עולם המכירה</span>
+            </h1>
+            <div>
+                <img onclick="document.location='HomePage.html'" id="logo" src="images/LOGO ROUND WHITE BG.png" />
+                <img id="BackBTN" onclick="history.back()" src="images/back.png" />
+            </div>
+        </div>
+    </div>
+
+    <div class="RollDown">
+        <p class="sell-intro">בחר/י את המסמך שברצונך להפיק עבור הרכב</p>
+        <div class="sell-options">
+            <div class="sell-card" onclick="goExport('exportPDF')">
+                <img src="images/book.png" alt="ספר רכב" />
+                <div class="sell-card-label">יצא ספר רכב</div>
+            </div>
+            <div class="sell-card" onclick="goExport('saleAd')">
+                <img src="images/deal.png" alt="דף מכירה" />
+                <div class="sell-card-label">צור דף מכירה להדפסה</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Must be logged in
+            if (!localStorage.getItem('LogInUser')) {
+                window.location.href = 'SignUpPage.html';
+                return;
+            }
+            // Must have a selected car (set by the "עולם המכירה" button on MyCarsPage)
+            var selected = localStorage.getItem('SelectedCar');
+            if (!selected || selected === 'null') {
+                Swal.fire({
+                    title: 'לא נבחר רכב',
+                    text: 'חזור/י לעמוד הרכבים ובחר/י רכב דרך כפתור "עולם המכירה"',
+                    icon: 'info',
+                    confirmButtonColor: '#1E5A82'
+                }).then(function () { window.location.href = 'MyCarsPage.html'; });
+            }
+        });
+
+        // Navigate to the CarBook page, which auto-fires the matching PDF
+        // export once its live car data has loaded (reuses the existing,
+        // tested PDF generators — no duplicated logic here).
+        function goExport(action) {
+            window.location.href = 'CarBookPage.html?action=' + action;
+        }
+    </script>
+</body>
+</html>

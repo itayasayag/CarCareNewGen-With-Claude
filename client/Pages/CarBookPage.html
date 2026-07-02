@@ -88,6 +88,14 @@
                     if (typeof window.recenterCarousel === 'function') {
                         window.recenterCarousel();
                     }
+                    // If arriving from the CarSell page with an action, auto-fire
+                    // the matching PDF export once the car data has fully loaded.
+                    var action = new URLSearchParams(window.location.search).get('action');
+                    if (action === 'exportPDF') {
+                        setTimeout(function () { $("#exportPDF").trigger('click'); }, 600);
+                    } else if (action === 'saleAd') {
+                        setTimeout(function () { $("#saleAdBtn").trigger('click'); }, 600);
+                    }
                 });
             }
             
