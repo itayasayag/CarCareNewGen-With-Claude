@@ -123,92 +123,215 @@
             })
 
             $("#exportPDF").click(function () {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const divIds = ['careCarousel', 'CarBook']; // IDs of the divs you want to include
-                let promises = [];
-
-                // Add title and image to the top of the page
-                const title = "";
-                const logoPath = "images/LOGO ROUND WHITE BG.png";
-                const logoWidth = 20; // width in mm
-                const logoHeight = 20; // height in mm
-                const titleFontSize = 20;
-                const textColor = "#235978";
-                const margin = 10; // margin from page edges
-
-                // Fetch 'SelectedCar' from local storage
-                const selectedCar = JSON.parse(localStorage.getItem('SelectedCar')) || 'Unknown';
-
-                // Add a date and time stamp
-                const currentDate = new Date();
-                const dateString = `${formatToDDMMYYYY(currentDate)} ${currentDate.toLocaleTimeString('he-IL')}`;
-
-                // Generate the images for the divs
-                divIds.forEach(id => {
-                    const div = document.getElementById(id);
-                    if (div) {
-                        promises.push(html2canvas(div, { scale: 2 }).then(canvas => {
-                            return canvas.toDataURL('image/png');
-                        }));
-                    }
-                });
-
-                Promise.all(promises).then(images => {
-                    // Define page size
-                    const imgWidth = 190; // Width with margin
-                    const pageHeight = 295; // A4 height in mm
-                    let yOffset = margin; // Start from top margin
-
-                    // Add the title and logo image to the PDF
-                    doc.setFontSize(titleFontSize);
-                    doc.setFont("Calibri");
-                    doc.text(title, 105, yOffset, { align: 'center' }); // Title at the center
-                    doc.addImage(logoPath, 'PNG', margin, margin, logoWidth, logoHeight); // Logo at the top-left corner
-                    doc.setFontSize(titleFontSize);
-                    doc.setTextColor(textColor);
-                    doc.text("CarCare", logoWidth + 20, margin + 10); // Add text next to the logo
-
-                    // Add the date and time in the top-right corner
-                    doc.setFontSize(12);
-                    doc.setTextColor(0, 0, 0); // Black color for date
-                    doc.text(dateString, 200, margin + 10, { align: 'right' });
-
-                    // Add the SelectedCar value to the center of the page
-                    doc.setFontSize(16);
-                    doc.setTextColor(textColor);
-                    doc.text(`Car-Book of: ${selectedCar}`, 105, yOffset + 30, { align: 'center' }); // Positioned just below the title
-                    let CarLplate = localStorage.getItem("SelectedCar");
-                    let pdfFileName = 'CarCareFile' + CarLplate + 'CarBook.pdf'
-                    
-                    // Add images of divs
-                    let position = yOffset + 50; // Start below the SelectedCar text
-                    images.forEach((imgData, index) => {
-                        const img = new Image();
-                        img.src = imgData;
-                        img.onload = function () {
-                            const imgHeight = img.height * imgWidth / img.width;
-
-                            // Adjust the image height to fit within the page
-                            if (position + imgHeight > pageHeight - margin) {
-                                position = margin; // Reset position to top
-                                doc.addPage();
-                            }
-
-                            // Add image to the PDF
-                            doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-                            position += imgHeight + 10; // Add some space between images
-
-                            // Save the PDF once all images are processed
-                            if (index === images.length - 1) {
-                                doc.save(pdfFileName);
-                            }
-                        };
-                    });
-                }).catch(error => {
-                    console.error('Error generating PDF:', error);
-                });
+                generateCarBookPDF();
             });
+
+            // ── Car-book dashboard export ─────────────────────────────────────
+            // Builds a clean, data-driven document: header, summary stat cards,
+            // the full treatment history (all records — not just the visible
+            // carousel slice), then an appendix with every uploaded receipt,
+            // each under a headline naming the exact care it belongs to.
+            function generateCarBookPDF() {
+                var selectedCar = JSON.parse(localStorage.getItem('SelectedCar')) || 'Unknown';
+                var careList = (JSON.parse(localStorage.getItem('UserCarCarelist')) || [])
+                    .filter(function (c) { return String(c.licensePlate) === String(selectedCar); });
+
+                // Sort newest first for display
+                careList.sort(function (a, b) { return new Date(b.recordDate) - new Date(a.recordDate); });
+
+                // ── Summary numbers ──
+                var total = careList.length;
+                var withReceipt = careList.filter(function (c) {
+                    return c.invoiceFileName && c.invoiceFileName !== "ללא תמונה" && c.invoiceFileName !== "null";
+                });
+                var documented = withReceipt.length;
+                var maxKM = 0;
+                careList.forEach(function (c) { if (c.currentKM && c.currentKM > maxKM) maxKM = c.currentKM; });
+                var kmStr = maxKM ? maxKM.toLocaleString('he-IL') : '—';
+
+                var nextTest = '—';
+                try {
+                    var vd = JSON.parse(localStorage.getItem('vehicleDetails'));
+                    if (vd && vd[0] && vd[0].tokef_dt) {
+                        var td = new Date(vd[0].tokef_dt);
+                        nextTest = !isNaN(td) ? formatToDDMMYYYY(td) : vd[0].tokef_dt;
+                    }
+                } catch (e) {}
+
+                // Car name/model
+                var carName = 'רכב ' + selectedCar;
+                try {
+                    var d = JSON.parse(localStorage.getItem('vehicleDetails'));
+                    if (d && d[0]) {
+                        var parts = [d[0].tozeret_nm, d[0].kinuy_mishari, d[0].shnat_yitzur].filter(Boolean);
+                        if (parts.length) carName = parts.join(' ');
+                    }
+                } catch (e) {}
+
+                var genDate = formatToDDMMYYYY(new Date()) + ' ' + new Date().toLocaleTimeString('he-IL');
+
+                // ── Build history rows ──
+                var rows = '';
+                if (!careList.length) {
+                    rows = '<tr><td colspan="5" style="text-align:center;color:#93A6B3;">לא תועדו טיפולים</td></tr>';
+                } else {
+                    careList.forEach(function (c) {
+                        var dt = formatToDDMMYYYY(new Date(c.recordDate));
+                        var hasR = c.invoiceFileName && c.invoiceFileName !== "ללא תמונה" && c.invoiceFileName !== "null";
+                        rows +=
+                            '<tr>' +
+                            '<td>' + (c.careName || '') + '</td>' +
+                            '<td>' + dt + '</td>' +
+                            '<td>' + (c.currentKM != null ? Number(c.currentKM).toLocaleString('he-IL') : '—') + '</td>' +
+                            '<td>' + (c.cost ? '₪' + Number(c.cost).toLocaleString('he-IL') : '—') + '</td>' +
+                            '<td>' + (hasR ? '<span class="cb-yes">✓</span>' : '<span class="cb-no">—</span>') + '</td>' +
+                            '</tr>';
+                    });
+                }
+
+                var docHtml =
+                    '<div class="cb-head">' +
+                    '  <img src="images/LOGO ROUND WHITE BG.png" alt="CarCare" />' +
+                    '  <div class="cb-head-titles"><div class="cb-brand">CarCare</div>' +
+                    '    <div class="cb-sub">ספר רכב דיגיטלי</div></div>' +
+                    '  <div class="cb-date">' + genDate + '</div>' +
+                    '</div>' +
+                    '<div class="cb-carname">' + carName + '</div>' +
+                    '<div class="cb-plate">מספר רישוי: ' + selectedCar + '</div>' +
+                    '<div class="cb-stats">' +
+                    '  <div class="cb-stat"><div class="cb-stat-num">' + total + '</div><div class="cb-stat-label">טיפולים מתועדים</div></div>' +
+                    '  <div class="cb-stat"><div class="cb-stat-num">' + documented + '</div><div class="cb-stat-label">עם קבלה</div></div>' +
+                    '  <div class="cb-stat"><div class="cb-stat-num">' + kmStr + '</div><div class="cb-stat-label">קילומטראז\'</div></div>' +
+                    '  <div class="cb-stat"><div class="cb-stat-num">' + nextTest + '</div><div class="cb-stat-label">טסט הבא</div></div>' +
+                    '</div>' +
+                    '<div class="cb-section-title">היסטוריית טיפולים מלאה</div>' +
+                    '<table class="cb-table"><thead><tr>' +
+                    '<th>סוג טיפול</th><th>תאריך</th><th>ק"מ</th><th>עלות</th><th>קבלה</th>' +
+                    '</tr></thead><tbody>' + rows + '</tbody></table>';
+
+                var docEl = document.getElementById('carbookDoc');
+                docEl.innerHTML = docHtml;
+
+                Swal.fire({
+                    title: 'מפיק ספר רכב...',
+                    html: 'אנא המתן, טוען חשבוניות',
+                    allowOutsideClick: false,
+                    didOpen: function () { Swal.showLoading(); }
+                });
+
+                // Fetch every receipt image as base64 (so it embeds in the PDF).
+                // Only image files can be drawn into the PDF appendix; PDF-format
+                // uploads are skipped (jsPDF can't rasterize them client-side).
+                var imageReceipts = withReceipt.filter(function (c) {
+                    var name = String(c.invoiceFileName || '').toLowerCase();
+                    return !name.endsWith('.pdf');
+                });
+                var receiptPromises = imageReceipts.map(function (c) {
+                    var url = server + '/api/upload/' + c.invoiceFileName;
+                    return fetch(url)
+                        .then(function (r) { return r.ok ? r.blob() : null; })
+                        .then(function (blob) {
+                            if (!blob) return null;
+                            return new Promise(function (resolve) {
+                                var reader = new FileReader();
+                                reader.onloadend = function () { resolve({ care: c, dataUrl: reader.result }); };
+                                reader.onerror = function () { resolve(null); };
+                                reader.readAsDataURL(blob);
+                            });
+                        })
+                        .catch(function () { return null; });
+                });
+
+                Promise.all(receiptPromises).then(function (receipts) {
+                    var valid = receipts.filter(Boolean);
+                    const { jsPDF } = window.jspdf;
+                    var pdf = new jsPDF('p', 'mm', 'a4');
+                    var pageW = pdf.internal.pageSize.getWidth();
+                    var pageH = pdf.internal.pageSize.getHeight();
+                    var margin = 8;
+
+                    // 1) Capture the dashboard page
+                    html2canvas(docEl, { scale: 2, backgroundColor: '#ffffff' }).then(function (canvas) {
+                        var imgData = canvas.toDataURL('image/png');
+                        var imgW = pageW - margin * 2;
+                        var imgH = canvas.height * imgW / canvas.width;
+                        var y = margin;
+                        // Paginate the dashboard itself if very long
+                        if (imgH <= pageH - margin * 2) {
+                            pdf.addImage(imgData, 'PNG', margin, y, imgW, imgH);
+                        } else {
+                            // slice vertically across pages
+                            var remaining = imgH, sy = 0;
+                            var pxPerMm = canvas.width / imgW;
+                            while (remaining > 0) {
+                                var sliceMm = Math.min(pageH - margin * 2, remaining);
+                                pdf.addImage(imgData, 'PNG', margin, margin - sy, imgW, imgH);
+                                remaining -= sliceMm; sy += sliceMm;
+                                if (remaining > 0) pdf.addPage();
+                            }
+                        }
+
+                        // 2) Appendix — one receipt per section, each with a headline
+                        var idx = 0;
+                        function addNextReceipt() {
+                            if (idx >= valid.length) {
+                                Swal.close();
+                                pdf.save('CarCare-ספר-רכב-' + selectedCar + '.pdf');
+                                return;
+                            }
+                            var item = valid[idx];
+                            var c = item.care;
+                            var headline = c.careName || 'טיפול';
+                            var meta = formatToDDMMYYYY(new Date(c.recordDate)) +
+                                       (c.currentKM != null ? '  •  ' + Number(c.currentKM).toLocaleString('he-IL') + ' ק"מ' : '') +
+                                       (c.garageName ? '  •  ' + c.garageName : '');
+
+                            var img = new Image();
+                            img.onload = function () {
+                                pdf.addPage();
+                                // Headline band
+                                pdf.setFillColor(30, 90, 130);
+                                pdf.rect(margin, margin, pageW - margin * 2, 16, 'F');
+                                pdf.setTextColor(255, 255, 255);
+                                pdf.setFontSize(14);
+                                pdf.text(reverseHeb(headline), pageW - margin - 3, margin + 7, { align: 'right' });
+                                pdf.setFontSize(9);
+                                pdf.setTextColor(207, 224, 236);
+                                pdf.text(reverseHeb(meta), pageW - margin - 3, margin + 13, { align: 'right' });
+
+                                // Receipt image, fit within remaining page
+                                var availW = pageW - margin * 2;
+                                var availH = pageH - (margin + 16) - margin - 4;
+                                var rW = img.width, rH = img.height;
+                                var ratio = Math.min(availW / rW, availH / rH);
+                                var drawW = rW * ratio, drawH = rH * ratio;
+                                var dx = (pageW - drawW) / 2;
+                                var dy = margin + 16 + 4;
+                                pdf.addImage(item.dataUrl, 'PNG', dx, dy, drawW, drawH);
+
+                                idx++;
+                                addNextReceipt();
+                            };
+                            img.onerror = function () { idx++; addNextReceipt(); };
+                            img.src = item.dataUrl;
+                        }
+                        addNextReceipt();
+                    }).catch(function (err) {
+                        Swal.close();
+                        console.error('PDF error:', err);
+                        Swal.fire({ title: 'שגיאה בהפקת ספר הרכב', icon: 'error' });
+                    });
+                });
+            }
+
+            // jsPDF's default fonts render Hebrew left-to-right; reversing the
+            // string makes RTL text read correctly for these short headlines.
+            function reverseHeb(str) {
+                if (!str) return '';
+                // Only reverse if it contains Hebrew characters
+                if (!/[\u0590-\u05FF]/.test(str)) return str;
+                return str.split('').reverse().join('');
+            }
 
             // ===== Sale-ad PDF =====
             $("#saleAdBtn").click(function () {
@@ -1311,6 +1434,9 @@
         <div class="sale-ad-phone" id="adPhone"></div>
         <div class="sale-ad-footer">well treated in carcare</div>
     </div>
+
+    <!-- Hidden car-book dashboard template — built dynamically & captured by html2canvas -->
+    <div id="carbookDoc" class="cb-doc" aria-hidden="true"></div>
 
 </body >
 </html >
