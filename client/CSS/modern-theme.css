@@ -1565,3 +1565,72 @@ html.cc-dark #MyCarsBtn {
 .btn-check-car:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(245,158,11,.45); }
 .btn-check-car:active { transform: translateY(0); }
 .btn-check-car:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ============================================================
+   City / garage dropdown must escape their wrappers
+   ------------------------------------------------------------
+   .row .rounded-input sets overflow:hidden (to keep inputs tidy),
+   which silently CLIPS the absolutely-positioned option lists —
+   they render but are invisible inside the 52px-tall box.
+   These wrappers (and the row itself) must allow overflow.
+   ============================================================ */
+#locationRow,
+#locationRow .row,
+#CityList,
+#GarageList,
+#AddCareDiv .row .col-3.rounded-input,
+#AddCareDiv .row .col-6.rounded-input {
+    overflow: visible !important;
+}
+
+/* The dropdown itself: anchor to its wrapper, full width, above everything */
+#CityList .garage-options-list,
+#GarageList .garage-options-list {
+    position: absolute !important;
+    top: calc(100% + 4px) !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    min-width: 160px;
+    z-index: 99999 !important;
+}
+
+/* ============================================================
+   addCarPage: license plate + "בדוק מספר רכב" on one line
+   ============================================================ */
+.lp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 70%;
+    max-width: 520px;
+    margin: 15px auto;
+}
+.lp-row input[type="number"] {
+    flex: 1 1 auto;
+    width: auto !important;
+    margin: 0 !important;
+    min-width: 0;
+}
+/* Light-blue check button, matching the app palette */
+.btn-check-car {
+    flex: 0 0 auto;
+    width: auto !important;
+    height: 50px;
+    margin: 0 !important;
+    padding: 0 18px !important;
+    background: linear-gradient(135deg, #2C7DB3 0%, #4FA3D1 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 25px !important;
+    font-size: 15px !important;
+    font-weight: 700;
+    font-family: var(--cc-font);
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(44,125,179,.32);
+    transition: transform .12s, box-shadow .15s;
+}
+.btn-check-car:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(44,125,179,.42); }
+.btn-check-car:active { transform: translateY(0); }
+.btn-check-car:disabled { opacity: .6; cursor: not-allowed; }

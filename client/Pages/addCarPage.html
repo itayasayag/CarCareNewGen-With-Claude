@@ -421,7 +421,7 @@
             }
             $("#checkCarBtn").prop("disabled", true).text("בודק...");
             GetCarDetails(lp, function () {
-                $("#checkCarBtn").prop("disabled", false).text("בדוק מספר רכב");
+                $("#checkCarBtn").prop("disabled", false).text("בדוק");
             });
         }
 
@@ -756,10 +756,10 @@
         <div class="container">
 
             <form id="registrationForm" method="post" action="#">
-                <div class="form-group">
+                <div class="lp-row">
                     <input type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="IDlicenseNum" name="licenseNum" placeholder="מספר רישוי" required>
+                    <button type="button" id="checkCarBtn" class="btn-check-car" onclick="checkCarNumber()">בדוק</button>
                 </div>
-                <button type="button" id="checkCarBtn" class="btn-check-car" onclick="checkCarNumber()">בדוק מספר רכב</button>
                 <div class="form-group">
                     <input type="text" class="form-control" id="IDnickname" name="nickname" placeholder="כינוי רכב" required>
                 </div>

@@ -81,14 +81,18 @@
         var GOV_GARAGE_URL = "https://data.gov.il/api/3/action/datastore_search";
 
         //READ CITY LIST from the gov dataset (distinct yishuv values)
+        var CITIES_LOADING = true;
+
         function ReadCity() {
+            CITIES_LOADING = true;
             // ask for many rows but only the yishuv field, then dedupe client-side
             var url = GOV_GARAGE_URL + "?resource_id=" + GOV_GARAGE_RESOURCE +
                       "&fields=yishuv&limit=32000";
             fetch(url)
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (!data.success) { console.log("gov city fetch failed"); return; }
+                    CITIES_LOADING = false;
+                    if (!data.success) { console.error("gov city fetch failed", data); return; }
                     var seen = {}, cities = [];
                     data.result.records.forEach(function (rec) {
                         var c = (rec.yishuv || "").trim();
@@ -96,8 +100,16 @@
                     });
                     cities.sort(function (a, b) { return a.localeCompare(b, 'he'); });
                     AddToListCity(cities);
+                    // If the user already tapped the field while we were loading,
+                    // populate the open dropdown now that data has arrived.
+                    if ($("#citySearchInput").is(':focus')) {
+                        $("#citySearchInput").trigger('input');
+                    }
                 })
-                .catch(function (e) { console.log("gov city error", e); });
+                .catch(function (e) {
+                    CITIES_LOADING = false;
+                    console.error("gov city error", e);
+                });
         }
 
         // NOTE: the city/garage dropdowns are positioned purely via CSS now
@@ -137,6 +149,14 @@
         });
 
         $(document).on('focus', '#citySearchInput', function () {
+            if (!CITY_LIST.length) {
+                // Data still in flight — show a hint rather than nothing
+                $("#cityOptionsList")
+                    .html("<div class='garage-option-empty'>" +
+                          (CITIES_LOADING ? "טוען ערים..." : "לא נטענו ערים") + "</div>")
+                    .show();
+                return;
+            }
             // Show full list immediately on first tap — user shouldn't have to type first
             renderCityOptions(CITY_LIST.slice(0, 40));
         });
