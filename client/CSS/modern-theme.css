@@ -789,6 +789,13 @@ body {
     box-sizing: border-box;
     overflow: hidden;
 }
+
+/* City and garage wrappers must NOT clip their absolutely-positioned
+   dropdown lists. Override the overflow:hidden set above. */
+#CityList.rounded-input,
+#GarageList.rounded-input {
+    overflow: visible !important;
+}
 .row .rounded-input input, .row .rounded-input-Garage input,
 .row .rounded-input textarea, .row .rounded-input select,
 .row .carcare-select {
@@ -1526,49 +1533,3 @@ html.cc-dark #MyCarsBtn {
     display: inline-block !important;
     cursor: pointer !important;
 }
-
-/* ── addCarPage: form inputs ─────────────────────────────────────────────────
-   Always show a visible border so users know the fields are editable.
-   Active/focused field gets a white background and stronger border.
-   ──────────────────────────────────────────────────────────────────────────── */
-#registrationForm .form-control {
-    background: var(--cc-bg) !important;
-    border: 1.5px solid #B9CBD9 !important;
-    border-radius: 20px !important;
-    color: var(--cc-ink) !important;
-    font-family: var(--cc-font) !important;
-    transition: border-color .15s, background .15s;
-    text-align: center;
-}
-#registrationForm .form-control:focus {
-    background: #ffffff !important;
-    border-color: var(--cc-primary) !important;
-    box-shadow: 0 0 0 3px rgba(30,90,130,.12) !important;
-    outline: none !important;
-}
-#registrationForm .form-control::placeholder {
-    color: var(--cc-muted);
-    text-align: center;
-}
-
-/* "בדוק מספר רכב" orange-tinted check button */
-.btn-check-car {
-    display: block;
-    width: 60%;
-    max-width: 240px;
-    margin: -6px auto 14px;
-    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-    color: #fff !important;
-    border: none;
-    border-radius: 999px;
-    padding: 9px 0;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: var(--cc-font);
-    cursor: pointer;
-    box-shadow: 0 3px 10px rgba(245,158,11,.35);
-    transition: transform .12s, box-shadow .15s;
-}
-.btn-check-car:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(245,158,11,.45); }
-.btn-check-car:active { transform: translateY(0); }
-.btn-check-car:disabled { opacity: .6; cursor: not-allowed; }
