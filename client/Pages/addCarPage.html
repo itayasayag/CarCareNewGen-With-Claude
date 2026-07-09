@@ -260,12 +260,16 @@
                         picURL: "null",
                         userEmail: tempUser.email
                     }
-                    var NewCartoStorage = JSON.stringify(car);
-                    var oldCarData = localStorage.getItem("UserCarlist");
-                    localStorage.setItem("UserCarlist", oldCarData + NewCartoStorage);
+                    // NOTE: do NOT touch the UserCarlist cache here.
+                    // The old code did `oldCarData + NewCartoStorage`, concatenating two
+                    // JSON strings into invalid JSON (e.g. "[{...}][{...}]"), which made
+                    // JSON.parse throw and the car list appear empty. It also fired the
+                    // GET immediately, racing the POST — if the GET won, the server
+                    // returned the list WITHOUT the new car and overwrote the cache.
+                    // That combination is why a new car only showed after a few refreshes.
+                    // The refetch now happens in postSCB(), strictly after the POST succeeds.
                     api = server + "/api/usercars/";
                     ajaxCall("POST", api, JSON.stringify(car), postSCB, postECB);
-                    ReadUserCarByEmail(tempUser.email);//קריאה מחדש של הרכבים לאתר, לאחר הוספת רכב.איתי.
                 }
             }
             else Swal.fire({
@@ -275,16 +279,25 @@
 
         }
         function postSCB(res) {
-
             console.log(res);
-            Swal.fire({
-                title: "הרכב נוסף בהצלחה!",
-                icon: "success"
-            });
             addCarSucceed = true;
-            ChangePageAfterAdd();
+            var tempUser = JSON.parse(localStorage.getItem('LogInUser'));
 
+            // Refresh the cached car list from the server only AFTER the POST
+            // succeeded, so the new car is guaranteed to be included. Navigate
+            // once the fresh list is stored (or if the refresh fails, anyway).
+            function proceed() {
+                Swal.fire({
+                    title: "הרכב נוסף בהצלחה!",
+                    icon: "success"
+                }).then(ChangePageAfterAdd);
+            }
 
+            if (tempUser && tempUser.email) {
+                ReadUserCarByEmail(tempUser.email, proceed);
+            } else {
+                proceed();
+            }
         }
 
         function postECB(err) {

@@ -7,8 +7,8 @@ if (typeof Swal !== 'undefined') {
 ﻿function AddCarToListFromStorage() {
     var temp = localStorage.getItem('LogInUser');
     var tempUser = JSON.parse(temp);
-    if (localStorage.getItem('UserCarlist') == null) {
-        // No cached list yet — fetch first, then render once data is back.
+    if (GetCachedCarList() == null) {
+        // No usable cached list — fetch first, then render once data is back.
         ReadUserCarByEmail(tempUser.email, RenderCarSelectFromStorage);
         return;
     }
@@ -19,7 +19,7 @@ if (typeof Swal !== 'undefined') {
 }
 
 function RenderCarSelectFromStorage() {
-    var StorageCarlist = JSON.parse(localStorage.getItem('UserCarlist'));
+    var StorageCarlist = GetCachedCarList();
     var valueCounter = 1;/* משתנה רץ לאופשנס*/
     var str = "<select onchange='changeCarSelect()' class='select-car' id='carSelect' name='carSelect'> <option value='' disabled selected>בחר רכב</option>";
     if (StorageCarlist != null) {
@@ -57,6 +57,22 @@ function AddCarToAlertsListFromStorage() { //טיפה שונה מהוספה רג
     document.getElementById("SelectDiv").innerHTML = str;
 }
 
+
+// Safely read the cached car list. Returns null if it's missing or corrupt.
+// (A past bug wrote invalid JSON here, which made JSON.parse throw and the
+// whole car list silently disappear until a fresh fetch overwrote it.)
+function GetCachedCarList() {
+    var raw = localStorage.getItem('UserCarlist');
+    if (raw == null) return null;
+    try {
+        var parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : null;
+    } catch (e) {
+        console.warn('UserCarlist cache was corrupt — clearing it.', e);
+        localStorage.removeItem('UserCarlist');
+        return null;
+    }
+}
 
 function ReadUserCarByEmail(email, onDone)
 {

@@ -102,6 +102,22 @@
         }
         .btn-remove:hover { background: var(--cc-accent); color: #fff !important; }
 
+        /* Edit button — outlined blue, sits between בחר and הסר */
+        .btn-edit-car {
+            background: transparent;
+            color: var(--cc-primary) !important;
+            border: 1.5px solid var(--cc-primary);
+            border-radius: 999px;
+            padding: 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--cc-font);
+            cursor: pointer;
+            text-align: center;
+            transition: background .15s, color .15s;
+        }
+        .btn-edit-car:hover { background: var(--cc-primary); color: #fff !important; }
+
         /* Purple "sales world" button — full width under the car header */
         .btn-sell-world {
             display: block;
@@ -293,6 +309,7 @@
                     '  </div>' +
                     '  <div class="car-actions">' +
                     '    <button class="btn-select" onclick="selectCar(\'' + lp + '\', event)">בחר</button>' +
+                    '    <button class="btn-edit-car" onclick="editCar(\'' + lp + '\', event)">ערוך</button>' +
                     '    <button class="btn-remove" onclick="deleteCar(\'' + lp + '\', \'' + car.nickName.replace(/'/g,"\\'") + '\', event)">הסר</button>' +
                     '  </div>' +
                     '</div>' +
@@ -317,6 +334,15 @@
                 });
                 container.appendChild(card);
             });
+        }
+
+        function editCar(licensePlate, event) {
+            if (event) event.stopPropagation();
+            // Select the car, then open addCarPage in edit mode (same flow the
+            // CarBook page's edit icon uses).
+            localStorage.setItem('SelectedCar', JSON.stringify(String(licensePlate)));
+            localStorage.setItem('editMode', JSON.stringify(true));
+            window.location.href = 'addCarPage.html';
         }
 
         function goToSellWorld(licensePlate, event) {

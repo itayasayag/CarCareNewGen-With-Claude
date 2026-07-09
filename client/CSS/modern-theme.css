@@ -1634,3 +1634,34 @@ html.cc-dark #MyCarsBtn {
 .btn-check-car:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(44,125,179,.42); }
 .btn-check-car:active { transform: translateY(0); }
 .btn-check-car:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ============================================================
+   CarBookPage — edit + info icons moved to the LEFT, below the
+   header with clear breathing room.
+   The old rules pinned them absolutely to the right (top:70%),
+   which pushed them up against the header band.
+   ============================================================ */
+.cb-toolbar {
+    display: flex;
+    direction: ltr;            /* page is RTL — force icons to sit on the left */
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    padding: 0 16px;
+    margin-top: 16px;          /* keeps icons off the header */
+    margin-bottom: 4px;
+}
+.cb-toolbar #editcars,
+.cb-toolbar #showDetails {
+    position: static !important;   /* undo the old absolute pinning */
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    cursor: pointer;
+    transition: transform .15s ease;
+}
+.cb-toolbar #editcars  { height: 34px !important; }
+.cb-toolbar #showDetails { height: 38px !important; }
+.cb-toolbar #editcars:hover,
+.cb-toolbar #showDetails:hover { transform: scale(1.08); }
