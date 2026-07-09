@@ -62,7 +62,7 @@ h3 {
     padding-bottom: 25px;
     background-color: #235978;
     color: white;
-    font-family: Titillium Web,Calibri, sans-serif; /*תוספות מאי*/
+    font-family: var(--cc-font); /*תוספות מאי*/
     text-align: center;
     margin: 0;
     font-size: 48px;
@@ -250,7 +250,7 @@ body, html {
 
 
 body {
-    font-family: Calibri, sans-serif;
+    font-family: var(--cc-font);
     direction: rtl; /* Right-to-left text direction */
     text-align: center;
 }
@@ -265,7 +265,7 @@ textarea {
     width: 70%;
     height: 50px;
     margin: auto;
-    font-family: Calibri;
+    font-family: var(--cc-font);
     font-size: 25px;
     margin: 15px 0;
     border: solid;
@@ -285,7 +285,7 @@ input[type="date"],
     width: 70%;
     height: 50px;
     margin: auto;
-    font-family: Calibri;
+    font-family: var(--cc-font);
     text-align: center;
     border: solid;
     border-width: 2px;
@@ -301,7 +301,7 @@ input[type="date"],
 
 
 input::placeholder {
-    font-family: Calibri, sans-serif;
+    font-family: var(--cc-font);
     text-align: center;
     font-size: 22px;
     color: #235978;
@@ -374,7 +374,7 @@ input::placeholder {
 
 .garage-option {
     padding: 10px 14px;
-    font-family: Calibri;
+    font-family: var(--cc-font);
     font-size: 18px;
     color: #235978;
     cursor: pointer;
@@ -386,7 +386,7 @@ input::placeholder {
 
 .garage-option-empty {
     padding: 10px 14px;
-    font-family: Calibri;
+    font-family: var(--cc-font);
     font-size: 16px;
     color: #999;
 }
@@ -497,7 +497,7 @@ input::placeholder {
     left: 10px;
     color: white;
     background-color: #235978;
-    font-family: Calibri, sans-serif;
+    font-family: var(--cc-font);
     font-size: 22px;
     text-align: left;
 }
@@ -595,7 +595,7 @@ input::placeholder {
 }
 
 #selectedcity {
-    font-family: Calibri;
+    font-family: var(--cc-font);
     text-align: center;
     border: solid;
     border-width: 2px;
@@ -904,13 +904,13 @@ div#carPhoto{
 }
 .ocrAlert{
     text-align:right;
-    font-family:calibri, sans-serif;
+    font-family: var(--cc-font);
 }
 .ocrAlert > pre {
     display: block;
     font-size: 87.5%;
     color: #212529;
-    font-family: calibri;
+    font-family: var(--cc-font);
     /* margin-left: auto; */
     /* margin-right: auto; */
     padding-right: 40%;

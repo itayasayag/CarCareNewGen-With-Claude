@@ -12,7 +12,7 @@
     <meta charset="utf-8" />
 
     <title>התחברות / הרשמה</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico?v=2">
 
 
     <meta charset="UTF-8">
@@ -23,7 +23,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CarCare">
     <meta name="theme-color" content="#1E5A82">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png?v=2">
     <link rel="icon" href="images/icon-192.png">
     <title>Registration Form</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
@@ -48,10 +48,6 @@
 
             changePageToLogIn();
 
-            $("#Guestlogin").click(function () {
-                window.location.href = "HomePage - Guest.html"
-            })
-
             $('#RegBtn').click(postUser);
             $('#loginBtn').click(login);
 
@@ -71,7 +67,7 @@
                 // Hide #loginBtn and show #RegBtn
                 $('#loginBtn').hide();
                 $('#RegBtn').show();
-                $('#Guestlogin').show();//guest always available
+                // guest login removed
                 // Hide #firstName, #lastName, #phoneNumber
                 $('#firstName, #lastName, #phoneNumber').show();
             });
@@ -96,8 +92,6 @@
                 // Hide #RegBtn and show #loginBtn
                 $('#RegBtn').hide();
                 $('#loginBtn').show();
-                // Guest login is always available
-                $('#Guestlogin').show();
                 // Hide #firstName, #lastName, #phoneNumber
                 $('#firstName, #lastName, #phoneNumber').hide();
             }
@@ -253,7 +247,7 @@
     </script>
     <style>
         body {
-            font-family: Calibri, sans-serif;
+            font-family: var(--cc-font);
             direction: rtl; /* Right-to-left text direction */
             text-align: center;
             display: block;
@@ -267,11 +261,11 @@
         input[type="email"],
         button {
             width: 70%;
-            height: 50px;
+            height: 46px;
             margin: auto;
-            font-family: Calibri;
-            font-size: 25px;
-            margin: 20px 0;
+            font-family: var(--cc-font);
+            font-size: 20px;
+            margin: 9px 0;
             border: solid;
             border-width: 2px;
             border-color: #e5e5e5;
@@ -285,7 +279,7 @@
 
         input::placeholder {
             text-align: right;
-            font-size: 22px;
+            font-size: 18px;
             color: #235978;
         }
 
@@ -342,7 +336,7 @@
             border: solid;
             border-width: 2px;
             border-color: #e5e5e5;
-            font-family: Calibri;
+            font-family: var(--cc-font);
             font-size: 20px;
             display: inline-block;
         }
@@ -390,7 +384,7 @@
                 <input type="text" class="form-control" id="lastName" name="lastName" placeholder="שם משפחה" required>
             </div>
             <div class="form-group">
-                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="מספר טלפון" required>
+                <input type="tel" inputmode="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="מספר טלפון" required>
             </div>
             <div class="form-group">
                 <input type="email" class="form-control" id="email" name="email" placeholder="מייל" required>
@@ -411,7 +405,6 @@
             <div id="googleBtnWrap" style="display:flex;justify-content:center;margin:8px auto 0;">
                 <div id="g_id_signin"></div>
             </div>
-            <button type="button" class="btn-secondary rounded-button" id="Guestlogin" style="width:80%;margin:10px auto 0;display:block;">התחבר כאורח</button>
         </div>
     </div>
 

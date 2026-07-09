@@ -141,6 +141,16 @@ body, body.mainpage {
     font-size: 16px !important;
 }
 
+/* No reminders → hide the white panel entirely, keep only the bell */
+.alertsDiv.no-reminders {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    justify-content: flex-start;
+}
+.alertsDiv.no-reminders .scroll { display: none; }
+
 .reminderinnerDiv {
     background: var(--cc-bg);
     border: 1px solid var(--cc-line);
@@ -384,7 +394,7 @@ html.cc-dark #BackBTN:hover { background: rgba(255,255,255,.24); }
 /* ---- Form rows (icon + input) ---- */
 .rounded-input, .rounded-input-Garage {
     background: var(--cc-surface);
-    border: 1px solid var(--cc-line);
+    border: 1.5px solid #B9CBD9;   /* visible outline so fields read as editable */
     border-radius: 14px;
     box-shadow: var(--cc-shadow-sm);
     margin: 10px 14px !important;
@@ -417,7 +427,7 @@ textarea::placeholder { color: var(--cc-muted); }
 /* Dropdowns inside content (care type, garage, car) */
 .carcare-select {
     background: var(--cc-surface) !important;
-    border: 1px solid transparent !important;
+    border: 1.5px solid #B9CBD9 !important;   /* visible outline */
     border-radius: 14px !important;
     padding: 12px 14px !important;
     box-shadow: var(--cc-shadow-sm);
@@ -782,7 +792,8 @@ body {
 .row .rounded-input input, .row .rounded-input-Garage input,
 .row .rounded-input textarea, .row .rounded-input select,
 .row .carcare-select {
-    text-align: right;
+    text-align: center;
+    text-align-last: center;   /* centers <select> text on iOS/Chrome */
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;

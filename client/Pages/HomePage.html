@@ -11,7 +11,7 @@
     <meta charset="utf-8" />
 
     <title>CarCare מסך הבית</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico?v=2">
 
 
     <meta charset="UTF-8">
@@ -22,7 +22,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CarCare">
     <meta name="theme-color" content="#1E5A82">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png?v=2">
     <link rel="icon" href="images/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -62,10 +62,23 @@
 
             var temp = localStorage.getItem('LogInUser');
             var tempUser = JSON.parse(temp);
-            if (temp !== null) {
-                document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
-                AddCarToListFromStorage();
+            if (temp === null) {
+                // Not logged in — block the page and send to sign-in.
+                Swal.fire({
+                    title: 'אינך מחובר/ת',
+                    text: 'יש להתחבר כדי להשתמש באפליקציה',
+                    icon: 'warning',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonText: 'לעמוד ההתחברות',
+                    confirmButtonColor: '#1E5A82'
+                }).then(function () {
+                    window.location.href = 'SignUpPage.html';
+                });
+                return; // stop all page wiring — nothing is clickable behind the swal
             }
+            document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
+            AddCarToListFromStorage();
 
             ReadUserCarCareByEmail(tempUser.email);
             var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
@@ -155,6 +168,7 @@
 
         function getReminderECB(err) {
             console.log(err);
+            $(".alertsDiv").addClass("no-reminders");
         }
 
         function AddReminderList(list) {
@@ -170,6 +184,12 @@
                 }
             }
             document.getElementById("ReminderList").innerHTML = str;
+            // No reminders → collapse the white panel, keep only the bell
+            if (str === "") {
+                $(".alertsDiv").addClass("no-reminders");
+            } else {
+                $(".alertsDiv").removeClass("no-reminders");
+            }
         }
 
         function removeReminder(reminderID) {
@@ -358,7 +378,7 @@
 
         #ReminderList {
             text-align: right;
-            font-family: Titillium Web, Calibri, sans-serif;
+            font-family: var(--cc-font);
             color: #823007;
             font-size: 20px;
         }
