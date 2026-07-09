@@ -413,7 +413,19 @@
 
 
 
-        function GetCarDetails(LPlate) {
+        function checkCarNumber() {
+            var lp = $("#IDlicenseNum").val().trim();
+            if (!lp) {
+                Swal.fire({ title: "הכנס/י מספר רישוי קודם", icon: "info" });
+                return;
+            }
+            $("#checkCarBtn").prop("disabled", true).text("בודק...");
+            GetCarDetails(lp, function () {
+                $("#checkCarBtn").prop("disabled", false).text("בדוק מספר רכב");
+            });
+        }
+
+        function GetCarDetails(LPlate, onDone) {
             var misparRechev = LPlate;
             var resourceId = "053cea08-09bc-40ec-8f7a-156f0677aff3";
             var url = `https://data.gov.il/api/3/action/datastore_search?resource_id=${resourceId}&q=${misparRechev}`;
@@ -427,17 +439,18 @@
                         ShowCarDetails(JSON.parse(localStorage.getItem('vehicleDetails')));
                     } else {
                         console.error("Failed to fetch data:", data);
-
                     }
+                    if (typeof onDone === 'function') onDone();
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    Swal.fire({ // במידה והרכב לא מופיע במערכת
+                    Swal.fire({
                         title: "מספר רישוי זה אינו מופיע במערכת",
                         icon: "error"
                     }).then(function () {
                         $("#IDlicenseNum").val("");
                     });
+                    if (typeof onDone === 'function') onDone();
                 });
 
 
@@ -736,8 +749,9 @@
 
             <form id="registrationForm" method="post" action="#">
                 <div class="form-group">
-                    <input onfocusout="GetCarDetails($(this).val())" type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="IDlicenseNum" name="licenseNum" placeholder="מספר רישוי" required>
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="IDlicenseNum" name="licenseNum" placeholder="מספר רישוי" required>
                 </div>
+                <button type="button" id="checkCarBtn" class="btn-check-car" onclick="checkCarNumber()">בדוק מספר רכב</button>
                 <div class="form-group">
                     <input type="text" class="form-control" id="IDnickname" name="nickname" placeholder="כינוי רכב" required>
                 </div>
