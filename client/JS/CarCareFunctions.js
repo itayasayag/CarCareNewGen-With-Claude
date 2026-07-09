@@ -1,19 +1,10 @@
-// ── SweetAlert2 global defaults ──────────────────────────────────────────────
-// Shadow window.Swal with a mixin that sets confirmButtonText = 'סגור' for
-// every dialog across the app. Individual calls can still override it.
-// We run this once after Swal is available (it loads via <script> before this).
-(function applySwalDefaults() {
-    if (window.Swal) {
-        window.Swal = window.Swal.mixin({ confirmButtonText: 'סגור' });
-    } else {
-        // Fallback: try again after DOM ready (in case of async load order)
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.Swal) window.Swal = window.Swal.mixin({ confirmButtonText: 'סגור' });
-        });
-    }
-})();
+// Set the default Swal confirm button text to Hebrew "סגור" app-wide.
+// Using mixin so individual calls can still override it.
+if (typeof Swal !== 'undefined') {
+    window.Swal = Swal.mixin({ confirmButtonText: 'סגור' });
+}
 
-function AddCarToListFromStorage() {
+﻿function AddCarToListFromStorage() {
     var temp = localStorage.getItem('LogInUser');
     var tempUser = JSON.parse(temp);
     if (localStorage.getItem('UserCarlist') == null) {

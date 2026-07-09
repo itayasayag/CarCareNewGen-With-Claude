@@ -789,13 +789,6 @@ body {
     box-sizing: border-box;
     overflow: hidden;
 }
-
-/* City and garage wrappers must NOT clip their absolutely-positioned
-   dropdown lists. Override the overflow:hidden set above. */
-#CityList.rounded-input,
-#GarageList.rounded-input {
-    overflow: visible !important;
-}
 .row .rounded-input input, .row .rounded-input-Garage input,
 .row .rounded-input textarea, .row .rounded-input select,
 .row .carcare-select {
@@ -1487,49 +1480,88 @@ html.cc-dark #MyCarsBtn {
 .cb-receipt-body img { max-width: 100%; max-height: 900px; border-radius: 8px; }
 
 /* ── SweetAlert2 global fixes ────────────────────────────────────────────────
-   Our .btn-primary / button overrides bleed into Swal popups and break the
-   confirm-button font and layout. These rules restore correct appearance for
-   all Swal dialogs across the app.
+   Only fix font and layout — do NOT override button backgrounds/colors,
+   as that wipes out Swal's own deny (red) and cancel (grey) styling.
    -------------------------------------------------------------------------- */
 
-/* Popup: always centered, RTL for Hebrew text */
+/* Popup: centered, correct font */
 .swal2-popup {
     font-family: var(--cc-font) !important;
     direction: rtl;
     text-align: center !important;
 }
-.swal2-title, .swal2-html-container, .swal2-content {
+.swal2-title, .swal2-html-container {
     font-family: var(--cc-font) !important;
     text-align: center !important;
-    width: 100% !important;
 }
 
-/* Action row: centered horizontally */
+/* Action row: centered */
 .swal2-actions {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
     flex-wrap: wrap !important;
-    width: 100% !important;
 }
 
-/* Confirm / deny / cancel buttons — reset all inherited app styles */
+/* Buttons: fix font and size ONLY — leave color/background to Swal */
 .swal2-confirm,
 .swal2-deny,
 .swal2-cancel {
     font-family: var(--cc-font) !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     border-radius: 8px !important;
-    padding: 10px 28px !important;
-    border: none !important;
-    box-shadow: none !important;
+    padding: 10px 24px !important;
     height: auto !important;
     width: auto !important;
     min-width: 80px !important;
     margin: 0 !important;
     line-height: 1.4 !important;
-    display: inline-block !important;
-    cursor: pointer !important;
 }
+
+/* ── addCarPage: form inputs ─────────────────────────────────────────────────
+   Always show a visible border so users know the fields are editable.
+   Active/focused field gets a white background and stronger border.
+   ──────────────────────────────────────────────────────────────────────────── */
+#registrationForm .form-control {
+    background: var(--cc-bg) !important;
+    border: 1.5px solid #B9CBD9 !important;
+    border-radius: 20px !important;
+    color: var(--cc-ink) !important;
+    font-family: var(--cc-font) !important;
+    transition: border-color .15s, background .15s;
+    text-align: center;
+}
+#registrationForm .form-control:focus {
+    background: #ffffff !important;
+    border-color: var(--cc-primary) !important;
+    box-shadow: 0 0 0 3px rgba(30,90,130,.12) !important;
+    outline: none !important;
+}
+#registrationForm .form-control::placeholder {
+    color: var(--cc-muted);
+    text-align: center;
+}
+
+/* "בדוק מספר רכב" orange-tinted check button */
+.btn-check-car {
+    display: block;
+    width: 60%;
+    max-width: 240px;
+    margin: -6px auto 14px;
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 0;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--cc-font);
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(245,158,11,.35);
+    transition: transform .12s, box-shadow .15s;
+}
+.btn-check-car:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(245,158,11,.45); }
+.btn-check-car:active { transform: translateY(0); }
+.btn-check-car:disabled { opacity: .6; cursor: not-allowed; }
