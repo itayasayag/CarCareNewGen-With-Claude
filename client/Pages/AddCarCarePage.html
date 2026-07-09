@@ -115,22 +115,30 @@
             $("#cityOptionsList").hide();
         }
 
-        $(document).on('input', '#citySearchInput', function () {
-            var q = $(this).val().trim();
-            if (!q) { $("#cityOptionsList").hide(); return; }
-            var filtered = CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 40);
-            if (!filtered.length) { $("#cityOptionsList").hide(); return; }
+        function renderCityOptions(list) {
+            if (!list.length) { $("#cityOptionsList").hide(); return; }
             $("#cityOptionsList").html(
-                filtered.map(function (c) {
+                list.map(function (c) {
                     return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
                 }).join('')
             );
             $("#cityOptionsList").show();
+        }
+
+        $(document).on('input', '#citySearchInput', function () {
+            var q = $(this).val().trim();
+            if (!q) {
+                // Empty query → show all (first 40 alphabetically)
+                renderCityOptions(CITY_LIST.slice(0, 40));
+                return;
+            }
+            var filtered = CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 40);
+            renderCityOptions(filtered);
         });
 
         $(document).on('focus', '#citySearchInput', function () {
-            var q = $(this).val().trim();
-            if (q && CITY_LIST.length) $(this).trigger('input');
+            // Show full list immediately on first tap — user shouldn't have to type first
+            renderCityOptions(CITY_LIST.slice(0, 40));
         });
 
         $(document).on('click', '.city-option-item, #cityOptionsList .garage-option', function () {
