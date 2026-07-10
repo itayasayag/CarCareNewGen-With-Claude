@@ -1728,3 +1728,123 @@ html.cc-dark #footerCarCare.footer {
 }
 #AddCareDiv #SelectDiv .select-car option { color: var(--cc-ink); }
 html.cc-dark #AddCareDiv #SelectDiv .select-car { color: var(--cc-ink) !important; }
+
+/* ╔══════════════════════════════════════════════════════════╗
+   ║  GRADIENT THEME LAYER — "icon look" across the whole UI  ║
+   ║  Appended as one block so a single git revert removes it ║
+   ╚══════════════════════════════════════════════════════════╝ */
+
+:root {
+    --cc-grad:      linear-gradient(135deg, #1E5A82 0%, #2A6F9E 100%);
+    --cc-grad-soft: linear-gradient(180deg, rgba(30,90,130,.10) 0%, rgba(30,90,130,0) 220px);
+}
+html.cc-dark {
+    --cc-grad:      linear-gradient(135deg, #14344D 0%, #1E5A82 100%);
+    --cc-grad-soft: linear-gradient(180deg, rgba(20,52,77,.55) 0%, rgba(20,52,77,0) 220px);
+}
+
+/* Page background gets a soft brand wash under the header */
+body, body.mainpage {
+    background-image: var(--cc-grad-soft) !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Headers use the same gradient as the app icon */
+.h1header { background: var(--cc-grad) !important; }
+
+/* ── Main action tiles (HomePage + CarBook carousel): navy gradient,
+     white icon + white text — same look as the new app icon. ── */
+.mainscreenimg {
+    background: var(--cc-grad) !important;
+    border: none !important;
+}
+.mainscreenimg img {
+    filter: brightness(0) invert(1);   /* any blue PNG -> clean white */
+}
+.mainscreenimg p,
+.mainscreenimg .lowerline,
+.mainscreenimg span {
+    color: #FFFFFF !important;          /* 4.9:1+ on the gradient's light end */
+    font-weight: 600;
+}
+.mainscreenimg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30,90,130,.35);
+}
+html.cc-dark .mainscreenimg { box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+
+/* Exception: tiles that carry a colored status (e.g. overdue red test date)
+   must keep their inline-colored spans readable — inline styles already win,
+   but give them a white chip so red-on-navy stays legible. */
+.mainscreenimg span[style*="color"] {
+    background: rgba(255,255,255,.92);
+    border-radius: 8px;
+    padding: 1px 7px;
+}
+
+/* ── Primary buttons / FAB / select pills: unified gradient ── */
+.btn-primary, .btn.btn-primary, .rounded-pill.btn-primary,
+#footerCarCare button, .footer button {
+    background: var(--cc-grad) !important;
+    color: #fff !important;
+}
+.btn-select { background: var(--cc-grad) !important; }
+.plus {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='white' stroke-width='4' stroke-linecap='round'%3E%3Cline x1='30' y1='20' x2='30' y2='40'/%3E%3Cline x1='20' y1='30' x2='40' y2='30'/%3E%3C/g%3E%3C/svg%3E"),
+        var(--cc-grad) !important;
+}
+.btn-check-car { background: var(--cc-grad) !important; }
+
+/* ── Section titles: gradient ink (falls back to solid where unsupported) ── */
+h2#h2carcare, .addNotih2, .cc-drawer-title {
+    color: var(--cc-primary);
+    background: var(--cc-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+html.cc-dark h2#h2carcare,
+html.cc-dark .addNotih2,
+html.cc-dark .cc-drawer-title {
+    /* gradient text is too dim on dark bg — use solid light ink instead */
+    background: none;
+    -webkit-text-fill-color: var(--cc-ink);
+    color: var(--cc-ink);
+}
+
+/* ── Side drawer: gradient accent strip + active switch ── */
+.cc-drawer { border-right: none; }
+.cc-drawer::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; right: 0;
+    width: 4px;
+    background: var(--cc-grad);
+}
+.cc-dm-switch.on, html.cc-dark .cc-dm-switch { background: var(--cc-grad) !important; }
+
+/* ── Car cards (MyCars): gradient icon chip + header hairline ── */
+.car-icon-wrap {
+    background: var(--cc-grad) !important;
+}
+.car-icon-wrap .car-icon { filter: brightness(0) invert(1); }
+.car-card-header { border-bottom: 1px solid var(--cc-line); }
+
+/* ── Reminders panel: brand accent instead of plain white box ── */
+.alertsDiv:not(.no-reminders) {
+    border-right: 4px solid #2A6F9E !important;
+}
+
+/* ── Inputs: focus ring picks up the gradient's light end ── */
+.rounded-input:focus-within,
+.rounded-input-Garage:focus-within,
+#registrationForm .form-control:focus {
+    border-color: #2A6F9E !important;
+    box-shadow: 0 0 0 3px rgba(42,111,158,.18) !important;
+}
+
+/* ── Contrast safeguards ──
+   White text sits only on the gradient (worst case #2A6F9E ≈ 4.9:1).
+   Body text stays --cc-ink on --cc-surface (>12:1 both modes). */
