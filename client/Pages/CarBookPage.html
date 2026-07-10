@@ -1288,6 +1288,14 @@
             <div>
                 <h1 class="h1header">
                     <span id="helloUser">CarCare</span>
+                    <!-- Anchored to the header band itself. #logo is
+                         position:relative;bottom:35px, so it still occupies a
+                         70px box in flow — anything placed after the header in
+                         normal flow gets pushed far below it. -->
+                    <span class="cb-toolbar">
+                        <img id="editcars" alt="עדכון פרטי רכב" src="images/edit.png" />
+                        <img id="showDetails" alt="הצג פרטי רכב" src="images/CARINFO.png" />
+                    </span>
                 </h1>
                     <img onclick="document.location='HomePage.html'" id="logo" src="images/LOGO ROUND WHITE BG.png" />
                     <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
@@ -1299,10 +1307,6 @@
 
         <div>
             <img id="BackBTN" onclick="history.back()" src="images/back.png" />
-            <div class="cb-toolbar">
-                <img id="editcars" alt="עדכון פרטי רכב" src="images/edit.png" />
-                <img id="showDetails" alt="הצג פרטי רכב" src="images/CARINFO.png" />
-            </div>
             <img id="exportPDF" src="images/book.png" alt="Export to PDF" title="ייצוא ספר רכב PDF" style="display:none;" />
             <img id="saleAdBtn" src="images/deal.png" alt="מודעת מכירה" title="הפק מודעת מכירה" style="display:none;" />
         </div>

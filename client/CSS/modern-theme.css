@@ -1655,17 +1655,22 @@ html.cc-dark #MyCarsBtn {
    The old rules pinned them absolutely to the right (top:70%),
    which pushed them up against the header band.
    ============================================================ */
+/* The toolbar is a child of .h1header and pinned to the band's bottom-left.
+   Absolute positioning is required: #logo is position:relative;bottom:35px, so
+   it still reserves a 70px box in normal flow — a toolbar placed after the
+   header would be pushed far below it regardless of margin. */
+.h1header { position: relative; }
 .cb-toolbar {
+    position: absolute;
+    left: 14px;
+    bottom: -46px;             /* icons start ~8px under the band: close, not touching */
     display: flex;
     direction: ltr;            /* page is RTL — force icons to sit on the left */
-    justify-content: flex-start;
     align-items: center;
     gap: 14px;
-    padding: 0 16px;
-    /* Sit just under the header's rounded edge — close, but never touching.
-       (Was 16px, which left an obvious gap.) */
-    margin-top: 6px;
-    margin-bottom: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 3;                /* above the header's rounded edge */
 }
 .cb-toolbar #editcars,
 .cb-toolbar #showDetails {
