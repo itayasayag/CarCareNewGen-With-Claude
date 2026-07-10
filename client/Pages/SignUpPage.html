@@ -355,15 +355,18 @@
     <div id="top">
         <div id="header" class="header">
             <h1 class="h1header">CarCare</h1>
+            <!-- Logo must live inside #top: #top is position:sticky with
+                 z-index:1000, so a logo placed after it gets painted under
+                 the header band. -->
+            <div class="miniMargin">
+                <img id="logo" src="images/LOGO ROUND WHITE BG.png" />
+            </div>
         </div>
 
     </div>
 
 
     <div class="container RollDown">
-        <div>
-            <img id="logo" src="images/LOGO ROUND WHITE BG.png" />
-        </div>
 
         <div class="btn-group btn-group-toggle" id="btngrp" data-toggle="buttons">
             <label class="btn btn-secondary active" id="Tgl1">

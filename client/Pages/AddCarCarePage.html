@@ -586,9 +586,6 @@
                 <img onclick="history.back()" id="BackBTN" src="images/back.png" />
                 <a href="SignUpPage.html" id="logoutBTN">התנתק </a>
             </div>
-            <div id="SelectDiv">
-                <!--דיב שמוסיפים אליו את כל הרכבים-->
-            </div>
         </div>
     </div>
 
@@ -597,6 +594,15 @@
         <h2 id="h2carcare">תיעוד טיפול</h2>
         <input type="file" id="imgupload" style="display:none" />
         <div id="AddCareDiv">
+            <!--רכב (same layout as SendCar: icon + select inside the form)-->
+            <div class="row">
+                <div class="col-3">
+                    <img class="img-care" id="SelecCarIMG" src="images/car (3).png" />
+                </div>
+                <div class="col-9 rounded-input" id="SelectDiv">
+                    <!--דיב שמוסיפים אליו את כל הרכבים-->
+                </div>
+            </div>
             <!--תאריך-->
             <div class="row">
                 <div class="col-3">

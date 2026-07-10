@@ -664,7 +664,17 @@ html.cc-dark .swal2-popup { background: var(--cc-surface) !important; color: var
     transition: background .15s ease;
 }
 .cc-drawer a:hover { background: var(--cc-bg); }
-.cc-drawer a .cc-ico { font-size: 18px; width: 22px; text-align: center; }
+/* Menu icons are now <img> (app artwork) rendered at emoji size. */
+.cc-drawer a .cc-ico {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex: 0 0 22px;
+    display: inline-block;
+    vertical-align: middle;
+}
+/* Keep icons legible on the dark drawer background */
+html.cc-dark .cc-drawer a .cc-ico { filter: brightness(0) invert(1); }
 
 .cc-drawer-spacer { flex-grow: 1; }
 
@@ -961,6 +971,10 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
     top: auto !important; left: auto !important;
     background: transparent !important;
     margin: 0 !important;
+    /* base CSS sets z-index:1001, above the fixed footer (z-index:900),
+       which made the receipt icon float over the "הוסף תיעוד" button
+       while scrolling. Reset it. */
+    z-index: auto !important;
 }
 #uplodePicture.receipt-upload span {
     font-family: var(--cc-font);
@@ -1665,3 +1679,52 @@ html.cc-dark #MyCarsBtn {
 .cb-toolbar #showDetails { height: 38px !important; }
 .cb-toolbar #editcars:hover,
 .cb-toolbar #showDetails:hover { transform: scale(1.08); }
+
+/* Give the AddCarCare footer an opaque backdrop so page content scrolling
+   underneath (e.g. the receipt-upload card) never shows over/behind the
+   "הוסף תיעוד" button. */
+#footerCarCare.footer {
+    background: linear-gradient(to top,
+                var(--cc-bg) 0%,
+                var(--cc-bg) 62%,
+                rgba(0,0,0,0) 100%) !important;
+    padding-top: 18px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    height: auto !important;
+    z-index: 950;
+}
+html.cc-dark #footerCarCare.footer {
+    background: linear-gradient(to top,
+                var(--cc-bg) 0%,
+                var(--cc-bg) 62%,
+                rgba(0,0,0,0) 100%) !important;
+}
+
+/* ============================================================
+   AddCarCarePage — the car selector now lives inside the form
+   (matching SendCar), not pinned to the header's right edge.
+   .select-car is globally position:absolute for the header
+   instances on other pages, so scope the reset to this form.
+   ============================================================ */
+#AddCareDiv #SelectDiv {
+    padding: 0 !important;
+}
+#AddCareDiv #SelectDiv .select-car {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    max-width: 100% !important;
+    width: 100%;
+    background: transparent !important;
+    border: none !important;
+    color: var(--cc-ink) !important;
+    font-family: var(--cc-font) !important;
+    font-size: 16px !important;
+    padding: 12px 14px !important;
+    text-align: center;
+    text-align-last: center;
+    -webkit-appearance: none;
+    appearance: none;
+}
+#AddCareDiv #SelectDiv .select-car option { color: var(--cc-ink); }
+html.cc-dark #AddCareDiv #SelectDiv .select-car { color: var(--cc-ink) !important; }

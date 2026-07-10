@@ -12,17 +12,19 @@
         }
     } catch (e) {}
 
-    // Navigation items: label, target page, icon (emoji keeps it dependency-free)
+    // Navigation items: label, target page, icon image.
+    // Icons are the app's own artwork (not emoji) so the menu matches the
+    // rest of the UI. They're rendered at emoji size (20px) via .cc-ico.
     var LINKS = [
-        { label: 'מסך הבית',     href: 'HomePage.html',        ico: '🏠' },
-        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: '📖' },
-        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: '🔔' },
-        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: '🔧' },
-        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: '🚗' },
-        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: '📍' },
-        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: '💡' },
-        { label: 'העברת רכב',    href: 'SendCar.html',         ico: '🔄' },
-        { label: 'התנתק',        href: 'SignUpPage.html',      ico: '🚪', logout: true }
+        { label: 'מסך הבית',     href: 'HomePage.html',        ico: 'images/menu-home.png' },
+        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: 'images/book.png' },
+        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: 'images/BellBlue.png' },
+        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: 'images/wrench (2).png' },
+        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/car_icon.png' },
+        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/location.png' },
+        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/oil-indicator.png' },
+        { label: 'העברת רכב',    href: 'SendCar.html',         ico: 'images/send.png' },
+        { label: 'התנתק',        href: 'SignUpPage.html',      ico: 'images/menu-logout.png', logout: true }
     ];
 
     function build() {
@@ -52,7 +54,8 @@
         var html = '<div class="cc-drawer-title">CarCare</div>';
         LINKS.forEach(function (l) {
             html += '<a href="' + l.href + '"' + (l.logout ? ' data-logout="1"' : '') +
-                    '><span class="cc-ico">' + l.ico + '</span>' + l.label + '</a>';
+                    '><img class="cc-ico" src="' + encodeURI(l.ico) + '" alt="" aria-hidden="true">' +
+                    l.label + '</a>';
         });
         html += '<div class="cc-drawer-spacer"></div>';
         html += '<div class="cc-dm-row"><span>מצב כהה 🌙</span>' +
