@@ -1662,8 +1662,10 @@ html.cc-dark #MyCarsBtn {
     align-items: center;
     gap: 14px;
     padding: 0 16px;
-    margin-top: 16px;          /* keeps icons off the header */
-    margin-bottom: 4px;
+    /* Sit just under the header's rounded edge — close, but never touching.
+       (Was 16px, which left an obvious gap.) */
+    margin-top: 6px;
+    margin-bottom: 0;
 }
 .cb-toolbar #editcars,
 .cb-toolbar #showDetails {

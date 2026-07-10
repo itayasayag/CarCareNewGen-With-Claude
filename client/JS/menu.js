@@ -13,17 +13,18 @@
     } catch (e) {}
 
     // Navigation items: label, target page, icon image.
-    // Icons are the app's own artwork (not emoji) so the menu matches the
-    // rest of the UI. They're rendered at emoji size (20px) via .cc-ico.
+    // Icons are the app's own artwork (not emoji), pre-flattened to a single
+    // brand navy on a transparent background (menu-*.png) so the whole menu is
+    // visually uniform. Rendered at emoji size (22px) via .cc-ico.
     var LINKS = [
         { label: 'מסך הבית',     href: 'HomePage.html',        ico: 'images/menu-home.png' },
-        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: 'images/book.png' },
-        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: 'images/BellBlue.png' },
-        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: 'images/wrench (2).png' },
-        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/car_icon.png' },
-        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/location.png' },
-        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/oil-indicator.png' },
-        { label: 'העברת רכב',    href: 'SendCar.html',         ico: 'images/send.png' },
+        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: 'images/menu-book.png' },
+        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: 'images/menu-bell.png' },
+        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: 'images/menu-wrench.png' },
+        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/menu-car.png' },
+        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/menu-location.png' },
+        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/menu-lights.png' },
+        { label: 'העברת רכב',    href: 'SendCar.html',         ico: 'images/menu-transfer.png' },
         { label: 'התנתק',        href: 'SignUpPage.html',      ico: 'images/menu-logout.png', logout: true }
     ];
 
