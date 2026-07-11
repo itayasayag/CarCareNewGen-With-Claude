@@ -33,6 +33,14 @@ def send_reminder_email(
 ):
     settings = get_settings()
     from_address = settings.email_address
+
+    # Fail fast with a clear message if SMTP isn't configured, instead of a
+    # confusing login error deep in the traceback.
+    if not settings.email_password:
+        print("[email] EMAIL_PASSWORD is not set — skipping reminder email. "
+              "Set EMAIL_ADDRESS and EMAIL_PASSWORD (Gmail App Password) in Railway.")
+        return
+
     subject = f"{care_name} לרכב: {car_nickname}"
     body = "CarCare זוהי תזכורת מאפליקציית"
 
@@ -61,10 +69,14 @@ def send_reminder_email(
             server.login(from_address, settings.email_password)
             server.sendmail(from_address, to_email, msg.as_string())
 
-        print(f"Reminder email sent to {to_email}")
+        print(f"[email] Reminder sent to {to_email} from {from_address}")
 
+    except smtplib.SMTPAuthenticationError:
+        print("[email] SMTP auth failed. Check EMAIL_ADDRESS and that "
+              "EMAIL_PASSWORD is a valid Gmail App Password (2-Step Verification "
+              "must be on, and use the 16-char app password with no spaces).")
     except Exception as e:
-        print(f"Failed to send reminder email: {e}")
+        print(f"[email] Failed to send reminder email: {e}")
     finally:
         if os.path.exists(ics_path):
             os.remove(ics_path)

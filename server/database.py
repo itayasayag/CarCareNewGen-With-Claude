@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     # Format: SERVER=x;DATABASE=y;UID=z;PWD=w;Encrypt=yes;...
     database_url: Optional[str] = None
 
-    # ── Other settings ────────────────────────────────────────────────────────
+    # ── Email (SMTP) ──────────────────────────────────────────────────────────
+    # Set EMAIL_ADDRESS and EMAIL_PASSWORD as environment variables (e.g. in
+    # Railway). EMAIL_PASSWORD must be a Gmail *App Password* (16 chars, no
+    # spaces), not the account's normal password. These override the defaults.
     email_address: str = "carcarereminders@gmail.com"
     email_password: str = ""
     upload_dir: str = "uploadedFiles"
