@@ -58,16 +58,20 @@ def create_reminder(reminder: ReminderCreate, background_tasks: BackgroundTasks)
             "VALUES (%s, %s, %s, %s, %s)", (reminder.remind_date, reminder.notes, reminder.email, reminder.care_id, reminder.license_plate))
         conn.commit()
 
-        # Send the confirmation email AFTER responding — SMTP can be slow/unreachable
-        # and must never block the user from seeing "reminder created".
-        background_tasks.add_task(
-            send_reminder_email,
-            to_email=reminder.email,
-            care_name=care_name,
-            car_nickname=car_nickname,
-            remind_date=reminder.remind_date,
-            notes=reminder.notes or ""
-        )
+        # ── Email reminders DISABLED for now ──────────────────────────────────
+        # Reminders currently live in the web app only. Email sending is parked
+        # until a verified sending domain is set up (Railway blocks SMTP, and
+        # Resend needs a verified domain to send to arbitrary user emails).
+        # To re-enable: uncomment the block below (and see services/email_service.py).
+        #
+        # background_tasks.add_task(
+        #     send_reminder_email,
+        #     to_email=reminder.email,
+        #     care_name=care_name,
+        #     car_nickname=car_nickname,
+        #     remind_date=reminder.remind_date,
+        #     notes=reminder.notes or ""
+        # )
 
         return {"message": "Reminder created successfully"}
     except Exception as e:
@@ -97,14 +101,15 @@ def update_reminder(reminder_id: int, reminder: ReminderUpdate, background_tasks
         cursor.execute("UPDATE Reminder SET RemindDate=%s, Notes=%s, CareID=%s WHERE ReminderID=%s", (reminder.remind_date, reminder.notes, reminder.care_id, reminder_id))
         conn.commit()
 
-        background_tasks.add_task(
-            send_reminder_email,
-            to_email=email,
-            care_name=care_name,
-            car_nickname=car_nickname,
-            remind_date=reminder.remind_date,
-            notes=reminder.notes or ""
-        )
+        # ── Email reminders DISABLED for now (see create_reminder note) ───────
+        # background_tasks.add_task(
+        #     send_reminder_email,
+        #     to_email=email,
+        #     care_name=care_name,
+        #     car_nickname=car_nickname,
+        #     remind_date=reminder.remind_date,
+        #     notes=reminder.notes or ""
+        # )
 
         return {"message": "Reminder updated successfully"}
     except HTTPException:
