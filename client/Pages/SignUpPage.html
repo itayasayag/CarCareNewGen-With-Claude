@@ -70,6 +70,7 @@
                 // guest login removed
                 // Hide #firstName, #lastName, #phoneNumber
                 $('#firstName, #lastName, #phoneNumber').show();
+                $('#forgotPwWrap').hide();   // forgot-password only on login tab
             });
 
             // Function to handle changes when loginOption is checked
@@ -94,6 +95,7 @@
                 $('#loginBtn').show();
                 // Hide #firstName, #lastName, #phoneNumber
                 $('#firstName, #lastName, #phoneNumber').hide();
+                $('#forgotPwWrap').show();   // forgot-password only on login tab
             }
         });
 
@@ -144,6 +146,51 @@
 
 
         //התחברות
+
+        function forgotPassword() {
+            Swal.fire({
+                title: "איפוס סיסמה",
+                input: "email",
+                inputLabel: "הכנס/י את כתובת המייל שלך",
+                inputPlaceholder: "you@example.com",
+                confirmButtonText: "המשך",
+                showCancelButton: true,
+                cancelButtonText: "ביטול",
+                confirmButtonColor: "#1E5A82",
+                inputValidator: function (value) {
+                    if (!value) return "יש להכניס כתובת מייל";
+                }
+            }).then(function (r) {
+                if (!r.isConfirmed) return;
+                var email = r.value;
+                Swal.fire({
+                    title: "בחר/י סיסמה חדשה",
+                    input: "password",
+                    inputPlaceholder: "סיסמה חדשה",
+                    confirmButtonText: "אפס סיסמה",
+                    showCancelButton: true,
+                    cancelButtonText: "ביטול",
+                    confirmButtonColor: "#1E5A82",
+                    inputValidator: function (value) {
+                        if (!value || value.length < 4) return "סיסמה חייבת להכיל לפחות 4 תווים";
+                    }
+                }).then(function (r2) {
+                    if (!r2.isConfirmed) return;
+                    var api = server + "/api/users/reset-password";
+                    ajaxCall("POST", api, JSON.stringify({ email: email, newPassword: r2.value }),
+                        function () {
+                            Swal.fire({ title: "הסיסמה אופסה בהצלחה", icon: "success",
+                                        text: "כעת ניתן להתחבר עם הסיסמה החדשה" });
+                        },
+                        function (err) {
+                            var msg = (err && err.status === 404)
+                                ? "לא נמצא חשבון עם כתובת מייל זו"
+                                : "אירעה שגיאה באיפוס הסיסמה";
+                            Swal.fire({ title: msg, icon: "error" });
+                        });
+                });
+            });
+        }
 
         function login() {
 
@@ -394,6 +441,9 @@
             </div>
             <div class="form-group">
                 <input type="password" class="form-control" id="password" name="password" placeholder="סיסמה" required>
+            </div>
+            <div id="forgotPwWrap">
+                <a href="#" id="forgotPwLink" onclick="forgotPassword(); return false;">שכחתי סיסמה</a>
             </div>
 
         </form>

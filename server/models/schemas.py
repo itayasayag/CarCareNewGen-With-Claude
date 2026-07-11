@@ -38,6 +38,10 @@ class UserLogin(CamelModel):
     email: str
     password: str
 
+class PasswordReset(CamelModel):
+    email: str
+    new_password: str
+
 class UserResponse(UserBase):
     verified: bool = False
 

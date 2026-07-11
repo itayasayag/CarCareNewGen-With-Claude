@@ -1235,8 +1235,23 @@ html.cc-dark #MyCarsBtn {
     width: 100%;
     display: flex !important;
     justify-content: center;
-    margin: 4px auto !important;
+    margin: 0 auto !important;   /* was 4px — sits right under the login button */
 }
+
+/* "שכחתי סיסמה" link under the password field */
+#forgotPwWrap {
+    text-align: center;
+    margin: 2px 0 6px;
+}
+#forgotPwLink {
+    color: var(--cc-primary);
+    font-family: var(--cc-font);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+#forgotPwLink:hover { color: var(--cc-primary-2); }
 
 /* ============================================================
    Utility classes — replacing former inline styles (CarBookPage)
