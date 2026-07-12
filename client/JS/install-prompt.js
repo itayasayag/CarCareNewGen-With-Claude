@@ -1,50 +1,79 @@
 /* ============================================================
-   CarCare — "Install app" button (Chrome/Edge; beforeinstallprompt)
+   CarCare — "Install app" affordances
    ------------------------------------------------------------
-   Include on any page that has a <button id="installAppBtn">.
-   The button starts hidden (class="is-hidden") and is revealed only
-   when the browser fires beforeinstallprompt on THAT page load.
+   Two elements, both optional per page:
+     #installAppBtn  — real one-tap install button (Chrome/Edge only)
+     #installInfoBtn — subtle ⓘ button shown ONLY on iOS, where no
+                       install API exists; tapping it explains the
+                       manual Safari "Add to Home Screen" steps.
 
-   Note: the captured event cannot survive a page navigation (each
-   page load is a fresh JS context — the browser discards it), so
-   every page that wants the button listens for the event itself.
-   That's fine here: HomePage.html is only reachable when logged in
-   (menu.js's site-wide guard), so this never gets exposed to a
-   logged-out visitor the way the earlier drawer-based version did.
+   Why the split: on iOS every browser is forced onto Apple's WebKit,
+   which has never implemented beforeinstallprompt — so a real install
+   button is impossible there. The ⓘ hint is the best achievable UX.
 
-   No equivalent event exists on Safari/iOS — there the button simply
-   never appears, and Share > Add to Home Screen remains the way in.
+   If the app is already installed (standalone), neither shows.
    ============================================================ */
 (function () {
-    var btn = document.getElementById('installAppBtn');
-    if (!btn) return;
+    var installBtn = document.getElementById('installAppBtn');
+    var infoBtn = document.getElementById('installInfoBtn');
+
+    // Already installed / running standalone? Show nothing.
+    var isStandalone = false;
+    try {
+        isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+    } catch (e) {}
+    if (isStandalone) return;
+
+    // Detect iOS (iPhone/iPad, incl. iPadOS reporting as Mac with touch).
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPad|iPhone|iPod/.test(ua)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    // ---- iOS: show the subtle ⓘ, wire it to the manual instructions ----
+    if (isIOS && infoBtn) {
+        infoBtn.classList.remove('is-hidden');
+        infoBtn.addEventListener('click', function () {
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'התקנת האפליקציה',
+                    html: '<div style="text-align:right;direction:rtl;line-height:1.9;font-size:15px;">' +
+                          'כדי להוסיף את CarCare למסך הבית ולפתוח אותה כמו אפליקציה:' +
+                          '<br>1. פִּתחו את האתר ב־<b>Safari</b>' +
+                          '<br>2. הקישו על כפתור <b>שיתוף</b> (הריבוע עם החץ ↑)' +
+                          '<br>3. גללו ובחרו <b>הוסף למסך הבית</b>' +
+                          '<br>4. הקישו <b>הוסף</b>' +
+                          '</div>',
+                    confirmButtonText: 'הבנתי',
+                    confirmButtonColor: '#1E5A82'
+                });
+            }
+        });
+        return; // iOS gets the ⓘ only, never the real button
+    }
+
+    // ---- Chrome/Edge (Android + desktop): the real install button ----
+    if (!installBtn) return;
 
     var deferredInstallPrompt = null;
-
-    // Already installed/running standalone? Never show the button.
-    try {
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-            return;
-        }
-    } catch (e) {}
 
     window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
         deferredInstallPrompt = e;
-        btn.classList.remove('is-hidden');
+        installBtn.classList.remove('is-hidden');
     });
 
     window.addEventListener('appinstalled', function () {
         deferredInstallPrompt = null;
-        btn.classList.add('is-hidden');
+        installBtn.classList.add('is-hidden');
     });
 
-    btn.addEventListener('click', function () {
+    installBtn.addEventListener('click', function () {
         if (!deferredInstallPrompt) return;
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then(function () {
             deferredInstallPrompt = null;
-            btn.classList.add('is-hidden');
+            installBtn.classList.add('is-hidden');
         });
     });
 })();

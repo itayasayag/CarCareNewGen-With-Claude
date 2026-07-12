@@ -1821,3 +1821,26 @@ html.cc-dark .reminder-edit-input {
 }
 #installAppBtn img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
 #installAppBtn.is-hidden { display: none !important; }
+
+/* ── "התקנת האפליקציה" — subtle iOS info affordance ─────────────────────────
+   Shown only on iOS (via install-prompt.js), where a real install button is
+   impossible. Deliberately understated: a muted text link with an ⓘ glyph,
+   not a prominent button. ── */
+#installInfoBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 8px auto 0;
+    padding: 4px 8px;
+    background: none;
+    border: none;
+    color: var(--cc-muted);
+    font-family: var(--cc-font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: .85;
+}
+#installInfoBtn span { font-size: 15px; color: var(--cc-primary); }
+#installInfoBtn:hover { opacity: 1; color: var(--cc-primary); }
+#installInfoBtn.is-hidden { display: none !important; }
