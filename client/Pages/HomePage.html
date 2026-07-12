@@ -307,25 +307,19 @@
             Swal.fire({
                 title: 'עריכת התראה',
                 html: `
-                
-            <div style="align-items: center;">
-                <label for="date">תאריך</label>
-                 <input type="date" id="Rdate" class="swal2-input" value= ${REMINDERDATE}>
-               
+            <div class="reminder-edit-field">
+                <label for="Rdate">תאריך</label>
+                <input type="date" id="Rdate" class="reminder-edit-input" value="${REMINDERDATE}">
             </div>
-            <br>
-            <div style="align-items: center;">
-                <label for="notes">הערה</label>
-                 <textarea id="Rnotes" class="swal2-input"  > ${note} </textarea>
-                
+            <div class="reminder-edit-field">
+                <label for="Rnotes">הערה</label>
+                <textarea id="Rnotes" class="reminder-edit-input reminder-edit-textarea" placeholder="הוסף הערה...">${note}</textarea>
             </div>
-
         `,
                 showCancelButton: true,
                 confirmButtonText: 'שמור',
                 cancelButtonText: 'בטל',
-            
-                
+
             }).then((result) => {
                 if (result.isConfirmed) {
                     const date = document.getElementById('Rdate').value;

@@ -1750,3 +1750,49 @@ html.cc-dark #footerCarCare.footer {
 }
 #AddCareDiv #SelectDiv .select-car option { color: var(--cc-ink); }
 html.cc-dark #AddCareDiv #SelectDiv .select-car { color: var(--cc-ink) !important; }
+
+/* ── "עריכת התראה" edit-reminder swal ────────────────────────────────────────
+   Fields previously had no visible border/box, so they read as plain text
+   rather than something tappable. Center everything and give inputs a clear,
+   obviously-editable outline. ── */
+.reminder-edit-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 14px 0;
+}
+.reminder-edit-field label {
+    font-family: var(--cc-font);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--cc-primary);
+    margin-bottom: 6px;
+}
+.reminder-edit-input {
+    width: 80%;
+    max-width: 280px;
+    border: 1.5px solid #B9CBD9 !important;
+    border-radius: 12px !important;
+    background: #f9fbfc !important;
+    color: var(--cc-ink) !important;
+    font-family: var(--cc-font) !important;
+    font-size: 16px !important;
+    text-align: center !important;
+    padding: 10px 12px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+.reminder-edit-input:focus {
+    border-color: var(--cc-primary) !important;
+    box-shadow: 0 0 0 3px rgba(30,90,130,.15) !important;
+    outline: none !important;
+}
+.reminder-edit-textarea {
+    height: 70px;
+    resize: none;
+}
+html.cc-dark .reminder-edit-input {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line) !important;
+}
