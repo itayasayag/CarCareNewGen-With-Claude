@@ -5,6 +5,26 @@
    Include on every page with: <script src="../JS/menu.js"></script>
    ============================================================ */
 (function () {
+    // ---- Site-wide login guard ────────────────────────────────────────────
+    // menu.js loads on every page, so this is the single place that can
+    // reliably protect ALL of them. Several pages (CarBookPage, MyCarsPage,
+    // FindGaragePage, LightIndicator, SendCar) had no guard of their own —
+    // a direct link let a logged-out visitor reach them. Public pages are
+    // explicitly excluded below.
+    var PUBLIC_PAGES = ['SignUpPage.html', 'HomePage - Guest.html'];
+    var currentPage = decodeURIComponent(location.pathname.split('/').pop() || '');
+    var isPublicPage = PUBLIC_PAGES.indexOf(currentPage) !== -1;
+
+    if (!isPublicPage) {
+        var loggedIn = null;
+        try { loggedIn = localStorage.getItem('LogInUser'); } catch (e) {}
+        if (!loggedIn) {
+            // Redirect immediately — don't let protected markup render/flash.
+            location.replace('SignUpPage.html');
+            return; // stop the rest of menu.js on this page
+        }
+    }
+
     // ---- Apply saved dark-mode preference ASAP ----
     try {
         if (localStorage.getItem('cc-theme') === 'dark') {
@@ -30,6 +50,10 @@
 
     function build() {
         if (document.querySelector('.cc-menu-btn')) return; // avoid duplicates
+        // No hamburger/drawer on the sign-up/login page itself — there's
+        // nothing a logged-out visitor should be navigating to yet, and it
+        // previously let people tap straight into protected pages.
+        if (currentPage === 'SignUpPage.html') return;
 
         // Replace the +(plus) image glyph with a transparent pixel so the CSS
         // gradient circle + drawn "+" shows cleanly (the PNG art was off-ratio).

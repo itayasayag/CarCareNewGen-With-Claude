@@ -1796,3 +1796,28 @@ html.cc-dark .reminder-edit-input {
     background: var(--cc-surface) !important;
     border-color: var(--cc-line) !important;
 }
+
+/* ── "התקן אפליקציה" — SignUpPage only (Chrome/Edge; hidden elsewhere) ──────
+   Deliberately NOT in the shared drawer: install must only be offered before
+   / at login, never from inside authenticated pages. ── */
+#installAppBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 70%;
+    max-width: 280px;
+    margin: 10px auto 0;
+    padding: 10px 0;
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-family: var(--cc-font);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(30,90,130,.3);
+}
+#installAppBtn img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+#installAppBtn.is-hidden { display: none !important; }

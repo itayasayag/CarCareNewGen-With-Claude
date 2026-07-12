@@ -458,8 +458,50 @@
             <div id="googleBtnWrap" style="display:flex;justify-content:center;margin:8px auto 0;">
                 <div id="g_id_signin"></div>
             </div>
+            <!-- One-tap "Install app" — Chrome/Edge only (no equivalent API on
+                 Safari/iOS, where Share > Add to Home Screen stays the way in).
+                 Lives ONLY on this page: a logged-out visitor should never be
+                 offered navigation shortcuts before signing in. -->
+            <button type="button" id="installAppBtn" class="is-hidden">
+                <img src="images/menu-install.png" alt="" aria-hidden="true">
+                התקן אפליקציה
+            </button>
         </div>
     </div>
+
+    <script>
+        (function () {
+            var deferredInstallPrompt = null;
+            var btn = document.getElementById('installAppBtn');
+
+            // Already installed/running standalone? Never show the button.
+            try {
+                if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                    return;
+                }
+            } catch (e) {}
+
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredInstallPrompt = e;
+                btn.classList.remove('is-hidden');
+            });
+
+            window.addEventListener('appinstalled', function () {
+                deferredInstallPrompt = null;
+                btn.classList.add('is-hidden');
+            });
+
+            btn.addEventListener('click', function () {
+                if (!deferredInstallPrompt) return;
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(function () {
+                    deferredInstallPrompt = null;
+                    btn.classList.add('is-hidden');
+                });
+            });
+        })();
+    </script>
 
 </body>
 </html>
