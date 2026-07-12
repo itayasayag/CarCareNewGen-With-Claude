@@ -464,9 +464,24 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- One-tap "Install app" — Chrome/Edge only. Safe to offer here:
+                     HomePage.html is only reachable when logged in (menu.js's
+                     site-wide guard runs before this page renders at all), so
+                     this can't be used to bypass login the way the earlier
+                     drawer-based version could. Logic shared with SignUpPage
+                     via install-prompt.js. -->
+                <div style="text-align:center; padding: 4px 0 90px;">
+                    <button type="button" id="installAppBtn" class="is-hidden">
+                        <img src="images/menu-install.png" alt="" aria-hidden="true">
+                        התקן אפליקציה
+                    </button>
+                </div>
+
                 <!-- Footer Section -->
                 <div class="footer">
                     <img id="plussign" class="plus" src="images/PLUS.png" />
                 </div>
+                <script src="../JS/install-prompt.js"></script>
             </body>
 </html >
