@@ -118,27 +118,6 @@
         }
         .btn-edit-car:hover { background: var(--cc-primary); color: #fff !important; }
 
-        /* Purple "sales world" button — full width under the car header */
-        .btn-sell-world {
-            display: block;
-            width: 100%;
-            margin-top: 14px;
-            background: linear-gradient(135deg, #7C3AED 0%, #9D5CF0 100%);
-            color: #fff !important;
-            border: none;
-            border-radius: 999px;
-            padding: 11px 0;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: var(--cc-font);
-            cursor: pointer;
-            text-align: center;
-            box-shadow: 0 3px 12px rgba(124,58,237,.35);
-            transition: transform .12s ease, box-shadow .15s ease;
-        }
-        .btn-sell-world:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(124,58,237,.45); }
-        .btn-sell-world:active { transform: translateY(0); }
-
         /* Treatment stats row */
         .car-stats {
             display: flex;
@@ -313,7 +292,6 @@
                     '    <button class="btn-remove" onclick="deleteCar(\'' + lp + '\', \'' + car.nickName.replace(/'/g,"\\'") + '\', event)">הסר</button>' +
                     '  </div>' +
                     '</div>' +
-                    '<button class="btn-sell-world" onclick="goToSellWorld(\'' + lp + '\', event)">עולם המכירה</button>' +
                     '<div class="car-stats">' +
                     '  <div class="car-stat">' +
                     '    <div class="car-stat-label">טיפולים<br>מתועדים</div>' +
@@ -343,13 +321,6 @@
             localStorage.setItem('SelectedCar', JSON.stringify(String(licensePlate)));
             localStorage.setItem('editMode', JSON.stringify(true));
             window.location.href = 'addCarPage.html';
-        }
-
-        function goToSellWorld(licensePlate, event) {
-            if (event) event.stopPropagation();
-            // Select the car so the PDFs on the sell page use its data
-            localStorage.setItem('SelectedCar', JSON.stringify(String(licensePlate)));
-            window.location.href = 'CarSell.html';
         }
 
         function selectCar(licensePlate, event) {
