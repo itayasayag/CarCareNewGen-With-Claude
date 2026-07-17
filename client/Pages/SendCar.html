@@ -48,6 +48,10 @@
             })
             $("#SendButton").click(function () {SendUser()})
             AddCarToInputListFromStorage();
+            var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
+            if (selectedCarValue !== null) {
+                $('#carSelect').val(selectedCarValue);
+            }
 
         })
 

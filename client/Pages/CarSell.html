@@ -31,6 +31,13 @@
             font-size: 15px;
             margin: 8px 18px 22px;
         }
+        .sell-page .h1header,
+        .sell-page .h1header span {
+            display: block;
+            width: 100%;
+            text-align: center !important;
+            box-sizing: border-box;
+        }
         .sell-options {
             display: flex;
             flex-direction: column;
@@ -39,6 +46,31 @@
             max-width: 480px;
             margin: 0 auto;
         }
+        .sell-car-select-row {
+            margin: 0 0 2px !important;
+        }
+        .sell-car-select-row #SelectDiv {
+            padding: 0 !important;
+        }
+        .sell-car-select-row #SelectDiv .select-car {
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            max-width: 100% !important;
+            width: 100%;
+            background: transparent !important;
+            border: none !important;
+            color: var(--cc-ink) !important;
+            font-family: var(--cc-font) !important;
+            font-size: 16px !important;
+            padding: 12px 14px !important;
+            text-align: center;
+            text-align-last: center;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .sell-car-select-row #SelectDiv .select-car option { color: var(--cc-ink); }
+        html.cc-dark .sell-car-select-row #SelectDiv .select-car { color: var(--cc-ink) !important; }
         .sell-card {
             display: flex;
             flex-direction: column;
@@ -68,7 +100,7 @@
         }
     </style>
 </head>
-<body>
+<body class="sell-page">
     <div id="top">
         <div class="header" id="header">
             <h1 class="h1header">
@@ -84,6 +116,14 @@
     <div class="RollDown">
         <p class="sell-intro">בחר/י פעולה לעולם המכירה של הרכב</p>
         <div class="sell-options">
+            <div class="row sell-car-select-row">
+                <div class="col-3">
+                    <img class="img-care" id="SelecCarIMG" src="images/car (3).png" alt="רכב" />
+                </div>
+                <div class="col-9 rounded-input" id="SelectDiv">
+                    <!-- רשימת הרכבים מוזרקת כאן -->
+                </div>
+            </div>
             <div class="sell-card" onclick="goTransfer()">
                 <img src="images/send.png" alt="שליחת רכב" />
                 <div class="sell-card-label">שלח רכב למשתמש</div>
@@ -106,7 +146,31 @@
                 window.location.href = 'SignUpPage.html';
                 return;
             }
+            AddCarToListFromStorage();
         });
+
+        function changeCarSelect() {
+            if ($("#carSelect").val() == "addCar") {
+                Swal.fire({
+                    title: "האם ברצונך להוסיף רכב חדש?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#235978",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "הוסף רכב חדש",
+                    cancelButtonText: "בטל",
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.location.href = "addCarPage.html";
+                    }
+                });
+                $('#carSelect').prop('selectedIndex', 0);
+                return;
+            }
+
+            localStorage.setItem('SelectedCar', JSON.stringify($("#carSelect").val()));
+            GetSelectedCarDetails($("#carSelect").val());
+        }
 
         function goTransfer() {
             window.location.href = 'SendCar.html';
