@@ -22,6 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
+    <script src="../JS/menu.js"></script>
     <style>
         .sell-intro {
             text-align: center;
@@ -81,15 +82,19 @@
     </div>
 
     <div class="RollDown">
-        <p class="sell-intro">בחר/י את המסמך שברצונך להפיק עבור הרכב</p>
+        <p class="sell-intro">בחר/י פעולה לעולם המכירה של הרכב</p>
         <div class="sell-options">
+            <div class="sell-card" onclick="goTransfer()">
+                <img src="images/send.png" alt="שליחת רכב" />
+                <div class="sell-card-label">שלח רכב למשתמש</div>
+            </div>
             <div class="sell-card" onclick="goExport('exportPDF')">
                 <img src="images/book.png" alt="ספר רכב" />
-                <div class="sell-card-label">יצא ספר רכב</div>
+                <div class="sell-card-label">הפק PDF של ספר הרכב</div>
             </div>
             <div class="sell-card" onclick="goExport('saleAd')">
                 <img src="images/deal.png" alt="דף מכירה" />
-                <div class="sell-card-label">צור דף מכירה להדפסה</div>
+                <div class="sell-card-label">הפק PDF לרכב למכירה</div>
             </div>
         </div>
     </div>
@@ -101,22 +106,33 @@
                 window.location.href = 'SignUpPage.html';
                 return;
             }
-            // Must have a selected car (set by the "עולם המכירה" button on MyCarsPage)
-            var selected = localStorage.getItem('SelectedCar');
-            if (!selected || selected === 'null') {
-                Swal.fire({
-                    title: 'לא נבחר רכב',
-                    text: 'חזור/י לעמוד הרכבים ובחר/י רכב דרך כפתור "עולם המכירה"',
-                    icon: 'info',
-                    confirmButtonColor: '#1E5A82'
-                }).then(function () { window.location.href = 'MyCarsPage.html'; });
-            }
         });
+
+        function goTransfer() {
+            window.location.href = 'SendCar.html';
+        }
 
         // Navigate to the CarBook page, which auto-fires the matching PDF
         // export once its live car data has loaded (reuses the existing,
         // tested PDF generators — no duplicated logic here).
         function goExport(action) {
+            var selected = localStorage.getItem('SelectedCar');
+            if (!selected || selected === 'null') {
+                Swal.fire({
+                    title: 'לא נבחר רכב',
+                    text: 'כדי להפיק PDF צריך לבחור רכב קודם',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'בחר רכב',
+                    cancelButtonText: 'ביטול',
+                    confirmButtonColor: '#1E5A82'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.location.href = 'MyCarsPage.html';
+                    }
+                });
+                return;
+            }
             window.location.href = 'CarBookPage.html?action=' + action;
         }
     </script>

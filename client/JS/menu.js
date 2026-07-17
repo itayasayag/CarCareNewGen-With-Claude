@@ -44,7 +44,7 @@
         { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/menu-car.png' },
         { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/menu-location.png' },
         { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/menu-lights.png' },
-        { label: 'העברת רכב',    href: 'SendCar.html',         ico: 'images/menu-transfer.png' },
+        { label: 'עולם המכירה',  href: 'CarSell.html',         ico: 'images/deal.png' },
         { label: 'התנתק',        href: 'SignUpPage.html',      ico: 'images/menu-logout.png', logout: true }
     ];
 
