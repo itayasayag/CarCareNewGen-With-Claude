@@ -21,6 +21,12 @@
 }
 
 /* ---- Base ---- */
+html {
+    background:
+        linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) top / 100% calc(env(safe-area-inset-top) + 14px) no-repeat,
+        var(--cc-bg);
+}
+
 body, body.mainpage {
     background: var(--cc-bg) !important;
     font-family: var(--cc-font) !important;
