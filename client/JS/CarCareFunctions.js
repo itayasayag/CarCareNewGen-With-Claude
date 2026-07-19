@@ -41,7 +41,7 @@ function RenderCarSelectFromStorage() {
 
 function AddCarToAlertsListFromStorage() { //טיפה שונה מהוספה רגילה בגלל העיצוב הוספה בעמוד התראות
     var temp = localStorage.getItem('LogInUser');
-    var StorageCarlist = JSON.parse(localStorage.getItem('UserCarlist'));
+    var StorageCarlist = GetCachedCarList() || [];
     var tempUser = JSON.parse(temp);
     userEmail = tempUser.email;
     var valueCounter = 1;/* משתנה רץ לאופשנס*/
@@ -53,7 +53,6 @@ function AddCarToAlertsListFromStorage() { //טיפה שונה מהוספה רג
         }
     }
     str += "</select>";
-    console.log(str);
     document.getElementById("SelectDiv").innerHTML = str;
 }
 
@@ -145,7 +144,11 @@ function searchCity() {
                 }
             });
         } else {
-            alert('Geocode was not successful for the following reason: ' + status);
+            Swal.fire({
+                title: 'לא הצלחנו למצוא את העיר',
+                text: 'נסו להזין שם עיר אחר',
+                icon: 'info'
+            });
         }
     });
 }
@@ -216,4 +219,3 @@ function GetSelectedCarDetails(LPlate) {
 
 
 }
-
