@@ -993,6 +993,142 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
     font-size: 16px;
 }
 
+/* HomePage quick add bottom sheet uses the same AddCarCare form language */
+body.quick-care-open {
+    overflow: hidden;
+}
+
+.quick-care-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1180;
+    background: rgba(8, 24, 36, .28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease;
+}
+
+.quick-care-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.quick-care-sheet {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    z-index: 1190;
+    width: 100%;
+    max-width: 480px;
+    max-height: min(86vh, 760px);
+    transform: translate(-50%, 100%);
+    display: flex;
+    flex-direction: column;
+    background: var(--cc-bg);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -14px 40px rgba(16,42,67,.24);
+    transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.quick-care-sheet.is-open {
+    transform: translate(-50%, 0);
+}
+
+.quick-care-handle {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: #C8D4DE;
+    margin: 10px auto 4px;
+}
+
+.quick-care-header {
+    position: relative;
+    padding: 0 18px 4px;
+    text-align: center;
+}
+
+.quick-care-header #h2carcare {
+    margin: 4px 0 8px !important;
+}
+
+.quick-care-close {
+    position: absolute;
+    left: 16px;
+    top: 0;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: var(--cc-surface);
+    color: var(--cc-primary);
+    box-shadow: var(--cc-shadow-sm);
+    font-size: 28px;
+    line-height: 34px;
+    cursor: pointer;
+}
+
+.quick-care-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 8px;
+}
+
+.quick-care-actions {
+    padding: 10px 18px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(247,249,251,0), var(--cc-bg) 22%);
+}
+
+.quick-care-actions .btn {
+    width: 100%;
+    min-height: 48px;
+    font-family: var(--cc-font);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-primary-2) 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 18px rgba(30,90,130,.22);
+}
+
+#quickUplodePicture.receipt-upload {
+    position: static !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 8px 14px 4px;
+    padding: 12px;
+    background: var(--cc-surface);
+    border: 1.5px dashed var(--cc-line);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+#quickUplodePicture.receipt-upload:hover {
+    border-color: var(--cc-primary-2);
+    background: var(--cc-bg);
+}
+
+#quickUplodePicture.receipt-upload #quickUploadrecipt {
+    position: static !important;
+    width: 40px !important;
+    height: 40px;
+    object-fit: contain;
+    top: auto !important;
+    left: auto !important;
+    background: transparent !important;
+    margin: 0 !important;
+    z-index: auto !important;
+}
+
+#quickUplodePicture.receipt-upload span {
+    font-family: var(--cc-font);
+    font-weight: 600;
+    color: var(--cc-primary);
+    font-size: 16px;
+}
+
 /* Location row: .row containing icon col + city col + garage col.
    Force one horizontal flex line with proper spacing. */
 #AddCareDiv .row {
@@ -1020,7 +1156,8 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
 }
 /* city box */
 #AddCareDiv .row .col-3.rounded-input,
-#CityList {
+#CityList,
+#QuickCityList {
     flex: 1 1 0 !important;
     min-width: 0;
     padding: 6px 10px !important;
@@ -1033,7 +1170,8 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
 }
 /* garage box (wider) */
 #AddCareDiv .row .col-6.rounded-input,
-#GarageList {
+#GarageList,
+#QuickGarageList {
     flex: 1.4 1 0 !important;
     min-width: 0;
     padding: 4px 8px !important;
@@ -1046,7 +1184,9 @@ html.cc-dark .cc-menu-btn:hover { background: rgba(255,255,255,.24) !important; 
 }
 /* selects inside city/garage fill their box */
 #CityList select, #GarageList select,
-#CityList .carcare-select, #GarageList .carcare-select {
+#CityList .carcare-select, #GarageList .carcare-select,
+#QuickCityList select, #QuickGarageList select,
+#QuickCityList .carcare-select, #QuickGarageList .carcare-select {
     width: 100% !important;
     border: none !important;
     background: transparent !important;
@@ -1614,9 +1754,12 @@ html.cc-dark #MyCarsBtn {
    These wrappers (and the row itself) must allow overflow.
    ============================================================ */
 #locationRow,
+#quickLocationRow,
 #locationRow .row,
 #CityList,
 #GarageList,
+#QuickCityList,
+#QuickGarageList,
 #AddCareDiv .row .col-3.rounded-input,
 #AddCareDiv .row .col-6.rounded-input {
     overflow: visible !important;
@@ -1624,7 +1767,9 @@ html.cc-dark #MyCarsBtn {
 
 /* The dropdown itself: anchor to its wrapper, full width, above everything */
 #CityList .garage-options-list,
-#GarageList .garage-options-list {
+#GarageList .garage-options-list,
+#QuickCityList .garage-options-list,
+#QuickGarageList .garage-options-list {
     position: absolute !important;
     top: calc(100% + 4px) !important;
     right: 0 !important;
@@ -1738,10 +1883,12 @@ html.cc-dark #footerCarCare.footer {
    .select-car is globally position:absolute for the header
    instances on other pages, so scope the reset to this form.
    ============================================================ */
-#AddCareDiv #SelectDiv {
+#AddCareDiv #SelectDiv,
+#AddCareDiv #QuickSelectDiv {
     padding: 0 !important;
 }
-#AddCareDiv #SelectDiv .select-car {
+#AddCareDiv #SelectDiv .select-car,
+#AddCareDiv #QuickSelectDiv .select-car {
     position: static !important;
     top: auto !important;
     right: auto !important;
@@ -1758,8 +1905,10 @@ html.cc-dark #footerCarCare.footer {
     -webkit-appearance: none;
     appearance: none;
 }
-#AddCareDiv #SelectDiv .select-car option { color: var(--cc-ink); }
-html.cc-dark #AddCareDiv #SelectDiv .select-car { color: var(--cc-ink) !important; }
+#AddCareDiv #SelectDiv .select-car option,
+#AddCareDiv #QuickSelectDiv .select-car option { color: var(--cc-ink); }
+html.cc-dark #AddCareDiv #SelectDiv .select-car,
+html.cc-dark #AddCareDiv #QuickSelectDiv .select-car { color: var(--cc-ink) !important; }
 
 /* ── "עריכת התראה" edit-reminder swal ────────────────────────────────────────
    Fields previously had no visible border/box, so they read as plain text

@@ -101,9 +101,11 @@
 
             })
         
-            $("#plussign").click(function () {
-                window.location.href = "AddCarCarePage.html"
-            })
+            $("#plussign").click(openQuickCareSheet);
+            $("#quickCareBackdrop, #quickCareClose").click(closeQuickCareSheet);
+            $("#quickCareAddButton").click(AddQuickCarCare);
+            $("#quickUplodePicture").click(function () { $("#quickImgupload").trigger('click'); });
+            $(document).on('change', '#quickSelectedtype', changeQuickCareTypeSelect);
 
             $("#Lights").click(function () {
                 window.location.href = "LightIndicator.html"
@@ -116,7 +118,10 @@
             $("#SellWorld").click(function () {
                 window.location.href = "CarSell.html"
             })
-            ReadUserCarByEmail(tempUser.email);
+            ReadUserCarByEmail(tempUser.email, renderQuickCarSelect);
+            ReadQuickCity();
+            ReadQuickCarCareFromDB();
+            renderQuickCarSelect();
             ReadRemindersFromDB();
            
     
@@ -364,6 +369,403 @@
         function getTypeNameECB(err) {
             console.log(err);
         }
+
+        var quickNewName = "ללא תמונה";
+        var QUICK_GARAGE_RESOURCE = "bb68386a-a331-4bbc-b668-bba2766d517d";
+        var QUICK_GARAGE_URL = "https://data.gov.il/api/3/action/datastore_search";
+        var QUICK_CITIES_LOADING = true;
+        var QUICK_CITY_LIST = [];
+        var QUICK_CURRENT_GARAGE_LIST = [];
+
+        function openQuickCareSheet() {
+            renderQuickCarSelect();
+            var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
+            if (selectedCarValue !== null) {
+                $('#quickCarSelect').val(selectedCarValue);
+            }
+            $("#quickCareSheet, #quickCareBackdrop").addClass("is-open");
+            $("body").addClass("quick-care-open");
+        }
+
+        function closeQuickCareSheet() {
+            $("#quickCareSheet, #quickCareBackdrop").removeClass("is-open");
+            $("body").removeClass("quick-care-open");
+            $("#quickCityOptionsList, #quickGarageOptionsList").hide();
+        }
+
+        function renderQuickCarSelect() {
+            var cars = GetCachedCarList() || [];
+            var str = "<select onchange='changeQuickCarSelect()' class='carcare-select quick-carcare-select' id='quickCarSelect' name='quickCarSelect'><option value='' disabled selected>בחר רכב</option>";
+            for (var i = 0; i < cars.length; i++) {
+                str += `<option value='${cars[i].licensePlate}'>` + cars[i].nickName + '</option>';
+            }
+            str += "<option style='background-color: #99BFD2' value='addCar'>הוסף רכב+ </option></select>";
+            document.getElementById("QuickSelectDiv").innerHTML = str;
+
+            var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
+            if (selectedCarValue !== null && cars.some(function (c) { return String(c.licensePlate) === String(selectedCarValue); })) {
+                $('#quickCarSelect').val(selectedCarValue);
+            }
+        }
+
+        function changeQuickCarSelect() {
+            if ($("#quickCarSelect").val() == "addCar") {
+                Swal.fire({
+                    title: "האם ברצונך להוסיף רכב חדש?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#235978",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "הוסף רכב חדש",
+                    cancelButtonText: "בטל",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "addCarPage.html";
+                    }
+                });
+                $('#quickCarSelect').prop('selectedIndex', 0);
+            }
+            else {
+                localStorage.setItem('SelectedCar', JSON.stringify($("#quickCarSelect").val()));
+                $('#carSelect').val($("#quickCarSelect").val());
+                showApprovedTag();
+                GetSelectedCarDetails($("#quickCarSelect").val());
+            }
+        }
+
+        function ReadQuickCity() {
+            QUICK_CITIES_LOADING = true;
+            var url = QUICK_GARAGE_URL + "?resource_id=" + QUICK_GARAGE_RESOURCE + "&fields=yishuv&limit=32000";
+            fetch(url)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    QUICK_CITIES_LOADING = false;
+                    if (!data.success) { console.error("gov city fetch failed", data); return; }
+                    var seen = {}, cities = [];
+                    data.result.records.forEach(function (rec) {
+                        var c = (rec.yishuv || "").trim();
+                        if (c && !seen[c]) { seen[c] = true; cities.push(c); }
+                    });
+                    cities.sort(function (a, b) { return a.localeCompare(b, 'he'); });
+                    QUICK_CITY_LIST = cities;
+                    $("#quickCityOptionsList").hide();
+                })
+                .catch(function (e) {
+                    QUICK_CITIES_LOADING = false;
+                    console.error("gov city error", e);
+                });
+        }
+
+        function renderQuickCityOptions(list) {
+            if (!list.length) { $("#quickCityOptionsList").hide(); return; }
+            $("#quickCityOptionsList").html(
+                list.map(function (c) {
+                    return "<div class='garage-option' data-city='" + c.replace(/'/g, "&#39;") + "'>" + c + "</div>";
+                }).join('')
+            ).show();
+        }
+
+        $(document).on('input', '#quickCitySearchInput', function () {
+            var q = $(this).val().trim();
+            if (!q) { renderQuickCityOptions(QUICK_CITY_LIST.slice(0, 40)); return; }
+            renderQuickCityOptions(QUICK_CITY_LIST.filter(function (c) { return c.includes(q); }).slice(0, 40));
+        });
+
+        $(document).on('focus', '#quickCitySearchInput', function () {
+            if (!QUICK_CITY_LIST.length) {
+                $("#quickCityOptionsList")
+                    .html("<div class='garage-option-empty'>" + (QUICK_CITIES_LOADING ? "טוען ערים..." : "לא נטענו ערים") + "</div>")
+                    .show();
+                return;
+            }
+            renderQuickCityOptions(QUICK_CITY_LIST.slice(0, 40));
+        });
+
+        $(document).on('click', '#quickCityOptionsList .garage-option', function () {
+            var city = $(this).data('city') || $(this).text().trim();
+            $("#quickCitySearchInput").val(city);
+            $("#quickCityOptionsList").hide();
+            $("#QuickCityList").removeClass('col-9').addClass('col-3');
+            $("#QuickGarageList").removeClass('is-hidden');
+            $("#quickGarageSearchInput").val('').attr('placeholder', 'טוען מוסכים...').prop('disabled', true);
+            $("#quickSelectedgarage").val('');
+            $("#quickGarageOptionsList").hide();
+            ReadQuickGarageFromDB(city);
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#QuickCityList').length) { $("#quickCityOptionsList").hide(); }
+            if (!$(e.target).closest('#QuickGarageList').length) { $("#quickGarageOptionsList").hide(); }
+        });
+
+        function ReadQuickGarageFromDB(chosenCity) {
+            if (!chosenCity) chosenCity = $("#quickCitySearchInput").val().trim();
+            var url = QUICK_GARAGE_URL + "?resource_id=" + QUICK_GARAGE_RESOURCE + "&q=" + encodeURIComponent(chosenCity) + "&limit=32000";
+            fetch(url)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.success) { console.log("gov garage fetch failed"); return; }
+                    var seen = {}, garages = [];
+                    data.result.records.forEach(function (rec) {
+                        if ((rec.yishuv || "").trim() !== chosenCity) return;
+                        var id = rec.mispar_mosah;
+                        if (id && !seen[id]) {
+                            seen[id] = true;
+                            garages.push({
+                                id: id,
+                                shem_mosah: rec.shem_mosah,
+                                ktovet: rec.ktovet,
+                                telephone: rec.telephone,
+                                sug_mosah: rec.sug_mosah
+                            });
+                        }
+                    });
+                    garages.sort(function (a, b) {
+                        return (a.shem_mosah || "").localeCompare(b.shem_mosah || "", 'he');
+                    });
+                    AddToQuickGarageList(garages);
+                })
+                .catch(function (e) { console.log("gov garage error", e); });
+        }
+
+        function AddToQuickGarageList(list) {
+            QUICK_CURRENT_GARAGE_LIST = list || [];
+            $("#quickGarageSearchInput").prop('disabled', false).val('').attr('placeholder', 'חפש מוסך...');
+            $("#quickSelectedgarage").val('');
+            renderQuickGarageOptions(QUICK_CURRENT_GARAGE_LIST);
+        }
+
+        function renderQuickGarageOptions(list) {
+            var $list = $("#quickGarageOptionsList");
+            if (!list.length) {
+                $list.html("<div class='garage-option-empty'>לא נמצאו מוסכים</div>").show();
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                html += "<div class='garage-option' data-id='" + list[i].id + "' data-name='" +
+                    String(list[i].shem_mosah || '').replace(/'/g, "&#39;") + "'>" + list[i].shem_mosah + "</div>";
+            }
+            $list.html(html).show();
+        }
+
+        $(document).on('focus', '#quickGarageSearchInput', function () {
+            if (!$(this).prop('disabled')) {
+                renderQuickGarageOptions(QUICK_CURRENT_GARAGE_LIST);
+            }
+        });
+
+        $(document).on('input', '#quickGarageSearchInput', function () {
+            var q = $(this).val().trim();
+            $("#quickSelectedgarage").val('');
+            if (!q) { renderQuickGarageOptions(QUICK_CURRENT_GARAGE_LIST); return; }
+            renderQuickGarageOptions(QUICK_CURRENT_GARAGE_LIST.filter(function (g) {
+                return (g.shem_mosah || '').indexOf(q) !== -1;
+            }));
+        });
+
+        $(document).on('click', '#quickGarageOptionsList .garage-option', function () {
+            $("#quickSelectedgarage").val($(this).data('id'));
+            $("#quickGarageSearchInput").val($(this).data('name'));
+            $("#quickGarageOptionsList").hide();
+        });
+
+        function ReadQuickCarCareFromDB() {
+            api = server + "/api/caretypes/";
+            ajaxCall("GET", api, "", getQuickCaretypeSCB, getQuickCaretypeECB);
+        }
+
+        function getQuickCaretypeSCB(suc) {
+            AddToQuickCareList(suc);
+        }
+
+        function getQuickCaretypeECB(err) {
+            console.log(err);
+        }
+
+        function AddToQuickCareList(list) {
+            var str = "<select class='carcare-select' id='quickSelectedtype' name='Type'><option value='' disabled selected>סוג טיפול</option>";
+            for (var i = 0; i < list.length; i++) {
+                str += `<option value='${list[i].careID}'>` + list[i].careName + '</option>';
+            }
+            str += "</select>";
+            document.getElementById("QuickType").innerHTML = str;
+        }
+
+        function changeQuickCareTypeSelect() {
+            var careId = $("#quickSelectedtype").val();
+            var careName = $("#quickSelectedtype option:selected").text().trim();
+            var isInsurance = (String(careId) === '10') || (careName.indexOf('ביטוח') !== -1);
+            if (isInsurance) {
+                $("#quickLocationRow").addClass('row-hidden');
+                $("#quickCityOptionsList, #quickGarageOptionsList").hide();
+                $("#quickSelectedgarage").val('');
+                $("#quickGarageSearchInput").val('');
+                $("#quickCitySearchInput").val('');
+            } else {
+                $("#quickLocationRow").removeClass('row-hidden');
+            }
+        }
+
+        function AddQuickCarCare() {
+            var temp = localStorage.getItem('LogInUser');
+            var tempUser = JSON.parse(temp);
+            var selectedCar = $("#quickCarSelect").val() || JSON.parse(localStorage.getItem('SelectedCar'));
+
+            if (selectedCar == null || selectedCar === '') {
+                Swal.fire({
+                    title: "לא נבחר רכב",
+                    text: "לא נבחר רכב עבורו נדרש להוסיף תיעוד",
+                    icon: "question"
+                });
+                return;
+            }
+
+            if (tempUser.email == null) {
+                Swal.fire({
+                    title: "אינך מחובר למערכת",
+                    icon: "info"
+                });
+                return;
+            }
+
+            if ($("#quick-date-input").val() == '' || $("#quick-kilometers").val() == '' || $("#quickSelectedtype").val() == null || $("#quickSelectedtype").val() == '' || $("#quick-cost").val() == '') {
+                Swal.fire({
+                    title: "מידע חסר",
+                    text: "ודא/י שמילאת תאריך, קילומטראז', סוג טיפול ועלות",
+                    icon: "question"
+                });
+                return;
+            }
+
+            uploadQuickInvoice(selectedCar);
+            var garageVal = $("#quickSelectedgarage").val();
+            var garageName = "";
+            if (garageVal) {
+                var match = QUICK_CURRENT_GARAGE_LIST.find(function (g) { return String(g.id) === String(garageVal); });
+                if (match) garageName = match.shem_mosah || "";
+            }
+
+            LogRecord = {
+                userEmail: tempUser.email,
+                licensePlate: parseInt(selectedCar),
+                recordDate: $("#quick-date-input").val(),
+                currentKM: $("#quick-kilometers").val(),
+                garageID: (garageVal && garageVal !== '0' && garageVal !== '') ? garageVal : null,
+                careID: $("#quickSelectedtype").val(),
+                cost: $("#quick-cost").val(),
+                notes: $("#quick-notes").val(),
+                invoiceFileName: quickNewName,
+                careName: "",
+                garageName: garageName
+            };
+
+            api = server + "/api/logs/";
+            ajaxCall("POST", api, JSON.stringify(LogRecord), quickPostSCB, quickPostECB);
+        }
+
+        function quickPostSCB(res) {
+            ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
+            console.log(res);
+            Swal.fire({
+                title: "נוסף תיעוד טיפול",
+                icon: "success",
+                showDenyButton: true,
+                confirmButtonText: 'חזרה לדף הבית',
+                denyButtonText: 'הוסף טיפול נוסף',
+                confirmButtonColor: '#1E5A82',
+                denyButtonColor: '#2C7DB3'
+            }).then(function (result) {
+                if (result.isDenied) {
+                    resetQuickCareForm();
+                } else {
+                    closeQuickCareSheet();
+                    resetQuickCareForm();
+                }
+            });
+        }
+
+        function quickPostECB(err) {
+            console.log(err);
+            Swal.fire({
+                title: "כשל בהוספת טיפול",
+                text: "אנא בדוק את הפרטים שהוזנו במערכת",
+                icon: "warning"
+            });
+        }
+
+        function resetQuickCareForm() {
+            $("#quick-date-input").val('');
+            $("#quick-kilometers").val('');
+            $("#quick-cost").val('');
+            $("#quick-notes").val('');
+            $("#quickSelectedtype").prop('selectedIndex', 0);
+            $("#quickLocationRow").removeClass('row-hidden');
+            $("#QuickCityList").removeClass('col-3').addClass('col-9');
+            $("#QuickGarageList").addClass('is-hidden');
+            $("#quickCitySearchInput").val('');
+            $("#quickGarageSearchInput").val('').attr('placeholder', 'תחילה בחר עיר').prop('disabled', true);
+            $("#quickSelectedgarage").val('');
+            $("#quickGarageOptionsList").hide();
+            $("#quickUploadrecipt").attr('src', 'images/uploadrecipt.png');
+            $("#quickImgupload").val('');
+            quickNewName = "ללא תמונה";
+        }
+
+        function uploadQuickInvoice(selectedCar) {
+            var data = new FormData();
+            var files = $("#quickImgupload").get(0).files;
+            if (files.length > 0) {
+                for (f = 0; f < files.length; f++) {
+                    data.append("files", renameQuickFile(files[f], selectedCar));
+                }
+            }
+            else {
+                return false;
+            }
+            api = server + "/api/upload/";
+            imageFolder = server + "/api/upload/";
+
+            $.ajax({
+                type: "POST",
+                url: api,
+                contentType: false,
+                processData: false,
+                data: data,
+                success: showQuickImages,
+                error: quickUploadError
+            });
+        }
+
+        function renameQuickFile(file, selectedCar) {
+            var tempUser = JSON.parse(localStorage.getItem('LogInUser'));
+            var createTime = new Date();
+            var ext = file.name.split('.').pop();
+            quickNewName = tempUser.email + "_" + parseInt(selectedCar) + 'invoice' + "_" + createTime.getTime() + '.' + ext;
+            return new File([file], quickNewName, { type: file.type });
+        }
+
+        function showQuickImages(data) {
+            if (data && data.uploadedFiles) data = data.uploadedFiles;
+            var src = "";
+            if (Array.isArray(data)) {
+                for (var i = 0; i < data.length; i++) {
+                    src = imageFolder + data[i];
+                }
+            }
+            else {
+                src = imageFolder + data;
+            }
+            if (src) document.getElementById("quickUploadrecipt").src = src;
+            Swal.fire({
+                title: "העלאת קובץ בוצעה בהצלחה!",
+                icon: "success"
+            });
+        }
+
+        function quickUploadError(data) {
+            console.log(data);
+        }
        
        
 
@@ -485,6 +887,90 @@
                 <div class="footer">
                     <img id="plussign" class="plus" src="images/PLUS.png" />
                 </div>
+                <div id="quickCareBackdrop" class="quick-care-backdrop"></div>
+                <section id="quickCareSheet" class="quick-care-sheet" aria-hidden="true">
+                    <div class="quick-care-handle"></div>
+                    <div class="quick-care-header">
+                        <button type="button" id="quickCareClose" class="quick-care-close" aria-label="סגור">×</button>
+                        <h2 id="h2carcare">תיעוד טיפול</h2>
+                    </div>
+                    <div class="quick-care-body">
+                        <input type="file" id="quickImgupload" style="display:none" />
+                        <div id="AddCareDiv">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img class="img-care" id="QuickSelecCarIMG" src="images/car (3).png" />
+                                </div>
+                                <div class="col-9 rounded-input" id="QuickSelectDiv"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/calendar.png" />
+                                </div>
+                                <div class="col-9 rounded-input">
+                                    <input id="quick-date-input" type="date" name="date" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/odometer-for-kilometers-and-speed-control (2).png" />
+                                </div>
+                                <div class="col-9 rounded-input">
+                                    <input id="quick-kilometers" type="number" inputmode="numeric" pattern="[0-9]*" name="kilometrs" placeholder="קילומטראז'" />
+                                </div>
+                            </div>
+                            <div class="row" id="quickCareTypeRow">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/wrench (2).png" />
+                                </div>
+                                <div class="col-9 rounded-input" id="QuickType">
+                                    <select class="carcare-select" name="Type">
+                                        <option value="" disabled selected>סוג טיפול</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" id="quickLocationRow">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/location.png" />
+                                </div>
+                                <div class="col-9 rounded-input" id="QuickCityList" style="position:relative;">
+                                    <input type="text" class="carcare-select" id="quickCitySearchInput"
+                                           placeholder="עיר" autocomplete="off" />
+                                    <div id="quickCityOptionsList" class="garage-options-list"></div>
+                                </div>
+                                <div class="col-6 rounded-input is-hidden" id="QuickGarageList" style="position: relative;">
+                                    <input type="text" class="carcare-select" id="quickGarageSearchInput"
+                                           placeholder="תחילה בחר עיר" disabled autocomplete="off" />
+                                    <input type="hidden" id="quickSelectedgarage" name="garage" value="" />
+                                    <div id="quickGarageOptionsList" class="garage-options-list"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/coins.png" />
+                                </div>
+                                <div class="col-9 rounded-input">
+                                    <input id="quick-cost" type="number" inputmode="decimal" name="cost" placeholder="עלות" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <img class="img-care" src="images/notes (1).png" />
+                                </div>
+                                <div class="col-9 rounded-input">
+                                    <textarea id="quick-notes" name="addnotes" placeholder="הוסף הערה" rows="4" cols="30"></textarea>
+                                </div>
+                            </div>
+                            <div id="quickUplodePicture" class="receipt-upload">
+                                <img id="quickUploadrecipt" src="images/uploadrecipt.png" />
+                                <span>הוסף חשבונית</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quick-care-actions">
+                        <button type="button" class="btn btn-primary rounded-pill" id="quickCareAddButton">הוסף תיעוד</button>
+                    </div>
+                </section>
                 <script src="../JS/install-prompt.js"></script>
             </body>
 </html >
