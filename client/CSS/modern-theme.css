@@ -221,17 +221,22 @@ body, body.mainpage {
     z-index: 900;
 }
 .footer.quick-care-launcher {
-    height: 42px !important;
-    background: var(--cc-surface) !important;
-    border: 1px solid var(--cc-line);
-    border-bottom: none;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -7px 24px rgba(16,42,67,.12);
-    pointer-events: auto;
-    transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .18s ease;
+    height: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    pointer-events: none;
+    overflow: visible;
+    transition: opacity .18s ease;
+}
+.footer.quick-care-launcher .plus {
+    top: auto !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
 }
 body.quick-care-open .footer.quick-care-launcher {
-    transform: translate(-50%, 100%);
+    transform: translateX(-50%);
     opacity: 0;
     pointer-events: none;
 }
@@ -1355,8 +1360,7 @@ html.cc-dark .footersignup {
     background: transparent !important;
 }
 html.cc-dark .footer.quick-care-launcher {
-    background: var(--cc-surface) !important;
-    border-color: var(--cc-line);
+    background: transparent !important;
 }
 
 /* MyCars page card inline styles use CSS vars, so they respond automatically.
