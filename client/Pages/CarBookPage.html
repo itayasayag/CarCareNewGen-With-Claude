@@ -113,9 +113,6 @@
 
             })
 
-            $("#plussign").click(function () {
-                window.location.href = "AddCarCarePage.html"
-            })
             $("#editcars").click(function () {
                 localStorage.setItem('editMode', JSON.stringify(true));//כניסה למצב עריכת רכב
                 window.location.href = "addCarPage.html"
@@ -1381,8 +1378,9 @@
         </div>
     </div>
     <div class="footer">
-        <img id="plussign" class="plus" onclick="window.location.href='AddCarCarePage.html'" src="images/PLUS.png" />
+        <img id="plussign" class="plus" src="images/PLUS.png" />
     </div>
+    <script src="../JS/quick-care.js"></script>
 
 
     <!-- invoice Modal -->

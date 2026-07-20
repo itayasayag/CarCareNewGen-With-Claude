@@ -29,7 +29,7 @@
             color: var(--cc-muted);
             font-family: var(--cc-font);
             font-size: 15px;
-            margin: 8px 18px 22px;
+            margin: 6px 18px 12px;
         }
         .sell-page .h1header,
         .sell-page .h1header span {
@@ -41,7 +41,7 @@
         .sell-options {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 10px;
             padding: 0 18px;
             max-width: 480px;
             margin: 0 auto;
@@ -75,12 +75,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
             background: var(--cc-surface);
             border: 1px solid var(--cc-line);
             border-radius: var(--cc-radius);
             box-shadow: var(--cc-shadow);
-            padding: 26px 18px;
+            min-height: 100px;
+            padding: 12px 16px;
             cursor: pointer;
             transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
         }
@@ -91,7 +92,7 @@
         }
         .sell-card:active { transform: translateY(0); }
         .sell-card img {
-            height: 64px;
+            height: 46px;
             width: auto;
             filter: brightness(0) saturate(100%) invert(31%) sepia(23%) saturate(1691%) hue-rotate(162deg) brightness(91%) contrast(88%);
         }
@@ -107,9 +108,23 @@
         .sell-card-label {
             font-family: var(--cc-font);
             font-weight: 700;
-            font-size: 18px;
+            font-size: 16px;
             color: var(--cc-primary);
             text-align: center;
+        }
+        .sell-page .RollDown {
+            margin-bottom: 0 !important;
+            padding-bottom: 10px !important;
+        }
+        @media (max-height: 740px) {
+            .sell-intro { margin-bottom: 8px; }
+            .sell-options { gap: 7px; }
+            .sell-card {
+                min-height: 68px;
+                flex-direction: row;
+                padding: 8px 14px;
+            }
+            .sell-card img { height: 38px; }
         }
     </style>
 </head>

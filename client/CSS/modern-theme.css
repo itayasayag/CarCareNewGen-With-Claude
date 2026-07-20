@@ -220,6 +220,21 @@ body, body.mainpage {
     padding-bottom: 0;
     z-index: 900;
 }
+.footer.quick-care-launcher {
+    height: 42px !important;
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-line);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -7px 24px rgba(16,42,67,.12);
+    pointer-events: auto;
+    transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .18s ease;
+}
+body.quick-care-open .footer.quick-care-launcher {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+    pointer-events: none;
+}
 /* Re-enable clicks on any button/link inside a footer (e.g. הוסף תיעוד, plus) */
 .footer button,
 .footer a,
@@ -1031,16 +1046,38 @@ body.quick-care-open {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+.quick-care-sheet.is-dragging {
+    transition: none;
+}
+
 .quick-care-sheet.is-open {
     transform: translate(-50%, 0);
 }
 
 .quick-care-handle {
+    position: relative;
+    width: 44px;
+    height: 5px;
+    margin: 0 auto -4px;
+    padding: 11px 40px 10px;
+    box-sizing: content-box;
+    background: transparent;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.quick-care-handle::after {
+    content: "";
+    display: block;
     width: 44px;
     height: 5px;
     border-radius: 999px;
     background: #C8D4DE;
-    margin: 10px auto 4px;
+}
+
+.quick-care-handle:active {
+    cursor: grabbing;
 }
 
 .quick-care-header {
@@ -1316,6 +1353,10 @@ html.cc-dark #logo {
 html.cc-dark .footer,
 html.cc-dark .footersignup {
     background: transparent !important;
+}
+html.cc-dark .footer.quick-care-launcher {
+    background: var(--cc-surface) !important;
+    border-color: var(--cc-line);
 }
 
 /* MyCars page card inline styles use CSS vars, so they respond automatically.
