@@ -16,6 +16,22 @@
 (function () {
     var installBtn = document.getElementById('installAppBtn');
     var infoBtn = document.getElementById('installInfoBtn');
+    var actions = (installBtn && installBtn.closest('.install-actions'))
+        || (infoBtn && infoBtn.closest('.install-actions'));
+
+    function showAction(button) {
+        if (!button) return;
+        button.classList.remove('is-hidden');
+        if (actions) actions.classList.add('is-visible');
+    }
+
+    function hideAction(button) {
+        if (!button) return;
+        button.classList.add('is-hidden');
+        if (actions && !actions.querySelector('#installAppBtn:not(.is-hidden), #installInfoBtn:not(.is-hidden)')) {
+            actions.classList.remove('is-visible');
+        }
+    }
 
     // Already installed / running standalone? Show nothing.
     var isStandalone = false;
@@ -32,7 +48,7 @@
 
     // ---- iOS: show the subtle ⓘ, wire it to the manual instructions ----
     if (isIOS && infoBtn) {
-        infoBtn.classList.remove('is-hidden');
+        showAction(infoBtn);
         infoBtn.addEventListener('click', function () {
             if (window.Swal) {
                 Swal.fire({
@@ -60,12 +76,12 @@
     window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
         deferredInstallPrompt = e;
-        installBtn.classList.remove('is-hidden');
+        showAction(installBtn);
     });
 
     window.addEventListener('appinstalled', function () {
         deferredInstallPrompt = null;
-        installBtn.classList.add('is-hidden');
+        hideAction(installBtn);
     });
 
     installBtn.addEventListener('click', function () {
@@ -73,7 +89,7 @@
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then(function () {
             deferredInstallPrompt = null;
-            installBtn.classList.add('is-hidden');
+            hideAction(installBtn);
         });
     });
 })();
