@@ -221,22 +221,32 @@ body, body.mainpage {
     z-index: 900;
 }
 .footer.quick-care-launcher {
+    position: static !important;
+    left: auto !important;
+    width: 0 !important;
+    max-width: none;
     height: 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     background: transparent !important;
     border: 0;
     border-radius: 0;
-    box-shadow: none;
+    box-shadow: none !important;
     pointer-events: none;
     overflow: visible;
+    transform: none !important;
     transition: opacity .18s ease;
 }
 .footer.quick-care-launcher .plus {
+    position: fixed !important;
     top: auto !important;
-    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    bottom: max(0px, calc(env(safe-area-inset-bottom) - 8px)) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    z-index: 900;
 }
 body.quick-care-open .footer.quick-care-launcher {
-    transform: translateX(-50%);
+    transform: none !important;
     opacity: 0;
     pointer-events: none;
 }
@@ -266,8 +276,9 @@ body.quick-care-open .footer.quick-care-launcher {
     background-position: center, center !important;
     background-size: 60px 60px, cover !important;
     background-repeat: no-repeat, no-repeat !important;
-    box-shadow: 0 5px 14px rgba(30,90,130,.34);
-    transition: transform .18s ease, box-shadow .18s ease;
+    box-shadow: none !important;
+    filter: none !important;
+    transition: transform .18s ease;
     cursor: pointer;
     display: block;
     pointer-events: auto;
@@ -276,8 +287,9 @@ body.quick-care-open .footer.quick-care-launcher {
     overflow: hidden;
 }
 .plus:hover {
-    transform: translateX(-50%) translateY(-2px) scale(1.04);
-    box-shadow: 0 8px 20px rgba(30,90,130,.40);
+    transform: translateX(-50%) scale(1.03);
+    box-shadow: none !important;
+    filter: none !important;
 }
 
 /* ---- Approved badge ---- */
@@ -1041,13 +1053,19 @@ body.quick-care-open {
     width: 100%;
     max-width: 480px;
     max-height: min(86vh, 760px);
-    transform: translate(-50%, 100%);
+    transform: translate(-50%, calc(100% + 48px));
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
     display: flex;
     flex-direction: column;
     background: var(--cc-bg);
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -14px 40px rgba(16,42,67,.24);
-    transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+    transition:
+        transform .28s cubic-bezier(.2, .8, .2, 1),
+        opacity .18s ease,
+        visibility 0s linear .28s;
     padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -1057,6 +1075,10 @@ body.quick-care-open {
 
 .quick-care-sheet.is-open {
     transform: translate(-50%, 0);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
 }
 
 .quick-care-handle {
@@ -2049,6 +2071,18 @@ html.cc-dark .reminder-edit-input {
 #installInfoBtn:hover { opacity: 1; color: var(--cc-primary); }
 #installInfoBtn.is-hidden { display: none !important; }
 
+.install-actions {
+    display: none;
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 0;
+}
+
+.install-actions.is-visible {
+    display: block;
+    padding: 0 0 10px;
+}
+
 /* The selected-car dashboard is a desktop enhancement only. */
 .desktop-car-dashboard { display: none; }
 
@@ -2068,6 +2102,14 @@ html.cc-dark .reminder-edit-input {
         margin-bottom: 0 !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
+    }
+
+    body.page-home {
+        overflow-y: hidden !important;
+    }
+
+    html.page-home-shell {
+        overflow-y: hidden !important;
     }
 
     #top,
@@ -2109,19 +2151,29 @@ html.cc-dark .reminder-edit-input {
     /* Home dashboard */
     .page-home .RollDown {
         width: min(calc(100% - 64px), 1440px);
-        padding-top: 26px;
-        padding-bottom: 24px;
+        flex: 1 1 0;
+        min-height: 0;
+        padding-top: 14px;
+        padding-bottom: 12px;
+        box-sizing: border-box;
+        overflow-y: hidden;
     }
 
     .page-home .content {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-template-rows: 176px 124px auto;
+        grid-template-rows:
+            clamp(132px, 20vh, 152px)
+            clamp(88px, 14vh, 100px)
+            clamp(170px, 30vh, 220px);
         grid-auto-rows: auto;
         align-content: start;
-        gap: 18px;
+        gap: 14px;
         width: 100%;
+        height: auto;
+        min-height: 0;
         margin: 0 auto;
+        box-sizing: border-box;
     }
 
     .page-home .content > .flextest {
@@ -2134,43 +2186,46 @@ html.cc-dark .reminder-edit-input {
         height: 100%;
         min-height: 0;
         margin: 0 !important;
-        padding: 22px 16px 18px;
+        padding: 14px 14px 12px;
         box-sizing: border-box;
     }
 
     .page-home .fleximg {
-        width: 66px !important;
-        height: 66px !important;
-        margin: 4px auto 12px !important;
+        width: 56px !important;
+        height: 56px !important;
+        margin: 0 auto 8px !important;
     }
 
     .page-home .mainscreenimg p {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .page-home #MyCarsBtn {
         grid-column: span 2;
-        min-height: 108px;
+        min-height: 0;
+        height: 100%;
         margin: 0 !important;
     }
 
     .page-home .alertsDiv {
         grid-column: span 2;
-        min-height: 108px;
-        max-height: 160px;
+        min-height: 0;
+        max-height: none;
+        height: 100%;
         margin: 0 !important;
         box-sizing: border-box;
     }
 
     .page-home .scroll {
-        max-height: 118px;
+        max-height: 82px;
     }
 
     .page-home .desktop-car-dashboard {
         display: grid;
         grid-column: 1 / -1;
         grid-template-columns: minmax(230px, .78fr) minmax(0, 2.22fr);
-        min-height: 184px;
+        min-height: 0;
+        height: 100%;
         background: var(--cc-surface);
         border: 1px solid var(--cc-line);
         border-radius: 8px;
@@ -2199,7 +2254,7 @@ html.cc-dark .reminder-edit-input {
         grid-template-rows: auto auto auto 1fr;
         gap: 2px 12px;
         align-content: center;
-        padding: 20px 22px;
+        padding: 14px 18px;
         background: rgba(30,90,130,.055);
         border-left: 1px solid var(--cc-line);
     }
@@ -2270,7 +2325,7 @@ html.cc-dark .reminder-edit-input {
     .desktop-car-overview {
         min-width: 0;
         display: grid;
-        grid-template-rows: minmax(96px, auto) 1fr;
+        grid-template-rows: minmax(82px, auto) 1fr;
     }
 
     .desktop-car-metrics {
@@ -2285,7 +2340,7 @@ html.cc-dark .reminder-edit-input {
         flex-direction: column;
         justify-content: center;
         gap: 5px;
-        padding: 14px 18px;
+        padding: 10px 14px;
         border-left: 1px solid var(--cc-line);
     }
 
@@ -2687,6 +2742,33 @@ html.cc-dark .reminder-edit-input {
         max-width: 1000px;
         margin-left: auto !important;
         margin-right: auto !important;
+    }
+}
+
+@media (min-width: 900px) and (max-height: 620px) {
+    .page-home .RollDown {
+        padding-top: 10px;
+        padding-bottom: 8px;
+    }
+
+    .page-home .content {
+        grid-template-rows: 116px 72px 144px;
+        gap: 10px;
+    }
+
+    .page-home .mainscreenimg {
+        padding: 8px 12px;
+    }
+
+    .page-home .fleximg {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .page-home .desktop-car-identity {
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
 }
 
