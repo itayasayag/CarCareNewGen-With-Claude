@@ -80,11 +80,12 @@
             document.getElementById("helloUser").innerHTML = "שלום " + tempUser.firstName;
             AddCarToListFromStorage();
 
-            ReadUserCarCareByEmail(tempUser.email);
+            ReadUserCarCareByEmail(tempUser.email, renderDesktopCarDashboard);
             var selectedCarValue = JSON.parse(localStorage.getItem('SelectedCar'));
             if (selectedCarValue !== null) {
                 $('#carSelect').val(selectedCarValue);//השמת הערך בבחירה
             }
+            renderDesktopCarDashboard();
             
             $("#logoutBTN").click(function () {
                 localStorage.clear();
@@ -118,7 +119,10 @@
             $("#SellWorld").click(function () {
                 window.location.href = "CarSell.html"
             })
-            ReadUserCarByEmail(tempUser.email, renderQuickCarSelect);
+            ReadUserCarByEmail(tempUser.email, function () {
+                renderQuickCarSelect();
+                renderDesktopCarDashboard();
+            });
             ReadQuickCity();
             ReadQuickCarCareFromDB();
             renderQuickCarSelect();
@@ -152,6 +156,7 @@
                localStorage.setItem('SelectedCar', LP);
                showApprovedTag();//הצגת האישור ברכב מאושר
                GetSelectedCarDetails($("#carSelect").val());
+               renderDesktopCarDashboard();
                console.log($("#carSelect").val());
            }
 
@@ -168,6 +173,7 @@
             var reminder = JSON.stringify(suc);
             localStorage.setItem('UserReminders', reminder);
             AddReminderList(suc);
+            renderDesktopCarDashboard();
             console.log(suc);
         }
 
@@ -256,6 +262,111 @@
 
             var formattedDate = day + '/' + month + '/' + year;
             return formattedDate;
+        }
+
+        function readDashboardStorage(key) {
+            try {
+                return JSON.parse(localStorage.getItem(key));
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function escapeDashboardText(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatDashboardDate(value) {
+            var date = new Date(value);
+            if (isNaN(date.getTime())) return '—';
+            return date.toLocaleDateString('he-IL');
+        }
+
+        function renderDesktopCarDashboard() {
+            var dashboard = document.getElementById('desktopCarDashboard');
+            if (!dashboard) return;
+
+            var selectedCar = readDashboardStorage('SelectedCar');
+            var cars = readDashboardStorage('UserCarlist') || [];
+            var selected = cars.find(function (car) {
+                return String(car.licensePlate) === String(selectedCar);
+            });
+
+            if (!selectedCar) {
+                dashboard.classList.add('is-empty');
+                dashboard.innerHTML = '<div class="desktop-car-empty">בחר רכב מהתפריט העליון כדי להציג את הדשבורד שלו</div>';
+                return;
+            }
+
+            if (!selected) {
+                dashboard.classList.add('is-empty');
+                dashboard.innerHTML = '<div class="desktop-car-empty">טוען את נתוני הרכב הנבחר...</div>';
+                return;
+            }
+
+            dashboard.classList.remove('is-empty');
+            var logs = (readDashboardStorage('UserCarCarelist') || [])
+                .filter(function (log) { return String(log.licensePlate) === String(selectedCar); })
+                .sort(function (a, b) { return new Date(b.recordDate) - new Date(a.recordDate); });
+            var reminders = (readDashboardStorage('UserReminders') || [])
+                .filter(function (reminder) { return String(reminder.licensePlate) === String(selectedCar); })
+                .filter(function (reminder) { return !isNaN(new Date(reminder.remindDate).getTime()); })
+                .sort(function (a, b) { return new Date(a.remindDate) - new Date(b.remindDate); });
+
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var upcomingReminder = reminders.find(function (reminder) {
+                return new Date(reminder.remindDate) >= today;
+            });
+            var maxKM = Number(selected.currentKM) || 0;
+            logs.forEach(function (log) {
+                var km = Number(log.currentKM) || 0;
+                if (km > maxKM) maxKM = km;
+            });
+
+            var lastLog = logs[0];
+            var recentHtml = logs.slice(0, 3).map(function (log) {
+                return '<div class="desktop-car-activity-item">' +
+                    '<span class="desktop-car-activity-name">' + escapeDashboardText(log.careName || 'תיעוד טיפול') + '</span>' +
+                    '<span>' + formatDashboardDate(log.recordDate) + '</span>' +
+                    '<span>' + Number(log.currentKM || 0).toLocaleString('he-IL') + ' ק״מ</span>' +
+                    '</div>';
+            }).join('');
+            if (!recentHtml) {
+                recentHtml = '<div class="desktop-car-activity-empty">עדיין אין תיעודים לרכב הזה</div>';
+            }
+
+            var verifiedLabel = selected.isVerified ? 'רכב מאומת' : 'ממתין לאימות';
+            var verifiedClass = selected.isVerified ? ' is-verified' : '';
+            var lastTreatment = lastLog
+                ? escapeDashboardText(lastLog.careName || 'טיפול') + '<small>' + formatDashboardDate(lastLog.recordDate) + '</small>'
+                : '—';
+            var nextReminder = upcomingReminder
+                ? escapeDashboardText(upcomingReminder.careName || 'תזכורת') + '<small>' + formatDashboardDate(upcomingReminder.remindDate) + '</small>'
+                : 'אין התראה קרובה';
+
+            dashboard.innerHTML =
+                '<div class="desktop-car-identity">' +
+                '  <div class="desktop-car-icon"><img src="images/car_icon.png" alt="" /></div>' +
+                '  <div class="desktop-car-name">' + escapeDashboardText(selected.nickName || 'הרכב שלי') + '</div>' +
+                '  <div class="desktop-car-plate">מ.ר. ' + escapeDashboardText(selected.licensePlate) + '</div>' +
+                '  <div class="desktop-car-status' + verifiedClass + '">' + verifiedLabel + '</div>' +
+                '  <button type="button" class="desktop-car-book-link" onclick="window.location.href=\'CarBookPage.html\'">לספר הרכב <span aria-hidden="true">←</span></button>' +
+                '</div>' +
+                '<div class="desktop-car-overview">' +
+                '  <div class="desktop-car-metrics">' +
+                '    <div class="desktop-car-metric"><span>קילומטראז׳ אחרון</span><strong>' + maxKM.toLocaleString('he-IL') + '<small> ק״מ</small></strong></div>' +
+                '    <div class="desktop-car-metric"><span>תיעודים</span><strong>' + logs.length + '</strong></div>' +
+                '    <div class="desktop-car-metric"><span>טיפול אחרון</span><strong>' + lastTreatment + '</strong></div>' +
+                '    <div class="desktop-car-metric is-reminder"><span>התראה קרובה</span><strong>' + nextReminder + '</strong></div>' +
+                '  </div>' +
+                '  <div class="desktop-car-activity"><span class="desktop-car-activity-title">תיעודים אחרונים</span>' + recentHtml + '</div>' +
+                '</div>';
         }
 
 
@@ -430,6 +541,7 @@
                 $('#carSelect').val($("#quickCarSelect").val());
                 showApprovedTag();
                 GetSelectedCarDetails($("#quickCarSelect").val());
+                renderDesktopCarDashboard();
             }
         }
 
@@ -665,7 +777,7 @@
         }
 
         function quickPostSCB(res) {
-            ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email);
+            ReadUserCarCareByEmail(JSON.parse(localStorage.getItem('LogInUser')).email, renderDesktopCarDashboard);
             console.log(res);
             Swal.fire({
                 title: "נוסף תיעוד טיפול",
@@ -785,7 +897,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
 </head>
-            <body class="mainpage" >
+            <body class="mainpage page-home" >
                 <div id="top">
                     <div class="header" , id="header">
                         <div id="VerifyPicture2">
@@ -864,6 +976,9 @@
                             </div>
                             <img id="redBell" src="images/bellred.png" />
                         </div>
+                        <section id="desktopCarDashboard" class="desktop-car-dashboard is-empty" aria-live="polite">
+                            <div class="desktop-car-empty">בחר רכב מהתפריט העליון כדי להציג את הדשבורד שלו</div>
+                        </section>
                     </div>
                 </div>
 
@@ -873,7 +988,7 @@
                      this can't be used to bypass login the way the earlier
                      drawer-based version could. Logic shared with SignUpPage
                      via install-prompt.js. -->
-                <div class="install-actions" aria-live="polite">
+                <div style="text-align:center; padding: 0 0 42px;">
                     <button type="button" id="installAppBtn" class="is-hidden">
                         <img src="images/menu-install.png" alt="" aria-hidden="true">
                         התקן אפליקציה
@@ -884,7 +999,7 @@
                 </div>
 
                 <!-- Footer Section -->
-                <div class="footer quick-care-launcher">
+                <div class="footer">
                     <img id="plussign" class="plus" src="images/PLUS.png" />
                 </div>
                 <div id="quickCareBackdrop" class="quick-care-backdrop"></div>
