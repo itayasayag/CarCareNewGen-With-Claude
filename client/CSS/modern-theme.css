@@ -301,9 +301,65 @@ body.quick-care-open .footer.quick-care-launcher {
     background: var(--cc-line); border-radius: 999px;
 }
 
+/* ---- Lightweight application motion ---- */
+@keyframes cc-page-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cc-card-enter {
+    from { opacity: 0; transform: translateY(10px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cc-logo-enter {
+    from { opacity: 0; transform: translateY(-6px) scale(.92); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body[class*="page-"] > .RollDown,
+body[class*="page-"] > .RollDownCarBook {
+    animation: cc-page-enter .28s ease-out backwards;
+}
+
+body[class*="page-"] #logo {
+    animation: cc-logo-enter .34s cubic-bezier(.2,.8,.2,1) .05s backwards;
+}
+
+.page-home .mainscreenimg,
+.page-home #MyCarsBtn,
+.page-home .alertsDiv,
+.page-home .desktop-car-dashboard,
+.page-sell .sell-card,
+.page-my-cars .car-card {
+    animation: cc-card-enter .34s cubic-bezier(.2,.8,.2,1) backwards;
+}
+
+.page-home .flextest:first-of-type .mainscreenimg:first-child { animation-delay: .04s; }
+.page-home .flextest:first-of-type .mainscreenimg:nth-child(2) { animation-delay: .08s; }
+.page-home .flextest:nth-of-type(2) .mainscreenimg:first-child { animation-delay: .12s; }
+.page-home .flextest:nth-of-type(2) .mainscreenimg:nth-child(2) { animation-delay: .16s; }
+.page-home #MyCarsBtn { animation-delay: .19s; }
+.page-home .alertsDiv { animation-delay: .22s; }
+.page-home .desktop-car-dashboard { animation-delay: .25s; }
+
+.page-sell .sell-card:nth-child(2) { animation-delay: .06s; }
+.page-sell .sell-card:nth-child(3) { animation-delay: .11s; }
+.page-sell .sell-card:nth-child(4) { animation-delay: .16s; }
+
+.mainscreenimg:active,
+.sell-card:active,
+.car-card:active {
+    transform: scale(.985);
+}
+
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ============================================================
@@ -1731,6 +1787,11 @@ html.cc-dark #MyCarsBtn {
    -------------------------------------------------------------------------- */
 
 /* Popup: centered, correct font */
+.swal2-container {
+    /* SweetAlert2 defaults below the quick-care sheet; alerts must own the top layer. */
+    z-index: 2147483647 !important;
+}
+
 .swal2-popup {
     font-family: var(--cc-font) !important;
     direction: rtl;
