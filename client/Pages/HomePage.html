@@ -896,7 +896,6 @@
     <script src="../JS/menu.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" />
     <link href="../CSS/modern-theme.css" rel="stylesheet" />
-    <link href="../CSS/home-airy-duotone.css" rel="stylesheet" />
 </head>
             <body class="mainpage page-home" >
                 <div id="top">
@@ -924,28 +923,50 @@
                     <div class="content">
                         <div class="flextest">
                             <div class="mainscreenimg">
-                                <img id="Lights" class="fleximg" src="images/home-ui/dashboard-warning.svg" />
+                                <img id="Lights" class="fleximg" src="images/oil-indicator.png" />
                                 <p>מקרא נורות</p>
                             </div>
                             <div class="mainscreenimg">
-                                <img id="FindGarage" class="fleximg" src="images/home-ui/garage-service.svg" />
+                                <img id="FindGarage" class="fleximg" src="images/maintenance (3).png" />
                                 <p>חפש מוסכים</p>
                             </div>
                         </div>
                         <div class="flextest">
                             <div class="mainscreenimg">
-                                <img id="MyCarBook" class="fleximg" src="images/home-ui/service-book.svg" />
+                                <img id="MyCarBook" class="fleximg" src="images/test.png" />
                                 <p>ספר הרכב שלי</p>
                             </div>
                             <div class="mainscreenimg">
-                                <img id="SellWorld" class="fleximg" src="images/home-ui/car-handover.svg" />
+                                <img id="SellWorld" class="fleximg" src="images/deal.png" />
                                 <p>עולם המכירה</p>
                             </div>
                         </div>
                         <!-- הרכבים שלי — full-width button -->
-                        <div id="MyCarsBtn" onclick="window.location.href='MyCarsPage.html'">
-                            <span class="home-my-cars-icon">
-                                <img src="images/home-ui/car-front.svg" alt="" />
+                        <div id="MyCarsBtn" onclick="window.location.href='MyCarsPage.html'" style="
+                            margin: 10px 14px;
+                            padding: 16px 18px;
+                            background: var(--cc-surface);
+                            border: 1px solid var(--cc-line);
+                            border-radius: var(--cc-radius);
+                            box-shadow: var(--cc-shadow);
+                            cursor: pointer;
+                            font-family: var(--cc-font);
+                            font-weight: 700;
+                            font-size: 18px;
+                            color: var(--cc-primary);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 12px;
+                        ">
+                            <span style="
+                                width:40px; height:40px;
+                                border-radius:50%;
+                                background:var(--cc-primary);
+                                display:flex; align-items:center; justify-content:center;
+                                flex-shrink:0; overflow:hidden;
+                            ">
+                                <img src="images/car_icon.png" style="width:34px;height:34px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.4);" />
                             </span>
                             הרכבים שלי
                         </div>
