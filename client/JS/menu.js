@@ -15,81 +15,6 @@
     var currentPage = decodeURIComponent(location.pathname.split('/').pop() || '');
     var isPublicPage = PUBLIC_PAGES.indexOf(currentPage) !== -1;
 
-    // One local icon language for static pages and dynamically injected forms.
-    var REFRESH_ICONS = {
-        'back.png': 'back',
-        'bellblue.png': 'bell',
-        'book.png': 'book-open',
-        'brakes.png': 'disc-3',
-        'calendar.png': 'calendar-days',
-        'car (3).png': 'car-front',
-        'car_icon.png': 'car-front',
-        'car-battery (1).png': 'battery-charging',
-        'car-insurance.png': 'shield-check',
-        'car-oilblue.png': 'droplets',
-        'carinfo.png': 'info',
-        'coins.png': 'coins',
-        'deal.png': 'handshake',
-        'edit.png': 'square-pen',
-        'file (1).png': 'upload',
-        'invoice1.png': 'receipt-text',
-        'kilometer.png': 'gauge',
-        'location.png': 'map-pin',
-        'maintenance (3).png': 'garage',
-        'menu-bell.png': 'bell',
-        'menu-book.png': 'book-open',
-        'menu-car.png': 'car-front',
-        'menu-home.png': 'house',
-        'menu-install.png': 'upload',
-        'menu-lights.png': 'circle-alert',
-        'menu-location.png': 'map-pin',
-        'menu-logout.png': 'log-out',
-        'menu-transfer.png': 'send',
-        'menu-wrench.png': 'wrench',
-        'money (2).png': 'coins',
-        'notes (1).png': 'notebook-pen',
-        'odometer-for-kilometers-and-speed-control (2).png': 'gauge',
-        'oil-indicator.png': 'circle-alert',
-        'picture-as-pdf.png': 'file-text',
-        'send.png': 'send',
-        'test.png': 'book-open',
-        'testblue.png': 'clipboard-check',
-        'tire-pressureblue.png': 'gauge',
-        'tiresblue.png': 'circle-dot-dashed',
-        'uploadcarpapers.png': 'upload',
-        'uploadimage.png': 'upload',
-        'uploadrecipt.png': 'receipt-text',
-        'user.png': 'user-round',
-        'wrench (2).png': 'wrench'
-    };
-
-    function refreshIcons(root) {
-        var images = [];
-        if (root && root.matches && root.matches('img[src]')) images.push(root);
-        if (root && root.querySelectorAll) {
-            images = images.concat(Array.prototype.slice.call(root.querySelectorAll('img[src]')));
-        }
-        images.forEach(function (img) {
-            var cleanSrc = decodeURIComponent((img.getAttribute('src') || '').split('?')[0]).replace(/\\/g, '/');
-            var fileName = cleanSrc.substring(cleanSrc.lastIndexOf('/') + 1).toLowerCase();
-            var replacement = REFRESH_ICONS[fileName];
-            if (replacement) img.setAttribute('src', 'images/ui/' + replacement + '.svg');
-        });
-    }
-
-    function watchForInjectedIcons() {
-        if (!document.body || document.documentElement.dataset.ccIconRefresh === '1') return;
-        document.documentElement.dataset.ccIconRefresh = '1';
-        refreshIcons(document);
-        new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                mutation.addedNodes.forEach(function (node) {
-                    if (node.nodeType === 1) refreshIcons(node);
-                });
-            });
-        }).observe(document.body, { childList: true, subtree: true });
-    }
-
     if (!isPublicPage) {
         var loggedIn = null;
         try { loggedIn = localStorage.getItem('LogInUser'); } catch (e) {}
@@ -108,24 +33,23 @@
     } catch (e) {}
 
     // Navigation items: label, target page, icon image.
-    // General navigation uses the local blue duotone family. Semantic artwork
-    // such as red reminders, missing-receipt warnings and dashboard lights is
-    // deliberately excluded so its real warning colour is never overwritten.
+    // Icons are the app's own artwork (not emoji), pre-flattened to a single
+    // brand navy on a transparent background (menu-*.png) so the whole menu is
+    // visually uniform. Rendered at emoji size (22px) via .cc-ico.
     var LINKS = [
-        { label: 'מסך הבית',     href: 'HomePage.html',        ico: 'images/ui/house.svg' },
-        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: 'images/ui/book-open.svg' },
-        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: 'images/ui/bell.svg' },
-        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: 'images/ui/wrench.svg' },
-        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/ui/car-front.svg' },
-        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/ui/map-pin.svg' },
-        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/ui/circle-alert.svg' },
-        { label: 'עולם המכירה',  href: 'CarSell.html',         ico: 'images/ui/handshake.svg' },
-        { label: 'התנתק',        href: 'SignUpPage.html',      ico: 'images/ui/log-out.svg', logout: true }
+        { label: 'מסך הבית',     href: 'HomePage.html',        ico: 'images/menu-home.png' },
+        { label: 'ספר הרכב שלי', href: 'CarBookPage.html',     ico: 'images/menu-book.png' },
+        { label: 'תזכורת חדשה',  href: 'AlertsPage.html',      ico: 'images/menu-bell.png' },
+        { label: 'הוסף טיפול',   href: 'AddCarCarePage.html',  ico: 'images/menu-wrench.png' },
+        { label: 'הוסף רכב',     href: 'addCarPage.html',      ico: 'images/menu-car.png' },
+        { label: 'מצא מוסך',     href: 'FindGaragePage.html',  ico: 'images/menu-location.png' },
+        { label: 'מקרא נורות',   href: 'LightIndicator.html',  ico: 'images/menu-lights.png' },
+        { label: 'עולם המכירה',  href: 'CarSell.html',         ico: 'images/deal.png' },
+        { label: 'התנתק',        href: 'SignUpPage.html',      ico: 'images/menu-logout.png', logout: true }
     ];
 
     function build() {
         if (document.querySelector('.cc-menu-btn')) return; // avoid duplicates
-        watchForInjectedIcons();
         // No hamburger/drawer on the sign-up/login page itself — there's
         // nothing a logged-out visitor should be navigating to yet, and it
         // previously let people tap straight into protected pages.
@@ -154,9 +78,7 @@
 
         var html = '<div class="cc-drawer-title">CarCare</div>';
         LINKS.forEach(function (l) {
-            var isCurrent = currentPage.toLowerCase() === l.href.toLowerCase();
             html += '<a href="' + l.href + '"' + (l.logout ? ' data-logout="1"' : '') +
-                    (isCurrent ? ' class="is-current" aria-current="page"' : '') +
                     '><img class="cc-ico" src="' + encodeURI(l.ico) + '" alt="" aria-hidden="true">' +
                     l.label + '</a>';
         });
